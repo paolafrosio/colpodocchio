@@ -700,7 +700,7 @@
                 card2El.classList.add('animate-card');
             }
 
-           /* RENDERING CIRCOLARE OTTIMIZZATO (SENZA TAGLI SULLE SCRITTE E CON SCALA BILANCIATA) */
+           /* RENDERING CIRCOLARE SENZA SOVRAPPOSIZIONI CON SCRITTE FISSE ED UNIFORMI */
         function renderCard(cardId, symbols) {
             const cardEl = document.getElementById(cardId);
             cardEl.innerHTML = '';
@@ -708,11 +708,11 @@
             const num = symbols.length;
             let positions = [];
 
-            // Posizionamento al 24% dal centro per evitare che le scritte tocchino il bordo
+            // Posizionamento compatto al 24% dal centro
             if (num === 8) {
                 positions.push({ r: 0, angle: 0 }); // Centro
                 for (let i = 0; i < 7; i++) {
-                    let angle = (i * (360 / 7)) + (Math.random() * 8 - 4);
+                    let angle = (i * (360 / 7)) + (Math.random() * 6 - 3);
                     positions.push({ r: 24, angle: angle }); 
                 }
             } else {
@@ -722,6 +722,53 @@
                     positions.push({ r: 23, angle: angle });
                 }
             }
+
+            let shuffledSymbols = symbols.map((sym, i) => ({ sym, pos: positions[i] }));
+            shuffledSymbols.sort(() => Math.random() - 0.5);
+
+            shuffledSymbols.forEach((item) => {
+                const symbolObj = item.sym;
+                const pos = item.pos;
+
+                const symEl = document.createElement('div');
+                symEl.className = 'symbol-item hover:bg-slate-900/10 hover:shadow-lg rounded-full';
+
+                // Posizionamento fisso sullo sfondo della carta
+                const rad = (pos.angle * Math.PI) / 180;
+                const left = 50 + pos.r * Math.cos(rad);
+                const top = 50 + pos.r * Math.sin(rad);
+
+                symEl.style.left = `${left}%`;
+                symEl.style.top = `${top}%`;
+                symEl.style.transform = `translate(-50%, -50%)`;
+
+                // LA SCALA E LA ROTAZIONE VANNO SOLO SU GRAFICA/EMOJI, NON SUL TESTO!
+                const scale = (0.75 + Math.random() * 0.45).toFixed(2);
+                const rotation = Math.floor(Math.random() * 360) - 180;
+                const graphicTransform = `transform: scale(${scale}) rotate(${rotation}deg);`;
+
+                let contentHtml = '';
+                if (symbolObj.type === 'emoji') {
+                    contentHtml = `<span class="text-3xl sm:text-4xl md:text-5xl drop-shadow-md select-none inline-block" style="${graphicTransform}">${symbolObj.icon}</span>`;
+                } else {
+                    contentHtml = `<img src="${symbolObj.icon}" class="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain drop-shadow-md select-none pointer-events-none inline-block" style="${graphicTransform}">`;
+                }
+
+                // ETICHETTA DI TESTO: Dimensione fissa (text-xs/text-sm), mai ruotata, mai scalata!
+                let labelHtml = state.showLabels 
+                    ? `<span class="text-[11px] sm:text-xs font-bold text-slate-900 bg-white/95 px-2 py-0.5 rounded-full shadow-md border border-slate-300 mt-1 whitespace-nowrap leading-none select-none z-10">${symbolObj.val}</span>` 
+                    : '';
+
+                symEl.innerHTML = `<div class="flex flex-col items-center justify-center">${contentHtml}${labelHtml}</div>`;
+
+                symEl.onclick = (e) => {
+                    e.stopPropagation();
+                    handleSymbolClick(symbolObj.val, symEl);
+                };
+
+                cardEl.appendChild(symEl);
+            });
+        }
 
             let shuffledSymbols = symbols.map((sym, i) => ({ sym, pos: positions[i] }));
             shuffledSymbols.sort(() => Math.random() - 0.5);
