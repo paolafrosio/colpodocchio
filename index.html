@@ -688,7 +688,7 @@
             renderCard('card2', state.deckCards[idx2]);
         }
 
-       /* RENDERING CIRCOLARE DINAMICO (SIMBOLI DISTRIBUITI, SCRITTE RUOTATE ED ELEMENTI DI DIVERSE DIMENSIONI) */
+       /* RENDERING CIRCOLARE: IMMAGINE SCALA E RUOTA, SCRITTA RUOTA MA NON SCALA */
         function renderCard(cardId, symbols) {
             const cardEl = document.getElementById(cardId);
             cardEl.innerHTML = '';
@@ -696,7 +696,6 @@
             const num = symbols.length;
             let positions = [];
 
-            // Raggio al 34% per occupare bene tutta la superficie circolare della carta
             if (num === 8) {
                 positions.push({ r: 0, angle: 0 }); // Centro
                 for (let i = 0; i < 7; i++) {
@@ -721,28 +720,33 @@
                 const symEl = document.createElement('div');
                 symEl.className = 'symbol-item hover:bg-slate-900/10 hover:shadow-lg rounded-full';
 
-                // Variabilità di scala (da 0.55x a 1.35x) e rotazione casuale
-                const scale = (0.55 + Math.random() * 0.80).toFixed(2);
-                const rotation = Math.floor(Math.random() * 360) - 180;
-
                 const rad = (pos.angle * Math.PI) / 180;
                 const left = 50 + pos.r * Math.cos(rad);
                 const top = 50 + pos.r * Math.sin(rad);
 
-                // Applicato a tutto l'elemento: figura e scritta ruotano e cambiano dimensione insieme
                 symEl.style.left = `${left}%`;
                 symEl.style.top = `${top}%`;
-                symEl.style.transform = `translate(-50%, -50%) scale(${scale}) rotate(${rotation}deg)`;
+                symEl.style.transform = `translate(-50%, -50%)`;
+
+                // PARAMETRI CASUALI
+                const scale = (0.55 + Math.random() * 0.80).toFixed(2);
+                const rotation = Math.floor(Math.random() * 360) - 180;
+
+                // 1. LA GRAFICA (Foto/Emoji): RUOTA E SCALA
+                const graphicStyle = `transform: scale(${scale}) rotate(${rotation}deg); display: inline-block;`;
+                
+                // 2. LA SCRITTA: RUOTA SOLTANTO (senza scale!)
+                const labelStyle = `transform: rotate(${rotation}deg); display: inline-block;`;
 
                 let contentHtml = '';
                 if (symbolObj.type === 'emoji') {
-                    contentHtml = `<span class="text-4xl sm:text-5xl md:text-6xl drop-shadow-md select-none">${symbolObj.icon}</span>`;
+                    contentHtml = `<span class="text-4xl sm:text-5xl md:text-6xl drop-shadow-md select-none" style="${graphicStyle}">${symbolObj.icon}</span>`;
                 } else {
-                    contentHtml = `<img src="${symbolObj.icon}" class="w-14 h-14 sm:w-18 sm:h-18 md:w-22 md:h-22 object-contain drop-shadow-md select-none pointer-events-none">`;
+                    contentHtml = `<img src="${symbolObj.icon}" class="w-14 h-14 sm:w-18 sm:h-18 md:w-22 md:h-22 object-contain drop-shadow-md select-none pointer-events-none" style="${graphicStyle}">`;
                 }
 
                 let labelHtml = state.showLabels 
-                    ? `<span class="text-[10px] sm:text-xs font-bold text-slate-800 bg-white/95 px-1.5 py-0.5 rounded-full shadow border border-slate-300 mt-0.5 whitespace-nowrap leading-none select-none">${symbolObj.val}</span>` 
+                    ? `<span class="text-[11px] sm:text-xs font-bold text-slate-800 bg-white/95 px-2 py-0.5 rounded-full shadow border border-slate-300 mt-1 whitespace-nowrap leading-none select-none z-10" style="${labelStyle}">${symbolObj.val}</span>` 
                     : '';
 
                 symEl.innerHTML = `<div class="flex flex-col items-center justify-center">${contentHtml}${labelHtml}</div>`;
