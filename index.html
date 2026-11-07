@@ -30,8 +30,7 @@
         .dobble-card:hover {
             transform: scale(1.02);
         }
-
-        .symbol-item {
+.symbol-item {
             transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
             position: absolute;
@@ -39,11 +38,21 @@
             align-items: center;
             justify-content: center;
             border-radius: 9999px;
-            padding: 4px;
+            padding: 0; /* Modificato da 4px a 0 per non rimpicciolire l'immagine */
+            overflow: hidden; /* Taglia i bordi dell'immagine fuori dal cerchio */
         }
 
         .symbol-item:hover {
             z-index: 40 !important;
+        }
+
+        /* Nuova regola per ingrandire le immagini */
+        .symbol-item img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            border-radius: 50%;
+            display: block;
         }
 
         .symbol-correct {
