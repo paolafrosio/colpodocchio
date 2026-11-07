@@ -47,12 +47,16 @@
             z-index: 40 !important;
         }
 
+      /* Regola per immagini personalizzate proporzionate */
         .symbol-item img {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
+            object-fit: contain !important; /* Non taglia i bordi dell'immagine */
             border-radius: 50%;
             display: block;
+            
+            /* LA MAGIA È QUI: 
+               Se sono ancora grandi metti 0.8 o 0.7 
+               Se sono piccole metti 1.1 o 1.2 */
+            transform: scale(0.85); 
         }
 
         .symbol-correct {
