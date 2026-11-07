@@ -30,7 +30,8 @@
         .dobble-card:hover {
             transform: scale(1.02);
         }
-.symbol-item {
+        
+        .symbol-item {
             transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
             position: absolute;
@@ -38,15 +39,14 @@
             align-items: center;
             justify-content: center;
             border-radius: 9999px;
-            padding: 0; /* Modificato da 4px a 0 per non rimpicciolire l'immagine */
-            overflow: hidden; /* Taglia i bordi dell'immagine fuori dal cerchio */
+            padding: 0; 
+            overflow: hidden; 
         }
 
         .symbol-item:hover {
             z-index: 40 !important;
         }
 
-        /* Nuova regola per ingrandire le immagini */
         .symbol-item img {
             width: 100% !important;
             height: 100% !important;
@@ -115,19 +115,14 @@
         </div>
 
         <div class="flex items-center gap-2 md:gap-3">
-            <!-- Toggle Text Labels -->
             <button id="toggle-labels-btn" onclick="toggleLabels()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition flex items-center gap-2 text-xs md:text-sm border border-slate-700 shadow-sm" title="Mostra o nascondi il testo scritto">
                 <i id="labels-icon" class="fa-solid fa-font text-emerald-400"></i>
                 <span id="labels-status-text" class="hidden md:inline font-medium">Testo: ON</span>
             </button>
-
-            <!-- Toggle Auto Pronunciation -->
             <button id="toggle-voice-btn" onclick="toggleSpeech()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition flex items-center gap-2 text-xs md:text-sm border border-slate-700 shadow-sm" title="Attiva/Disattiva pronuncia vocale">
                 <i id="voice-icon" class="fa-solid fa-volume-high text-amber-400"></i>
                 <span id="voice-status-text" class="hidden md:inline font-medium">Voce: ON</span>
             </button>
-
-            <!-- Settings Button -->
             <button onclick="requireSettingsAccess()" class="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
                 <i class="fa-solid fa-lock"></i>
                 <span>Area Docente</span>
@@ -137,10 +132,8 @@
 
     <!-- AREA DI GIOCO PRINCIPALE -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-2 flex flex-col justify-center items-center gap-3">
-
         <!-- STATUS BAR & FEEDBACK VOCALE -->
         <div class="w-full flex flex-col sm:flex-row justify-between items-center bg-slate-900/90 backdrop-blur-md rounded-2xl p-3 border border-slate-800 text-white shadow-xl gap-3">
-            <!-- Subject Badge -->
             <div class="flex items-center gap-2">
                 <span id="current-preset-badge" class="bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-xs sm:text-sm font-semibold px-3 py-1 rounded-full flex items-center gap-2">
                     <i class="fa-solid fa-user"></i> Il Corpo Umano (30+ parti)
@@ -150,7 +143,6 @@
                 </span>
             </div>
 
-            <!-- Pronunciation Banner & Repeat Sound -->
             <div id="last-word-container" class="flex items-center gap-3 bg-slate-950/80 px-4 py-1.5 rounded-xl border border-slate-800 min-h-[44px]">
                 <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Parola:</span>
                 <span id="last-word-display" class="text-lg md:text-xl font-bold text-emerald-400">---</span>
@@ -159,7 +151,6 @@
                 </button>
             </div>
 
-            <!-- Score Display -->
             <div class="flex items-center gap-6">
                 <div id="timer-box" class="hidden flex items-center gap-2">
                     <i class="fa-solid fa-stopwatch text-amber-400 text-xl"></i>
@@ -175,24 +166,15 @@
 
         <!-- LE DUE CARTE CIRCOLARI -->
         <div class="w-full flex-1 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 my-1">
-            
-            <!-- CARTE 1 -->
             <div id="card1" class="dobble-card animate-card w-full max-w-[340px] sm:max-w-[420px] md:max-w-[460px] bg-gradient-to-b from-slate-100 to-slate-200 rounded-full border-8 border-emerald-400 relative overflow-hidden flex items-center justify-center">
-                <!-- Simboli iniettati da JS -->
             </div>
-
-            <!-- VS / EQUALS BADGE -->
             <div class="flex md:flex-col items-center justify-center gap-1 my-[-10px] md:my-0">
                 <div class="bg-emerald-400 text-slate-950 w-12 h-12 rounded-full flex items-center justify-center font-black text-2xl shadow-xl border-4 border-slate-900 z-10">
                     <i class="fa-solid fa-equals"></i>
                 </div>
             </div>
-
-            <!-- CARTE 2 -->
             <div id="card2" class="dobble-card animate-card w-full max-w-[340px] sm:max-w-[420px] md:max-w-[460px] bg-gradient-to-b from-slate-100 to-slate-200 rounded-full border-8 border-emerald-400 relative overflow-hidden flex items-center justify-center">
-                <!-- Simboli iniettati da JS -->
             </div>
-
         </div>
 
         <!-- CONTROLLI DI GIOCO -->
@@ -207,7 +189,6 @@
                 Azzera Punti
             </button>
         </div>
-
     </main>
 
     <footer class="text-center py-2 text-xs text-slate-500">
@@ -228,8 +209,7 @@
             </div>
 
             <div class="overflow-y-auto flex-1 my-4 space-y-6 pr-2">
-                
-                <!-- SELEZIONE DIFFICOLTÀ (NUMERO FIGURA PER CARTA) -->
+                <!-- SELEZIONE DIFFICOLTÀ -->
                 <div>
                     <label class="block text-sm font-semibold text-slate-300 mb-2">Numero di Figure per Carta:</label>
                     <div class="grid grid-cols-2 gap-3">
@@ -244,30 +224,30 @@
 
                 <!-- SELEZIONE SET PREDEFINITO CPIA -->
                 <div>
-                    <label class="block text-sm font-semibold text-slate-300 mb-3">Scegli il Set Vocabolario CPIA / L2:</label>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <label class="block text-sm font-semibold text-slate-300 mb-3">Scegli la Categoria / Vocabolario:</label>
+                    <div id="presets-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         <button onclick="selectPreset('corpo')" class="preset-btn p-3 rounded-2xl border-2 border-emerald-500/40 bg-emerald-950/40 hover:bg-emerald-900/50 flex flex-col items-center gap-2 text-center transition">
-                            <span class="text-2xl">👁️</span>
-                            <span class="font-bold text-xs sm:text-sm text-emerald-200">Il Corpo Umano (30+)</span>
+                            <span class="text-2xl"></span>
+                            <span class="font-bold text-xs sm:text-sm text-emerald-200">Il Corpo Umano</span>
                         </button>
                         <button onclick="selectPreset('casa')" class="preset-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 hover:bg-slate-800 flex flex-col items-center gap-2 text-center transition">
-                            <span class="text-2xl">🏠</span>
+                            <span class="text-2xl"></span>
                             <span class="font-bold text-xs sm:text-sm text-slate-200">La Casa & Oggetti</span>
                         </button>
                         <button onclick="selectPreset('citta')" class="preset-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 hover:bg-slate-800 flex flex-col items-center gap-2 text-center transition">
-                            <span class="text-2xl">🚌</span>
+                            <span class="text-2xl"></span>
                             <span class="font-bold text-xs sm:text-sm text-slate-200">La Città & Servizi</span>
                         </button>
                         <button onclick="selectPreset('cibo')" class="preset-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 hover:bg-slate-800 flex flex-col items-center gap-2 text-center transition">
-                            <span class="text-2xl">🍎</span>
+                            <span class="text-2xl"></span>
                             <span class="font-bold text-xs sm:text-sm text-slate-200">Cibo & Bevande</span>
                         </button>
                         <button onclick="selectPreset('azioni')" class="preset-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 hover:bg-slate-800 flex flex-col items-center gap-2 text-center transition">
-                            <span class="text-2xl">🏃</span>
+                            <span class="text-2xl"></span>
                             <span class="font-bold text-xs sm:text-sm text-slate-200">Verbi d'Azione</span>
                         </button>
                         <button onclick="selectPreset('abbigliamento')" class="preset-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 hover:bg-slate-800 flex flex-col items-center gap-2 text-center transition">
-                            <span class="text-2xl">👕</span>
+                            <span class="text-2xl"></span>
                             <span class="font-bold text-xs sm:text-sm text-slate-200">Abbigliamento</span>
                         </button>
                     </div>
@@ -277,10 +257,10 @@
                 <div id="custom-symbols-container" class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800 space-y-4">
                     <div>
                         <label class="block text-sm font-semibold text-emerald-400 mb-1">
-                            <i class="fa-solid fa-cloud-arrow-up"></i> Carica Immagini Personalizzate dal dispositivo:
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Crea il tuo mazzo personalizzato:
                         </label>
                         <p class="text-xs text-slate-400 mb-3">
-                            Puoi selezionare immagini (PNG, JPG, SVG). Assegna a ciascuna la parola italiana da pronunciare.
+                            1. Carica le immagini. 2. Modifica i nomi per la pronuncia. 3. Salva la nuova categoria.
                         </p>
                         
                         <input type="file" id="image-file-input" multiple accept="image/*" class="hidden" onchange="handleFileUpload(event)">
@@ -292,27 +272,38 @@
                     <!-- GRIGLIA ANTEPRIMA CON EDITING PAROLA -->
                     <div>
                         <div class="flex justify-between items-center mb-2">
-                            <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Vocabolario Attivo (<span id="loaded-count">0</span> elementi):</span>
+                            <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Immagini Caricate (<span id="loaded-count">0</span>):</span>
                             <button onclick="clearCustomSymbols()" class="text-xs text-red-400 hover:text-red-300 transition">Svuota Elenco</button>
                         </div>
                         <div id="symbols-preview-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto p-2 bg-slate-900 rounded-xl border border-slate-800">
                             <!-- Renderizzato da JS -->
                         </div>
                     </div>
-                </div>
 
+                    <!-- NUOVO BLOCCO: SALVATAGGIO CATEGORIA PERSONALIZZATA -->
+                    <div class="mt-4 pt-4 border-t border-slate-800">
+                        <label class="block text-sm font-semibold text-emerald-400 mb-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Salva come Nuova Categoria:
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="text" id="new-category-name" placeholder="Nome (es. Frutta, Scuola...)" class="flex-1 bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-400">
+                            <button onclick="saveAsNewCategory()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-sm transition">
+                                Salva
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="pt-4 border-t border-slate-800 flex justify-end gap-3">
                 <button onclick="applySettings()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition shadow-lg">
-                    Salva e Genera Mazzo
+                    Chiudi e Genera Mazzo
                 </button>
             </div>
-
         </div>
     </div>
 
-    <!-- MODALE GAMEOVER / RISULTATI SFIDA -->
+    <!-- MODALE GAMEOVER -->
     <div id="gameover-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-emerald-500/40 w-full max-w-md rounded-3xl p-6 text-white text-center shadow-2xl flex flex-col items-center">
             <div class="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-4xl mb-4">
@@ -354,249 +345,59 @@
         /* --- COSTANTI SICUREZZA --- */
         const TEACHER_PIN = "1234";
 
-        /* --- SET PREDEFINITI VOCABOLARIO CPIA L2 COMPLETI (30+ ELEMENTI PER IL CORPO) --- */
+        /* --- SET PREDEFINITI VOCABOLARIO CPIA L2 COMPLETI --- */
         const PRESETS = {
             corpo: {
                 name: "Il Corpo Umano (30+ Parti)",
                 badge: '<i class="fa-solid fa-user"></i> Corpo Umano',
                 items: [
-                    { type: 'emoji', icon: '👄', val: 'bocca' },
-                    { type: 'emoji', icon: '👃', val: 'naso' },
-                    { type: 'emoji', icon: '👁️', val: 'occhio' },
-                    { type: 'emoji', icon: '👂', val: 'orecchio' },
-                    { type: 'emoji', icon: '✋', val: 'mano' },
-                    { type: 'emoji', icon: '🦶', val: 'piede' },
-                    { type: 'emoji', icon: '🗣️', val: 'testa' },
-                    { type: 'emoji', icon: '💪', val: 'braccio' },
-                    { type: 'emoji', icon: '🦵', val: 'gamba' },
-                    { type: 'emoji', icon: '🫃', val: 'pancia' },
-                    { type: 'emoji', icon: '🦷', val: 'dente' },
-                    { type: 'emoji', icon: '👅', val: 'lingua' },
-                    { type: 'emoji', icon: '🫀', val: 'cuore' },
-                    { type: 'emoji', icon: '🧠', val: 'cervello' },
-                    { type: 'emoji', icon: '🦴', val: 'osso' },
-                    { type: 'emoji', icon: '💇', val: 'capelli' },
-                    { type: 'emoji', icon: '👈', val: 'dito' },
-                    { type: 'emoji', icon: '🫁', val: 'polmoni' },
-                    { type: 'emoji', icon: '🦵', val: 'ginocchio' },
-                    { type: 'emoji', icon: '🤳', val: 'spalla' },
-                    { type: 'emoji', icon: '👔', val: 'collo' },
-                    { type: 'emoji', icon: '🧍', val: 'schiena' },
-                    { type: 'emoji', icon: '🫱', val: 'gomito' },
-                    { type: 'emoji', icon: '👕', val: 'petto' },
-                    { type: 'emoji', icon: '👣', val: 'impronta' },
-                    { type: 'emoji', icon: '👀', val: 'occhi' },
-                    { type: 'emoji', icon: '💅', val: 'unghia' },
-                    { type: 'emoji', icon: '🧔', val: 'barba' },
-                    { type: 'emoji', icon: '👨‍🦰', val: 'baffi' },
-                    { type: 'emoji', icon: '🩸', val: 'sangue' },
-                    { type: 'emoji', icon: '🩺', val: 'salute' },
-                    { type: 'emoji', icon: '🩹', val: 'cerotto' },
-                    { type: 'emoji', icon: '🧬', val: 'corpo' },
-                    { type: 'emoji', icon: '😊', val: 'faccia' },
-                    { type: 'emoji', icon: '🤝', val: 'pugno' },
-                    { type: 'emoji', icon: '🦿', val: 'gamba artificiale' },
-                    { type: 'emoji', icon: '🦾', val: 'braccio robotico' },
-                    { type: 'emoji', icon: '🩻', val: 'radiografia' },
-                    { type: 'emoji', icon: '🤒', val: 'febbre' },
-                    { type: 'emoji', icon: '😷', val: 'mascherina' },
-                    { type: 'emoji', icon: '💉', val: 'siringa' }
+                    { type: 'emoji', icon: '', val: 'bocca' }, { type: 'emoji', icon: '', val: 'naso' }, { type: 'emoji', icon: '', val: 'occhio' }, { type: 'emoji', icon: '', val: 'orecchio' }, { type: 'emoji', icon: '', val: 'mano' }, { type: 'emoji', icon: '', val: 'piede' }, { type: 'emoji', icon: '', val: 'testa' }, { type: 'emoji', icon: '', val: 'braccio' }, { type: 'emoji', icon: '', val: 'gamba' }, { type: 'emoji', icon: '', val: 'pancia' }, { type: 'emoji', icon: '', val: 'dente' }, { type: 'emoji', icon: '', val: 'lingua' }, { type: 'emoji', icon: '', val: 'cuore' }, { type: 'emoji', icon: '', val: 'cervello' }, { type: 'emoji', icon: '', val: 'osso' }, { type: 'emoji', icon: '', val: 'capelli' }, { type: 'emoji', icon: '', val: 'dito' }, { type: 'emoji', icon: '', val: 'polmoni' }, { type: 'emoji', icon: '', val: 'ginocchio' }, { type: 'emoji', icon: '', val: 'spalla' }, { type: 'emoji', icon: '', val: 'collo' }, { type: 'emoji', icon: '', val: 'schiena' }, { type: 'emoji', icon: '', val: 'gomito' }, { type: 'emoji', icon: '', val: 'petto' }, { type: 'emoji', icon: '', val: 'impronta' }, { type: 'emoji', icon: '', val: 'occhi' }, { type: 'emoji', icon: '', val: 'unghia' }, { type: 'emoji', icon: '', val: 'barba' }, { type: 'emoji', icon: '', val: 'baffi' }, { type: 'emoji', icon: '', val: 'sangue' }, { type: 'emoji', icon: '', val: 'salute' }, { type: 'emoji', icon: '', val: 'cerotto' }, { type: 'emoji', icon: '', val: 'corpo' }, { type: 'emoji', icon: '', val: 'faccia' }, { type: 'emoji', icon: '', val: 'pugno' }, { type: 'emoji', icon: '', val: 'gamba artificiale' }, { type: 'emoji', icon: '', val: 'braccio robotico' }, { type: 'emoji', icon: '', val: 'radiografia' }, { type: 'emoji', icon: '', val: 'febbre' }, { type: 'emoji', icon: '', val: 'mascherina' }, { type: 'emoji', icon: '', val: 'siringa' }
                 ]
             },
             casa: {
                 name: "La Casa & Oggetti",
                 badge: '<i class="fa-solid fa-house"></i> La Casa',
                 items: [
-                    { type: 'emoji', icon: '🏠', val: 'casa' },
-                    { type: 'emoji', icon: '🪑', val: 'sedia' },
-                    { type: 'emoji', icon: '🛋️', val: 'divano' },
-                    { type: 'emoji', icon: '🛏️', val: 'letto' },
-                    { type: 'emoji', icon: '🚪', val: 'porta' },
-                    { type: 'emoji', icon: '🪟', val: 'finestra' },
-                    { type: 'emoji', icon: '🔑', val: 'chiave' },
-                    { type: 'emoji', icon: '📱', val: 'telefono' },
-                    { type: 'emoji', icon: '📺', val: 'televisione' },
-                    { type: 'emoji', icon: '💡', val: 'lampada' },
-                    { type: 'emoji', icon: '⏰', val: 'orologio' },
-                    { type: 'emoji', icon: '🍽️', val: 'piatto' },
-                    { type: 'emoji', icon: '🥄', val: 'cucchiaio' },
-                    { type: 'emoji', icon: '🍴', val: 'forchetta' },
-                    { type: 'emoji', icon: '🔪', val: 'coltello' },
-                    { type: 'emoji', icon: '🥛', val: 'bicchiere' },
-                    { type: 'emoji', icon: '🧹', val: 'scopa' },
-                    { type: 'emoji', icon: '🧼', val: 'sapone' },
-                    { type: 'emoji', icon: '🪞', val: 'specchio' },
-                    { type: 'emoji', icon: '🖼️', val: 'quadro' },
-                    { type: 'emoji', icon: '🚿', val: 'doccia' },
-                    { type: 'emoji', icon: '🚽', val: 'bagno' },
-                    { type: 'emoji', icon: '🔑', val: 'chiavi' },
-                    { type: 'emoji', icon: '📦', val: 'scatola' },
-                    { type: 'emoji', icon: '📻', val: 'radio' },
-                    { type: 'emoji', icon: '🕯️', val: 'candela' },
-                    { type: 'emoji', icon: '💻', val: 'computer' },
-                    { type: 'emoji', icon: '📚', val: 'libri' },
-                    { type: 'emoji', icon: '🗑️', val: 'cestino' },
-                    { type: 'emoji', icon: '🪴', val: 'pianta' },
-                    { type: 'emoji', icon: '🧥', val: 'cappotto' }
+                    { type: 'emoji', icon: '', val: 'casa' }, { type: 'emoji', icon: '', val: 'sedia' }, { type: 'emoji', icon: '', val: 'divano' }, { type: 'emoji', icon: '', val: 'letto' }, { type: 'emoji', icon: '', val: 'porta' }, { type: 'emoji', icon: '', val: 'finestra' }, { type: 'emoji', icon: '', val: 'chiave' }, { type: 'emoji', icon: '', val: 'telefono' }, { type: 'emoji', icon: '', val: 'televisione' }, { type: 'emoji', icon: '', val: 'lampada' }, { type: 'emoji', icon: '', val: 'orologio' }, { type: 'emoji', icon: '', val: 'piatto' }, { type: 'emoji', icon: '', val: 'cucchiaio' }, { type: 'emoji', icon: '', val: 'forchetta' }, { type: 'emoji', icon: '', val: 'coltello' }, { type: 'emoji', icon: '', val: 'bicchiere' }, { type: 'emoji', icon: '', val: 'scopa' }, { type: 'emoji', icon: '', val: 'sapone' }, { type: 'emoji', icon: '', val: 'specchio' }, { type: 'emoji', icon: '', val: 'quadro' }, { type: 'emoji', icon: '', val: 'doccia' }, { type: 'emoji', icon: '', val: 'bagno' }, { type: 'emoji', icon: '', val: 'chiavi' }, { type: 'emoji', icon: '', val: 'scatola' }, { type: 'emoji', icon: '', val: 'radio' }, { type: 'emoji', icon: '', val: 'candela' }, { type: 'emoji', icon: '', val: 'computer' }, { type: 'emoji', icon: '', val: 'libri' }, { type: 'emoji', icon: '', val: 'cestino' }, { type: 'emoji', icon: '', val: 'pianta' }, { type: 'emoji', icon: '', val: 'cappotto' }
                 ]
             },
             citta: {
                 name: "La Città & Servizi",
                 badge: '<i class="fa-solid fa-city"></i> La Città',
                 items: [
-                    { type: 'emoji', icon: '🚌', val: 'autobus' },
-                    { type: 'emoji', icon: '🚆', val: 'treno' },
-                    { type: 'emoji', icon: '🏥', val: 'ospedale' },
-                    { type: 'emoji', icon: '🏫', val: 'scuola' },
-                    { type: 'emoji', icon: '🛒', val: 'supermercato' },
-                    { type: 'emoji', icon: '✉️', val: 'posta' },
-                    { type: 'emoji', icon: '🏦', val: 'banca' },
-                    { type: 'emoji', icon: '💊', val: 'farmacia' },
-                    { type: 'emoji', icon: '🚓', val: 'polizia' },
-                    { type: 'emoji', icon: '🚒', val: 'pompieri' },
-                    { type: 'emoji', icon: '🚏', val: 'fermata' },
-                    { type: 'emoji', icon: '🚕', val: 'taxi' },
-                    { type: 'emoji', icon: '🚲', val: 'bicicletta' },
-                    { type: 'emoji', icon: '🚗', val: 'macchina' },
-                    { type: 'emoji', icon: '🚥', val: 'semaforo' },
-                    { type: 'emoji', icon: '🏢', val: 'palazzo' },
-                    { type: 'emoji', icon: '🏪', val: 'negozio' },
-                    { type: 'emoji', icon: '☕', val: 'bar' },
-                    { type: 'emoji', icon: '🍕', val: 'pizzeria' },
-                    { type: 'emoji', icon: '🌳', val: 'parco' },
-                    { type: 'emoji', icon: '✈️', val: 'aeroporto' },
-                    { type: 'emoji', icon: '⛽', val: 'benzinaio' },
-                    { type: 'emoji', icon: '🌉', val: 'ponte' },
-                    { type: 'emoji', icon: '🎟️', val: 'biglietto' },
-                    { type: 'emoji', icon: '🗺️', val: 'mappa' },
-                    { type: 'emoji', icon: '🚶', val: 'pedone' },
-                    { type: 'emoji', icon: '⚓', val: 'porto' },
-                    { type: 'emoji', icon: '🏨', val: 'albergo' },
-                    { type: 'emoji', icon: '⛲', val: 'fontana' },
-                    { type: 'emoji', icon: '🏛️', val: 'museo' },
-                    { type: 'emoji', icon: '🏟️', val: 'stadio' }
+                    { type: 'emoji', icon: '', val: 'autobus' }, { type: 'emoji', icon: '', val: 'treno' }, { type: 'emoji', icon: '', val: 'ospedale' }, { type: 'emoji', icon: '', val: 'scuola' }, { type: 'emoji', icon: '', val: 'supermercato' }, { type: 'emoji', icon: '', val: 'posta' }, { type: 'emoji', icon: '', val: 'banca' }, { type: 'emoji', icon: '', val: 'farmacia' }, { type: 'emoji', icon: '', val: 'polizia' }, { type: 'emoji', icon: '', val: 'pompieri' }, { type: 'emoji', icon: '', val: 'fermata' }, { type: 'emoji', icon: '', val: 'taxi' }, { type: 'emoji', icon: '', val: 'bicicletta' }, { type: 'emoji', icon: '', val: 'macchina' }, { type: 'emoji', icon: '', val: 'semaforo' }, { type: 'emoji', icon: '', val: 'palazzo' }, { type: 'emoji', icon: '', val: 'negozio' }, { type: 'emoji', icon: '', val: 'bar' }, { type: 'emoji', icon: '', val: 'pizzeria' }, { type: 'emoji', icon: '', val: 'parco' }, { type: 'emoji', icon: '', val: 'aeroporto' }, { type: 'emoji', icon: '', val: 'benzinaio' }, { type: 'emoji', icon: '', val: 'ponte' }, { type: 'emoji', icon: '', val: 'biglietto' }, { type: 'emoji', icon: '', val: 'mappa' }, { type: 'emoji', icon: '', val: 'pedone' }, { type: 'emoji', icon: '', val: 'porto' }, { type: 'emoji', icon: '', val: 'albergo' }, { type: 'emoji', icon: '', val: 'fontana' }, { type: 'emoji', icon: '', val: 'museo' }, { type: 'emoji', icon: '', val: 'stadio' }
                 ]
             },
             cibo: {
                 name: "Cibo & Bevande",
                 badge: '<i class="fa-solid fa-utensils"></i> Cibo',
                 items: [
-                    { type: 'emoji', icon: '🍎', val: 'mela' },
-                    { type: 'emoji', icon: '🍌', val: 'banana' },
-                    { type: 'emoji', icon: '🍞', val: 'pane' },
-                    { type: 'emoji', icon: '🧀', val: 'formaggio' },
-                    { type: 'emoji', icon: '🥛', val: 'latte' },
-                    { type: 'emoji', icon: '🥩', val: 'carne' },
-                    { type: 'emoji', icon: '🐟', val: 'pesce' },
-                    { type: 'emoji', icon: '🥚', val: 'uovo' },
-                    { type: 'emoji', icon: '🍕', val: 'pizza' },
-                    { type: 'emoji', icon: '🍝', val: 'pasta' },
-                    { type: 'emoji', icon: '🥗', val: 'insalata' },
-                    { type: 'emoji', icon: '🍅', val: 'pomodoro' },
-                    { type: 'emoji', icon: '🥔', val: 'patata' },
-                    { type: 'emoji', icon: '🥕', val: 'carota' },
-                    { type: 'emoji', icon: '🍊', val: 'arancia' },
-                    { type: 'emoji', icon: '🍇', val: 'uva' },
-                    { type: 'emoji', icon: '☕', val: 'caffè' },
-                    { type: 'emoji', icon: '🍵', val: 'tè' },
-                    { type: 'emoji', icon: '💧', val: 'acqua' },
-                    { type: 'emoji', icon: '🍦', val: 'gelato' },
-                    { type: 'emoji', icon: '🍰', val: 'torta' },
-                    { type: 'emoji', icon: '🍫', val: 'cioccolato' },
-                    { type: 'emoji', icon: '🍚', val: 'riso' },
-                    { type: 'emoji', icon: '🍋', val: 'limone' },
-                    { type: 'emoji', icon: '🍓', val: 'fragola' },
-                    { type: 'emoji', icon: '🥒', val: 'cetriolo' },
-                    { type: 'emoji', icon: '🧅', val: 'cipolla' },
-                    { type: 'emoji', icon: '🥖', val: 'baguette' },
-                    { type: 'emoji', icon: '🥐', val: 'cornetto' },
-                    { type: 'emoji', icon: '🧃', val: 'succo' },
-                    { type: 'emoji', icon: '🧂', val: 'sale' }
+                    { type: 'emoji', icon: '', val: 'mela' }, { type: 'emoji', icon: '', val: 'banana' }, { type: 'emoji', icon: '', val: 'pane' }, { type: 'emoji', icon: '', val: 'formaggio' }, { type: 'emoji', icon: '', val: 'latte' }, { type: 'emoji', icon: '', val: 'carne' }, { type: 'emoji', icon: '', val: 'pesce' }, { type: 'emoji', icon: '', val: 'uovo' }, { type: 'emoji', icon: '', val: 'pizza' }, { type: 'emoji', icon: '', val: 'pasta' }, { type: 'emoji', icon: '', val: 'insalata' }, { type: 'emoji', icon: '', val: 'pomodoro' }, { type: 'emoji', icon: '', val: 'patata' }, { type: 'emoji', icon: '', val: 'carota' }, { type: 'emoji', icon: '', val: 'arancia' }, { type: 'emoji', icon: '', val: 'uva' }, { type: 'emoji', icon: '', val: 'caffè' }, { type: 'emoji', icon: '', val: 'tè' }, { type: 'emoji', icon: '', val: 'acqua' }, { type: 'emoji', icon: '', val: 'gelato' }, { type: 'emoji', icon: '', val: 'torta' }, { type: 'emoji', icon: '', val: 'cioccolato' }, { type: 'emoji', icon: '', val: 'riso' }, { type: 'emoji', icon: '', val: 'limone' }, { type: 'emoji', icon: '', val: 'fragola' }, { type: 'emoji', icon: '', val: 'cetriolo' }, { type: 'emoji', icon: '', val: 'cipolla' }, { type: 'emoji', icon: '', val: 'baguette' }, { type: 'emoji', icon: '', val: 'cornetto' }, { type: 'emoji', icon: '', val: 'succo' }, { type: 'emoji', icon: '', val: 'sale' }
                 ]
             },
             azioni: {
                 name: "Verbi d'Azione",
                 badge: '<i class="fa-solid fa-person-running"></i> Azioni',
                 items: [
-                    { type: 'emoji', icon: '🏃', val: 'correre' },
-                    { type: 'emoji', icon: '🚶', val: 'camminare' },
-                    { type: 'emoji', icon: '🍽️', val: 'mangiare' },
-                    { type: 'emoji', icon: '🥤', val: 'bere' },
-                    { type: 'emoji', icon: '😴', val: 'dormire' },
-                    { type: 'emoji', icon: '📖', val: 'leggere' },
-                    { type: 'emoji', icon: '✍️', val: 'scrivere' },
-                    { type: 'emoji', icon: '🗣️', val: 'parlare' },
-                    { type: 'emoji', icon: '👂', val: 'ascoltare' },
-                    { type: 'emoji', icon: '👁️', val: 'guardare' },
-                    { type: 'emoji', icon: '🎵', val: 'cantare' },
-                    { type: 'emoji', icon: '💃', val: 'ballare' },
-                    { type: 'emoji', icon: '🧼', val: 'lavare' },
-                    { type: 'emoji', icon: '🍳', val: 'cucinare' },
-                    { type: 'emoji', icon: '🧹', val: 'pulire' },
-                    { type: 'emoji', icon: '🛒', val: 'comprare' },
-                    { type: 'emoji', icon: '💻', val: 'lavorare' },
-                    { type: 'emoji', icon: '🎒', val: 'studiare' },
-                    { type: 'emoji', icon: '🚗', val: 'guidare' },
-                    { type: 'emoji', icon: '🏊', val: 'nuotare' },
-                    { type: 'emoji', icon: '🤝', val: 'salutare' },
-                    { type: 'emoji', icon: '💭', val: 'pensare' },
-                    { type: 'emoji', icon: '🤳', val: 'chiamare' },
-                    { type: 'emoji', icon: '🚴', val: 'pedalare' },
-                    { type: 'emoji', icon: '✂️', val: 'tagliare' },
-                    { type: 'emoji', icon: '🧹', val: 'spazzare' },
-                    { type: 'emoji', icon: '🛌', val: 'riposare' },
-                    { type: 'emoji', icon: '🎁', val: 'regalare' },
-                    { type: 'emoji', icon: '⚽', val: 'giocare' },
-                    { type: 'emoji', icon: '✈️', val: 'volare' },
-                    { type: 'emoji', icon: '🚪', val: 'aprire' }
+                    { type: 'emoji', icon: '', val: 'correre' }, { type: 'emoji', icon: '', val: 'camminare' }, { type: 'emoji', icon: '', val: 'mangiare' }, { type: 'emoji', icon: '', val: 'bere' }, { type: 'emoji', icon: '', val: 'dormire' }, { type: 'emoji', icon: '', val: 'leggere' }, { type: 'emoji', icon: '', val: 'scrivere' }, { type: 'emoji', icon: '', val: 'parlare' }, { type: 'emoji', icon: '', val: 'ascoltare' }, { type: 'emoji', icon: '', val: 'guardare' }, { type: 'emoji', icon: '', val: 'cantare' }, { type: 'emoji', icon: '', val: 'ballare' }, { type: 'emoji', icon: '', val: 'lavare' }, { type: 'emoji', icon: '', val: 'cucinare' }, { type: 'emoji', icon: '', val: 'pulire' }, { type: 'emoji', icon: '', val: 'comprare' }, { type: 'emoji', icon: '', val: 'lavorare' }, { type: 'emoji', icon: '', val: 'studiare' }, { type: 'emoji', icon: '', val: 'guidare' }, { type: 'emoji', icon: '', val: 'nuotare' }, { type: 'emoji', icon: '', val: 'salutare' }, { type: 'emoji', icon: '', val: 'pensare' }, { type: 'emoji', icon: '', val: 'chiamare' }, { type: 'emoji', icon: '', val: 'pedalare' }, { type: 'emoji', icon: '', val: 'tagliare' }, { type: 'emoji', icon: '', val: 'spazzare' }, { type: 'emoji', icon: '', val: 'riposare' }, { type: 'emoji', icon: '', val: 'regalare' }, { type: 'emoji', icon: '', val: 'giocare' }, { type: 'emoji', icon: '', val: 'volare' }, { type: 'emoji', icon: '', val: 'aprire' }
                 ]
             },
             abbigliamento: {
                 name: "Abbigliamento",
                 badge: '<i class="fa-solid fa-shirt"></i> Vestiti',
                 items: [
-                    { type: 'emoji', icon: '👕', val: 'maglietta' },
-                    { type: 'emoji', icon: '👖', val: 'pantaloni' },
-                    { type: 'emoji', icon: '👗', val: 'vestito' },
-                    { type: 'emoji', icon: '🧥', val: 'cappotto' },
-                    { type: 'emoji', icon: '👟', val: 'scarpe' },
-                    { type: 'emoji', icon: '🧦', val: 'calzini' },
-                    { type: 'emoji', icon: '🧢', val: 'cappellino' },
-                    { type: 'emoji', icon: '👒', val: 'cappello' },
-                    { type: 'emoji', icon: '🧣', val: 'sciarpa' },
-                    { type: 'emoji', icon: '🧤', val: 'guanti' },
-                    { type: 'emoji', icon: '👔', val: 'cravatta' },
-                    { type: 'emoji', icon: '🩳', val: 'pantaloncini' },
-                    { type: 'emoji', icon: '👙', val: 'costume' },
-                    { type: 'emoji', icon: '🥾', val: 'scarponi' },
-                    { type: 'emoji', icon: '👠', val: 'tacchi' },
-                    { type: 'emoji', icon: '🕶️', val: 'occhiali da sole' },
-                    { type: 'emoji', icon: '👓', val: 'occhiali' },
-                    { type: 'emoji', icon: '💼', val: 'borsa' },
-                    { type: 'emoji', icon: '🎒', val: 'zaino' },
-                    { type: 'emoji', icon: '☂️', val: 'ombrello' },
-                    { type: 'emoji', icon: '💍', val: 'anello' },
-                    { type: 'emoji', icon: '⌚', val: 'orologio da polso' },
-                    { type: 'emoji', icon: '👘', val: 'pigiama' },
-                    { type: 'emoji', icon: '🥼', val: 'camice' },
-                    { type: 'emoji', icon: '🦺', val: 'gilet' },
-                    { type: 'emoji', icon: '👑', val: 'corona' },
-                    { type: 'emoji', icon: '👝', val: 'pochette' },
-                    { type: 'emoji', icon: '👛', val: 'portafoglio' },
-                    { type: 'emoji', icon: '🎽', val: 'canottiera' },
-                    { type: 'emoji', icon: '🩰', val: 'scarpette' },
-                    { type: 'emoji', icon: '🩴', val: 'infradito' }
+                    { type: 'emoji', icon: '', val: 'maglietta' }, { type: 'emoji', icon: '', val: 'pantaloni' }, { type: 'emoji', icon: '', val: 'vestito' }, { type: 'emoji', icon: '', val: 'cappotto' }, { type: 'emoji', icon: '', val: 'scarpe' }, { type: 'emoji', icon: '', val: 'calzini' }, { type: 'emoji', icon: '', val: 'cappellino' }, { type: 'emoji', icon: '', val: 'cappello' }, { type: 'emoji', icon: '', val: 'sciarpa' }, { type: 'emoji', icon: '', val: 'guanti' }, { type: 'emoji', icon: '', val: 'cravatta' }, { type: 'emoji', icon: '', val: 'pantaloncini' }, { type: 'emoji', icon: '', val: 'costume' }, { type: 'emoji', icon: '', val: 'scarponi' }, { type: 'emoji', icon: '', val: 'tacchi' }, { type: 'emoji', icon: '', val: 'occhiali da sole' }, { type: 'emoji', icon: '', val: 'occhiali' }, { type: 'emoji', icon: '', val: 'borsa' }, { type: 'emoji', icon: '', val: 'zaino' }, { type: 'emoji', icon: '', val: 'ombrello' }, { type: 'emoji', icon: '', val: 'anello' }, { type: 'emoji', icon: '', val: 'orologio da polso' }, { type: 'emoji', icon: '', val: 'pigiama' }, { type: 'emoji', icon: '', val: 'camice' }, { type: 'emoji', icon: '', val: 'gilet' }, { type: 'emoji', icon: '', val: 'corona' }, { type: 'emoji', icon: '', val: 'pochette' }, { type: 'emoji', icon: '', val: 'portafoglio' }, { type: 'emoji', icon: '', val: 'canottiera' }, { type: 'emoji', icon: '', val: 'scarpette' }, { type: 'emoji', icon: '', val: 'infradito' }
                 ]
             }
         };
 
         /* --- STATO DEL GIOCO --- */
         let state = {
-            n: 7, // 7 -> 8 figure per carta (Galois GF(7) projective plane)
+            n: 7, 
             symbolsPerCard: 8,
             currentPresetKey: 'corpo',
-            activeSymbols: [], // Elenco attivo degli elementi
-            deckCards: [], // Tutte le carte generate
+            activeSymbols: [], 
+            deckCards: [], 
             card1Index: -1,
             card2Index: -1,
             matchingSymbol: null,
@@ -610,7 +411,6 @@
             lastSpokenWord: ''
         };
 
-        // Suoni Tone.js
         let synthSound, wrongSound;
 
         window.onload = function() {
@@ -636,14 +436,12 @@
             }
         }
 
-        /* --- GENERATORE DI PIANI PROIETTIVI FINITI (MATH ENGINE) --- */
+        /* --- GENERATORE DI PIANI PROIETTIVI FINITI --- */
         function generateProjectivePlaneDeck(n, symbols) {
-            // n dev'essere un numero primo (es. 5 per 6 simboli/carta, 7 per 8 simboli/carta)
             const cards = [];
-            const numSymbolsNeeded = n * n + n + 1; // 57 simboli per n=7
+            const numSymbolsNeeded = n * n + n + 1;
 
             if (symbols.length < numSymbolsNeeded) {
-                // Duplica o estendi i simboli se non ne abbiamo abbastanza
                 let extended = [...symbols];
                 let counter = 1;
                 while (extended.length < numSymbolsNeeded) {
@@ -657,7 +455,6 @@
                 symbols = extended;
             }
 
-            // Linea 1: N+1 carte del primo tipo
             for (let i = 0; i <= n; i++) {
                 let card = [0];
                 for (let j = 0; j < n; j++) {
@@ -666,7 +463,6 @@
                 cards.push(card);
             }
 
-            // Altre N*N carte
             for (let i = 0; i < n; i++) {
                 for (let j = 0; j < n; j++) {
                     let card = [i + 1];
@@ -677,25 +473,31 @@
                 }
             }
 
-            // Map numeri ad oggetti simbolo effettivi
             return cards.map(c => c.map(idx => symbols[idx % symbols.length]));
         }
 
-        /* --- SELEZIONE E GESTIONE SET VOCABOLARIO --- */
+        /* --- SELEZIONE PRESET --- */
         function selectPreset(presetKey) {
             state.currentPresetKey = presetKey;
             const preset = PRESETS[presetKey];
-            state.activeSymbols = JSON.parse(JSON.stringify(preset.items));
+            // Crea una copia dell'array per poterlo manipolare senza modificare l'originale salvato
+            state.activeSymbols = preset.items.map(sym => ({ ...sym }));
             
             document.getElementById('current-preset-badge').innerHTML = preset.badge + " (" + state.activeSymbols.length + "+)";
             updateSymbolsPreviewGrid();
             buildDeck();
             
-            // Aggiorna stile bottoni preset nelle impostazioni
             document.querySelectorAll('.preset-btn').forEach(btn => {
                 btn.classList.remove('border-emerald-500', 'bg-emerald-950/40', 'border-emerald-500/40');
                 btn.classList.add('border-slate-700', 'bg-slate-800/50');
             });
+            
+            // Colora il pulsante attivo se esiste nel DOM
+            const activeBtn = Array.from(document.querySelectorAll('.preset-btn')).find(b => b.onclick.toString().includes(presetKey));
+            if(activeBtn) {
+                activeBtn.classList.add('border-emerald-500', 'bg-emerald-950/40', 'border-emerald-500/40');
+                activeBtn.classList.remove('border-slate-700', 'bg-slate-800/50');
+            }
         }
 
         function buildDeck() {
@@ -704,7 +506,7 @@
             nextPair(false);
         }
 
-        /* --- CARICAMENTO E GESTIONE SIMBOLI PERSONALIZZATI --- */
+        /* --- CARICAMENTO E SALVATAGGIO SIMBOLI PERSONALIZZATI --- */
         function handleFileUpload(event) {
             const files = event.target.files;
             if (!files || files.length === 0) return;
@@ -712,7 +514,6 @@
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    // Prendi il nome del file senza estensione come valore predefinito
                     const fileNameName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
                     state.activeSymbols.unshift({
                         type: 'image',
@@ -763,18 +564,58 @@
             updateSymbolsPreviewGrid();
         }
 
+        // NUOVA FUNZIONE: Salva il set corrente come nuova categoria
+        function saveAsNewCategory() {
+            const nameInput = document.getElementById('new-category-name');
+            const categoryName = nameInput.value.trim();
+            
+            if (!categoryName) {
+                alert("Per favore, inserisci un nome per la tua nuova categoria!");
+                return;
+            }
+            if (state.activeSymbols.length === 0) {
+                alert("Non ci sono immagini caricate. Carica prima le immagini per creare una categoria!");
+                return;
+            }
+            
+            // Crea una chiave univoca basata sul tempo per non sovrascrivere niente
+            const key = 'custom_' + Date.now();
+            
+            // Salva nel dizionario dei Preset copiando i dati in profondità
+            PRESETS[key] = {
+                name: categoryName,
+                badge: '<i class="fa-solid fa-star text-amber-400"></i> ' + categoryName,
+                items: state.activeSymbols.map(sym => ({ ...sym }))
+            };
+            
+            // Crea il bottone nella griglia delle categorie
+            const grid = document.getElementById('presets-grid');
+            const btn = document.createElement('button');
+            btn.onclick = () => selectPreset(key);
+            btn.className = "preset-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 hover:bg-slate-800 flex flex-col items-center gap-2 text-center transition";
+            btn.innerHTML = `
+                <span class="text-2xl"><i class="fa-solid fa-star text-amber-400"></i></span>
+                <span class="font-bold text-xs sm:text-sm text-slate-200">${categoryName}</span>
+            `;
+            grid.appendChild(btn);
+            
+            // Selezionala in automatico e ripulisci il campo
+            nameInput.value = "";
+            alert(`Fantastico! La categoria "${categoryName}" è stata salvata.`);
+            selectPreset(key);
+        }
+
         /* --- SINTESI VOCALE E PRONUNCIA --- */
         function speakWord(text) {
             if (!state.audioEnabled || !text) return;
             
-            // Cancella pronunce in coda
             if (state.synth.speaking) {
                 state.synth.cancel();
             }
 
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'it-IT';
-            utterance.rate = 0.9; // Velocità naturale e scandita per L2
+            utterance.rate = 0.9;
             utterance.pitch = 1.0;
             
             state.synth.speak(utterance);
@@ -812,7 +653,6 @@
                 icon.className = "fa-solid fa-font text-slate-500 opacity-40";
                 text.textContent = "Testo: OFF";
             }
-            // Rirenderizza le carte correnti per applicare la preferenza visiva
             renderCard('card1', state.deckCards[state.card1Index]);
             renderCard('card2', state.deckCards[state.card2Index]);
         }
@@ -830,7 +670,6 @@
             state.card1Index = idx1;
             state.card2Index = idx2;
 
-            // Trova l'unico simbolo comune
             const card1Vals = state.deckCards[idx1].map(s => s.val);
             const card2Vals = state.deckCards[idx2].map(s => s.val);
             state.matchingSymbol = card1Vals.find(val => card2Vals.includes(val));
@@ -841,7 +680,7 @@
             if (animate) {
                 card1El.classList.remove('animate-card');
                 card2El.classList.remove('animate-card');
-                void card1El.offsetWidth; // Force reflow
+                void card1El.offsetWidth;
                 card1El.classList.add('animate-card');
                 card2El.classList.add('animate-card');
             }
@@ -850,26 +689,21 @@
             renderCard('card2', state.deckCards[idx2]);
         }
 
-        /* RENDERING CIRCOLARE SENZA SOVRAPPOSIZIONI CON ROTAZIONE E SCALA */
+        /* RENDERING CIRCOLARE */
         function renderCard(cardId, symbols) {
             const cardEl = document.getElementById(cardId);
             cardEl.innerHTML = '';
 
-            const num = symbols.length; // Es. 8 simboli
-            
-            // Definiamo posizioni radiale distribuite
-            // 1 al centro, 7 distribuiti sulla circonferenza esterna (o 1 centro + 2 anello interno + 5 esterno)
+            const num = symbols.length;
             let positions = [];
 
             if (num === 8) {
-                // 1 Centro + 7 Anello Esterno
-                positions.push({ r: 0, angle: 0 }); // Centro
+                positions.push({ r: 0, angle: 0 });
                 for (let i = 0; i < 7; i++) {
                     let angle = (i * (360 / 7)) + (Math.random() * 10 - 5);
-                    positions.push({ r: 35, angle: angle }); // 35% del raggio
+                    positions.push({ r: 35, angle: angle });
                 }
             } else {
-                // 1 Centro + N-1 Anello
                 positions.push({ r: 0, angle: 0 });
                 for (let i = 0; i < num - 1; i++) {
                     let angle = (i * (360 / (num - 1)));
@@ -877,7 +711,6 @@
                 }
             }
 
-            // Mescola l'ordine dei simboli visivi sulla carta
             let shuffledSymbols = symbols.map((sym, i) => ({ sym, pos: positions[i] }));
             shuffledSymbols.sort(() => Math.random() - 0.5);
 
@@ -888,11 +721,9 @@
                 const symEl = document.createElement('div');
                 symEl.className = 'symbol-item hover:bg-slate-900/10 hover:shadow-lg rounded-full';
 
-                // Scala casuale e rotazione causale (stile originale)
-                const scale = (0.65 + Math.random() * 0.65).toFixed(2); // Tra 0.65x e 1.30x
-                const rotation = Math.floor(Math.random() * 360) - 180; // Tra -180 deg e +180 deg
+                const scale = (0.65 + Math.random() * 0.65).toFixed(2);
+                const rotation = Math.floor(Math.random() * 360) - 180;
 
-                // Calcola top/left in percentuale dal centro (50%, 50%)
                 const rad = (pos.angle * Math.PI) / 180;
                 const left = 50 + pos.r * Math.cos(rad);
                 const top = 50 + pos.r * Math.sin(rad);
@@ -901,7 +732,6 @@
                 symEl.style.top = `${top}%`;
                 symEl.style.transform = `translate(-50%, -50%) scale(${scale}) rotate(${rotation}deg)`;
 
-                // Contenuto Simbolo (Emoji o Immagine)
                 let contentHtml = '';
                 if (symbolObj.type === 'emoji') {
                     contentHtml = `<span class="text-4xl sm:text-5xl md:text-6xl drop-shadow-md select-none">${symbolObj.icon}</span>`;
@@ -909,14 +739,12 @@
                     contentHtml = `<img src="${symbolObj.icon}" class="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain drop-shadow-md select-none pointer-events-none">`;
                 }
 
-                // Etichetta Scritta Opzionale
                 let labelHtml = state.showLabels 
                     ? `<span class="text-[10px] sm:text-xs font-bold text-slate-800 bg-white/95 px-1.5 py-0.5 rounded-full shadow border border-slate-300 mt-0.5 whitespace-nowrap">${symbolObj.val}</span>` 
                     : '';
 
                 symEl.innerHTML = `<div class="flex flex-col items-center justify-center">${contentHtml}${labelHtml}</div>`;
 
-                // Evento Click/Touch
                 symEl.onclick = (e) => {
                     e.stopPropagation();
                     handleSymbolClick(symbolObj.val, symEl);
@@ -929,34 +757,23 @@
         /* --- CLIC SUL SIMBOLO & VERIFICA CORRETTEZZA --- */
         function handleSymbolClick(val, element) {
             if (val === state.matchingSymbol) {
-                // CORRETTO!
                 element.classList.add('symbol-correct');
                 
                 if (synthSound) {
                     synthSound.triggerAttackRelease("C5", "8n");
                 }
 
-                // Coriandoli
-                confetti({
-                    particleCount: 35,
-                    spread: 60,
-                    origin: { y: 0.6 }
-                });
-
-                // Pronuncia la parola in Italiano L2
+                confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
                 speakWord(val);
 
-                // Incrementa punteggio
                 state.score += 1;
                 document.getElementById('score-display').textContent = state.score;
 
-                // Passa alla prossima coppia dopo una breve pausa animazione
                 setTimeout(() => {
                     nextPair(true);
                 }, 450);
 
             } else {
-                // ERRORE!
                 element.classList.add('symbol-wrong');
                 if (wrongSound) {
                     wrongSound.triggerAttackRelease("G2", "8n");
@@ -974,7 +791,7 @@
             state.lastSpokenWord = '';
         }
 
-        /* --- TIMER & MODALITÀ SFIDA 60S --- */
+        /* --- TIMER --- */
         function toggleTimeAttack() {
             if (state.isTimeAttack) {
                 stopTimeAttack();
