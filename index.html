@@ -21,12 +21,12 @@
             -webkit-user-select: none;
         }
 
-.dobble-card {
-    aspect-ratio: 1 / 1;
-    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.35), 0 0 25px inset rgba(255, 255, 255, 0.85);
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    overflow: visible !important; /* Mantiene visibile il testo che sporge */
-}
+        .dobble-card {
+            aspect-ratio: 1 / 1;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.35), 0 0 25px inset rgba(255, 255, 255, 0.85);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: visible !important;
+        }
 
         .dobble-card:hover {
             transform: scale(1.02);
@@ -41,33 +41,24 @@
             justify-content: center;
             border-radius: 9999px;
             padding: 0; 
-            overflow: hidden; 
         }
 
-/* Impedisce al testo di andare a capo e lo mantiene compatto al centro */
-.symbol-item span.font-bold {
-    max-width: 110px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    display: inline-block;
-}
+        .symbol-item span.font-bold {
+            max-width: 110px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: inline-block;
+        }
 
-        
         .symbol-item:hover {
             z-index: 40 !important;
         }
 
-      /* Regola per immagini personalizzate proporzionate */
         .symbol-item img {
-            object-fit: contain !important; /* Non taglia i bordi dell'immagine */
+            object-fit: contain !important;
             border-radius: 50%;
             display: block;
-            
-            /* LA MAGIA È QUI: 
-               Se sono ancora grandi metti 0.8 o 0.7 
-               Se sono piccole metti 1.1 o 1.2 */
-            transform: scale(0.85); 
         }
 
         .symbol-correct {
@@ -242,27 +233,27 @@
                     <label class="block text-sm font-semibold text-slate-300 mb-3">Scegli la Categoria / Vocabolario:</label>
                     <div id="presets-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         <button onclick="selectPreset('corpo')" class="preset-btn p-3 rounded-2xl border-2 border-emerald-500/40 bg-emerald-950/40 hover:bg-emerald-900/50 flex flex-col items-center gap-2 text-center transition">
-                            <span class="text-2xl"></span>
+                            <span class="text-2xl">👁️</span>
                             <span class="font-bold text-xs sm:text-sm text-emerald-200">Il Corpo Umano</span>
                         </button>
                         <button onclick="selectPreset('casa')" class="preset-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 hover:bg-slate-800 flex flex-col items-center gap-2 text-center transition">
-                            <span class="text-2xl"></span>
+                            <span class="text-2xl">🏠</span>
                             <span class="font-bold text-xs sm:text-sm text-slate-200">La Casa & Oggetti</span>
                         </button>
                         <button onclick="selectPreset('citta')" class="preset-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 hover:bg-slate-800 flex flex-col items-center gap-2 text-center transition">
-                            <span class="text-2xl"></span>
+                            <span class="text-2xl">🚌</span>
                             <span class="font-bold text-xs sm:text-sm text-slate-200">La Città & Servizi</span>
                         </button>
                         <button onclick="selectPreset('cibo')" class="preset-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 hover:bg-slate-800 flex flex-col items-center gap-2 text-center transition">
-                            <span class="text-2xl"></span>
+                            <span class="text-2xl">🍎</span>
                             <span class="font-bold text-xs sm:text-sm text-slate-200">Cibo & Bevande</span>
                         </button>
                         <button onclick="selectPreset('azioni')" class="preset-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 hover:bg-slate-800 flex flex-col items-center gap-2 text-center transition">
-                            <span class="text-2xl"></span>
+                            <span class="text-2xl">🏃</span>
                             <span class="font-bold text-xs sm:text-sm text-slate-200">Verbi d'Azione</span>
                         </button>
                         <button onclick="selectPreset('abbigliamento')" class="preset-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 hover:bg-slate-800 flex flex-col items-center gap-2 text-center transition">
-                            <span class="text-2xl"></span>
+                            <span class="text-2xl">👕</span>
                             <span class="font-bold text-xs sm:text-sm text-slate-200">Abbigliamento</span>
                         </button>
                     </div>
@@ -366,42 +357,42 @@
                 name: "Il Corpo Umano (30+ Parti)",
                 badge: '<i class="fa-solid fa-user"></i> Corpo Umano',
                 items: [
-                    { type: 'emoji', icon: '', val: 'bocca' }, { type: 'emoji', icon: '', val: 'naso' }, { type: 'emoji', icon: '', val: 'occhio' }, { type: 'emoji', icon: '', val: 'orecchio' }, { type: 'emoji', icon: '', val: 'mano' }, { type: 'emoji', icon: '', val: 'piede' }, { type: 'emoji', icon: '', val: 'testa' }, { type: 'emoji', icon: '', val: 'braccio' }, { type: 'emoji', icon: '', val: 'gamba' }, { type: 'emoji', icon: '', val: 'pancia' }, { type: 'emoji', icon: '', val: 'dente' }, { type: 'emoji', icon: '', val: 'lingua' }, { type: 'emoji', icon: '', val: 'cuore' }, { type: 'emoji', icon: '', val: 'cervello' }, { type: 'emoji', icon: '', val: 'osso' }, { type: 'emoji', icon: '', val: 'capelli' }, { type: 'emoji', icon: '', val: 'dito' }, { type: 'emoji', icon: '', val: 'polmoni' }, { type: 'emoji', icon: '', val: 'ginocchio' }, { type: 'emoji', icon: '', val: 'spalla' }, { type: 'emoji', icon: '', val: 'collo' }, { type: 'emoji', icon: '', val: 'schiena' }, { type: 'emoji', icon: '', val: 'gomito' }, { type: 'emoji', icon: '', val: 'petto' }, { type: 'emoji', icon: '', val: 'impronta' }, { type: 'emoji', icon: '', val: 'occhi' }, { type: 'emoji', icon: '', val: 'unghia' }, { type: 'emoji', icon: '', val: 'barba' }, { type: 'emoji', icon: '', val: 'baffi' }, { type: 'emoji', icon: '', val: 'sangue' }, { type: 'emoji', icon: '', val: 'salute' }, { type: 'emoji', icon: '', val: 'cerotto' }, { type: 'emoji', icon: '', val: 'corpo' }, { type: 'emoji', icon: '', val: 'faccia' }, { type: 'emoji', icon: '', val: 'pugno' }, { type: 'emoji', icon: '', val: 'gamba artificiale' }, { type: 'emoji', icon: '', val: 'braccio robotico' }, { type: 'emoji', icon: '', val: 'radiografia' }, { type: 'emoji', icon: '', val: 'febbre' }, { type: 'emoji', icon: '', val: 'mascherina' }, { type: 'emoji', icon: '', val: 'siringa' }
+                    { type: 'emoji', icon: '👄', val: 'bocca' }, { type: 'emoji', icon: '👃', val: 'naso' }, { type: 'emoji', icon: '👁️', val: 'occhio' }, { type: 'emoji', icon: '👂', val: 'orecchio' }, { type: 'emoji', icon: '✋', val: 'mano' }, { type: 'emoji', icon: '🦶', val: 'piede' }, { type: 'emoji', icon: '🗣️', val: 'testa' }, { type: 'emoji', icon: '💪', val: 'braccio' }, { type: 'emoji', icon: '🦵', val: 'gamba' }, { type: 'emoji', icon: '🫃', val: 'pancia' }, { type: 'emoji', icon: '🦷', val: 'dente' }, { type: 'emoji', icon: '👅', val: 'lingua' }, { type: 'emoji', icon: '🫀', val: 'cuore' }, { type: 'emoji', icon: '🧠', val: 'cervello' }, { type: 'emoji', icon: '🦴', val: 'osso' }, { type: 'emoji', icon: '💇', val: 'capelli' }, { type: 'emoji', icon: '👈', val: 'dito' }, { type: 'emoji', icon: '🫁', val: 'polmoni' }, { type: 'emoji', icon: '🦵', val: 'ginocchio' }, { type: 'emoji', icon: '🤳', val: 'spalla' }, { type: 'emoji', icon: '👔', val: 'collo' }, { type: 'emoji', icon: '🧍', val: 'schiena' }, { type: 'emoji', icon: '🫱', val: 'gomito' }, { type: 'emoji', icon: '👕', val: 'petto' }, { type: 'emoji', icon: '👣', val: 'impronta' }, { type: 'emoji', icon: '👀', val: 'occhi' }, { type: 'emoji', icon: '💅', val: 'unghia' }, { type: 'emoji', icon: '🧔', val: 'barba' }, { type: 'emoji', icon: '👨‍🦰', val: 'baffi' }, { type: 'emoji', icon: '🩸', val: 'sangue' }, { type: 'emoji', icon: '🩺', val: 'salute' }, { type: 'emoji', icon: '🩹', val: 'cerotto' }, { type: 'emoji', icon: '🧬', val: 'corpo' }, { type: 'emoji', icon: '😊', val: 'faccia' }, { type: 'emoji', icon: '🤝', val: 'pugno' }, { type: 'emoji', icon: '🦿', val: 'gamba artificiale' }, { type: 'emoji', icon: '🦾', val: 'braccio robotico' }, { type: 'emoji', icon: '🩻', val: 'radiografia' }, { type: 'emoji', icon: '🤒', val: 'febbre' }, { type: 'emoji', icon: '😷', val: 'mascherina' }, { type: 'emoji', icon: '💉', val: 'siringa' }
                 ]
             },
             casa: {
                 name: "La Casa & Oggetti",
                 badge: '<i class="fa-solid fa-house"></i> La Casa',
                 items: [
-                    { type: 'emoji', icon: '', val: 'casa' }, { type: 'emoji', icon: '', val: 'sedia' }, { type: 'emoji', icon: '', val: 'divano' }, { type: 'emoji', icon: '', val: 'letto' }, { type: 'emoji', icon: '', val: 'porta' }, { type: 'emoji', icon: '', val: 'finestra' }, { type: 'emoji', icon: '', val: 'chiave' }, { type: 'emoji', icon: '', val: 'telefono' }, { type: 'emoji', icon: '', val: 'televisione' }, { type: 'emoji', icon: '', val: 'lampada' }, { type: 'emoji', icon: '', val: 'orologio' }, { type: 'emoji', icon: '', val: 'piatto' }, { type: 'emoji', icon: '', val: 'cucchiaio' }, { type: 'emoji', icon: '', val: 'forchetta' }, { type: 'emoji', icon: '', val: 'coltello' }, { type: 'emoji', icon: '', val: 'bicchiere' }, { type: 'emoji', icon: '', val: 'scopa' }, { type: 'emoji', icon: '', val: 'sapone' }, { type: 'emoji', icon: '', val: 'specchio' }, { type: 'emoji', icon: '', val: 'quadro' }, { type: 'emoji', icon: '', val: 'doccia' }, { type: 'emoji', icon: '', val: 'bagno' }, { type: 'emoji', icon: '', val: 'chiavi' }, { type: 'emoji', icon: '', val: 'scatola' }, { type: 'emoji', icon: '', val: 'radio' }, { type: 'emoji', icon: '', val: 'candela' }, { type: 'emoji', icon: '', val: 'computer' }, { type: 'emoji', icon: '', val: 'libri' }, { type: 'emoji', icon: '', val: 'cestino' }, { type: 'emoji', icon: '', val: 'pianta' }, { type: 'emoji', icon: '', val: 'cappotto' }
+                    { type: 'emoji', icon: '🏠', val: 'casa' }, { type: 'emoji', icon: '🪑', val: 'sedia' }, { type: 'emoji', icon: '🛋️', val: 'divano' }, { type: 'emoji', icon: '🛏️', val: 'letto' }, { type: 'emoji', icon: '🚪', val: 'porta' }, { type: 'emoji', icon: '🪟', val: 'finestra' }, { type: 'emoji', icon: '🔑', val: 'chiave' }, { type: 'emoji', icon: '📱', val: 'telefono' }, { type: 'emoji', icon: '📺', val: 'televisione' }, { type: 'emoji', icon: '💡', val: 'lampada' }, { type: 'emoji', icon: '⏰', val: 'orologio' }, { type: 'emoji', icon: '🍽️', val: 'piatto' }, { type: 'emoji', icon: '🥄', val: 'cucchiaio' }, { type: 'emoji', icon: '🍴', val: 'forchetta' }, { type: 'emoji', icon: '🔪', val: 'coltello' }, { type: 'emoji', icon: '🥛', val: 'bicchiere' }, { type: 'emoji', icon: '🧹', val: 'scopa' }, { type: 'emoji', icon: '🧼', val: 'sapone' }, { type: 'emoji', icon: '🪞', val: 'specchio' }, { type: 'emoji', icon: '🖼️', val: 'quadro' }, { type: 'emoji', icon: '🚿', val: 'doccia' }, { type: 'emoji', icon: '🚽', val: 'bagno' }, { type: 'emoji', icon: '🗝️', val: 'chiavi' }, { type: 'emoji', icon: '📦', val: 'scatola' }, { type: 'emoji', icon: '📻', val: 'radio' }, { type: 'emoji', icon: '🕯️', val: 'candela' }, { type: 'emoji', icon: '💻', val: 'computer' }, { type: 'emoji', icon: '📚', val: 'libri' }, { type: 'emoji', icon: '🗑️', val: 'cestino' }, { type: 'emoji', icon: '🪴', val: 'pianta' }, { type: 'emoji', icon: '🧥', val: 'cappotto' }
                 ]
             },
             citta: {
                 name: "La Città & Servizi",
                 badge: '<i class="fa-solid fa-city"></i> La Città',
                 items: [
-                    { type: 'emoji', icon: '', val: 'autobus' }, { type: 'emoji', icon: '', val: 'treno' }, { type: 'emoji', icon: '', val: 'ospedale' }, { type: 'emoji', icon: '', val: 'scuola' }, { type: 'emoji', icon: '', val: 'supermercato' }, { type: 'emoji', icon: '', val: 'posta' }, { type: 'emoji', icon: '', val: 'banca' }, { type: 'emoji', icon: '', val: 'farmacia' }, { type: 'emoji', icon: '', val: 'polizia' }, { type: 'emoji', icon: '', val: 'pompieri' }, { type: 'emoji', icon: '', val: 'fermata' }, { type: 'emoji', icon: '', val: 'taxi' }, { type: 'emoji', icon: '', val: 'bicicletta' }, { type: 'emoji', icon: '', val: 'macchina' }, { type: 'emoji', icon: '', val: 'semaforo' }, { type: 'emoji', icon: '', val: 'palazzo' }, { type: 'emoji', icon: '', val: 'negozio' }, { type: 'emoji', icon: '', val: 'bar' }, { type: 'emoji', icon: '', val: 'pizzeria' }, { type: 'emoji', icon: '', val: 'parco' }, { type: 'emoji', icon: '', val: 'aeroporto' }, { type: 'emoji', icon: '', val: 'benzinaio' }, { type: 'emoji', icon: '', val: 'ponte' }, { type: 'emoji', icon: '', val: 'biglietto' }, { type: 'emoji', icon: '', val: 'mappa' }, { type: 'emoji', icon: '', val: 'pedone' }, { type: 'emoji', icon: '', val: 'porto' }, { type: 'emoji', icon: '', val: 'albergo' }, { type: 'emoji', icon: '', val: 'fontana' }, { type: 'emoji', icon: '', val: 'museo' }, { type: 'emoji', icon: '', val: 'stadio' }
+                    { type: 'emoji', icon: '🚌', val: 'autobus' }, { type: 'emoji', icon: '🚆', val: 'treno' }, { type: 'emoji', icon: '🏥', val: 'ospedale' }, { type: 'emoji', icon: '🏫', val: 'scuola' }, { type: 'emoji', icon: '🛒', val: 'supermercato' }, { type: 'emoji', icon: '✉️', val: 'posta' }, { type: 'emoji', icon: '🏦', val: 'banca' }, { type: 'emoji', icon: '💊', val: 'farmacia' }, { type: 'emoji', icon: '🚓', val: 'polizia' }, { type: 'emoji', icon: '🚒', val: 'pompieri' }, { type: 'emoji', icon: '🚏', val: 'fermata' }, { type: 'emoji', icon: '🚕', val: 'taxi' }, { type: 'emoji', icon: '🚲', val: 'bicicletta' }, { type: 'emoji', icon: '🚗', val: 'macchina' }, { type: 'emoji', icon: '🚥', val: 'semaforo' }, { type: 'emoji', icon: '🏢', val: 'palazzo' }, { type: 'emoji', icon: '🏪', val: 'negozio' }, { type: 'emoji', icon: '☕', val: 'bar' }, { type: 'emoji', icon: '🍕', val: 'pizzeria' }, { type: 'emoji', icon: '🌳', val: 'parco' }, { type: 'emoji', icon: '✈️', val: 'aeroporto' }, { type: 'emoji', icon: '⛽', val: 'benzinaio' }, { type: 'emoji', icon: '🌉', val: 'ponte' }, { type: 'emoji', icon: '🎟️', val: 'biglietto' }, { type: 'emoji', icon: '🗺️', val: 'mappa' }, { type: 'emoji', icon: '🚶', val: 'pedone' }, { type: 'emoji', icon: '⚓', val: 'porto' }, { type: 'emoji', icon: '🏨', val: 'albergo' }, { type: 'emoji', icon: '⛲', val: 'fontana' }, { type: 'emoji', icon: '🏛️', val: 'museo' }, { type: 'emoji', icon: '🏟️', val: 'stadio' }
                 ]
             },
             cibo: {
                 name: "Cibo & Bevande",
                 badge: '<i class="fa-solid fa-utensils"></i> Cibo',
                 items: [
-                    { type: 'emoji', icon: '', val: 'mela' }, { type: 'emoji', icon: '', val: 'banana' }, { type: 'emoji', icon: '', val: 'pane' }, { type: 'emoji', icon: '', val: 'formaggio' }, { type: 'emoji', icon: '', val: 'latte' }, { type: 'emoji', icon: '', val: 'carne' }, { type: 'emoji', icon: '', val: 'pesce' }, { type: 'emoji', icon: '', val: 'uovo' }, { type: 'emoji', icon: '', val: 'pizza' }, { type: 'emoji', icon: '', val: 'pasta' }, { type: 'emoji', icon: '', val: 'insalata' }, { type: 'emoji', icon: '', val: 'pomodoro' }, { type: 'emoji', icon: '', val: 'patata' }, { type: 'emoji', icon: '', val: 'carota' }, { type: 'emoji', icon: '', val: 'arancia' }, { type: 'emoji', icon: '', val: 'uva' }, { type: 'emoji', icon: '', val: 'caffè' }, { type: 'emoji', icon: '', val: 'tè' }, { type: 'emoji', icon: '', val: 'acqua' }, { type: 'emoji', icon: '', val: 'gelato' }, { type: 'emoji', icon: '', val: 'torta' }, { type: 'emoji', icon: '', val: 'cioccolato' }, { type: 'emoji', icon: '', val: 'riso' }, { type: 'emoji', icon: '', val: 'limone' }, { type: 'emoji', icon: '', val: 'fragola' }, { type: 'emoji', icon: '', val: 'cetriolo' }, { type: 'emoji', icon: '', val: 'cipolla' }, { type: 'emoji', icon: '', val: 'baguette' }, { type: 'emoji', icon: '', val: 'cornetto' }, { type: 'emoji', icon: '', val: 'succo' }, { type: 'emoji', icon: '', val: 'sale' }
+                    { type: 'emoji', icon: '🍎', val: 'mela' }, { type: 'emoji', icon: '🍌', val: 'banana' }, { type: 'emoji', icon: '🍞', val: 'pane' }, { type: 'emoji', icon: '🧀', val: 'formaggio' }, { type: 'emoji', icon: '🥛', val: 'latte' }, { type: 'emoji', icon: '🥩', val: 'carne' }, { type: 'emoji', icon: '🐟', val: 'pesce' }, { type: 'emoji', icon: '🥚', val: 'uovo' }, { type: 'emoji', icon: '🍕', val: 'pizza' }, { type: 'emoji', icon: '🍝', val: 'pasta' }, { type: 'emoji', icon: '🥗', val: 'insalata' }, { type: 'emoji', icon: '🍅', val: 'pomodoro' }, { type: 'emoji', icon: '🥔', val: 'patata' }, { type: 'emoji', icon: '🥕', val: 'carota' }, { type: 'emoji', icon: '🍊', val: 'arancia' }, { type: 'emoji', icon: '🍇', val: 'uva' }, { type: 'emoji', icon: '☕', val: 'caffè' }, { type: 'emoji', icon: '🍵', val: 'tè' }, { type: 'emoji', icon: '💧', val: 'acqua' }, { type: 'emoji', icon: '🍦', val: 'gelato' }, { type: 'emoji', icon: '🍰', val: 'torta' }, { type: 'emoji', icon: '🍫', val: 'cioccolato' }, { type: 'emoji', icon: '🍚', val: 'riso' }, { type: 'emoji', icon: '🍋', val: 'limone' }, { type: 'emoji', icon: '🍓', val: 'fragola' }, { type: 'emoji', icon: '🥒', val: 'cetriolo' }, { type: 'emoji', icon: '🧅', val: 'cipolla' }, { type: 'emoji', icon: '🥖', val: 'baguette' }, { type: 'emoji', icon: '🥐', val: 'cornetto' }, { type: 'emoji', icon: '🧃', val: 'succo' }, { type: 'emoji', icon: '🧂', val: 'sale' }
                 ]
             },
             azioni: {
                 name: "Verbi d'Azione",
                 badge: '<i class="fa-solid fa-person-running"></i> Azioni',
                 items: [
-                    { type: 'emoji', icon: '', val: 'correre' }, { type: 'emoji', icon: '', val: 'camminare' }, { type: 'emoji', icon: '', val: 'mangiare' }, { type: 'emoji', icon: '', val: 'bere' }, { type: 'emoji', icon: '', val: 'dormire' }, { type: 'emoji', icon: '', val: 'leggere' }, { type: 'emoji', icon: '', val: 'scrivere' }, { type: 'emoji', icon: '', val: 'parlare' }, { type: 'emoji', icon: '', val: 'ascoltare' }, { type: 'emoji', icon: '', val: 'guardare' }, { type: 'emoji', icon: '', val: 'cantare' }, { type: 'emoji', icon: '', val: 'ballare' }, { type: 'emoji', icon: '', val: 'lavare' }, { type: 'emoji', icon: '', val: 'cucinare' }, { type: 'emoji', icon: '', val: 'pulire' }, { type: 'emoji', icon: '', val: 'comprare' }, { type: 'emoji', icon: '', val: 'lavorare' }, { type: 'emoji', icon: '', val: 'studiare' }, { type: 'emoji', icon: '', val: 'guidare' }, { type: 'emoji', icon: '', val: 'nuotare' }, { type: 'emoji', icon: '', val: 'salutare' }, { type: 'emoji', icon: '', val: 'pensare' }, { type: 'emoji', icon: '', val: 'chiamare' }, { type: 'emoji', icon: '', val: 'pedalare' }, { type: 'emoji', icon: '', val: 'tagliare' }, { type: 'emoji', icon: '', val: 'spazzare' }, { type: 'emoji', icon: '', val: 'riposare' }, { type: 'emoji', icon: '', val: 'regalare' }, { type: 'emoji', icon: '', val: 'giocare' }, { type: 'emoji', icon: '', val: 'volare' }, { type: 'emoji', icon: '', val: 'aprire' }
+                    { type: 'emoji', icon: '🏃', val: 'correre' }, { type: 'emoji', icon: '🚶', val: 'camminare' }, { type: 'emoji', icon: '🍽️', val: 'mangiare' }, { type: 'emoji', icon: '🥤', val: 'bere' }, { type: 'emoji', icon: '😴', val: 'dormire' }, { type: 'emoji', icon: '📖', val: 'leggere' }, { type: 'emoji', icon: '✍️', val: 'scrivere' }, { type: 'emoji', icon: '🗣️', val: 'parlare' }, { type: 'emoji', icon: '👂', val: 'ascoltare' }, { type: 'emoji', icon: '👁️', val: 'guardare' }, { type: 'emoji', icon: '🎵', val: 'cantare' }, { type: 'emoji', icon: '💃', val: 'ballare' }, { type: 'emoji', icon: '🧼', val: 'lavare' }, { type: 'emoji', icon: '🍳', val: 'cucinare' }, { type: 'emoji', icon: '🧹', val: 'pulire' }, { type: 'emoji', icon: '🛒', val: 'comprare' }, { type: 'emoji', icon: '💼', val: 'lavorare' }, { type: 'emoji', icon: '📚', val: 'studiare' }, { type: 'emoji', icon: '🚗', val: 'guidare' }, { type: 'emoji', icon: '🏊', val: 'nuotare' }, { type: 'emoji', icon: '👋', val: 'salutare' }, { type: 'emoji', icon: '🤔', val: 'pensare' }, { type: 'emoji', icon: '📞', val: 'chiamare' }, { type: 'emoji', icon: '🚴', val: 'pedalare' }, { type: 'emoji', icon: '✂️', val: 'tagliare' }, { type: 'emoji', icon: '🧹', val: 'spazzare' }, { type: 'emoji', icon: '🛋️', val: 'riposare' }, { type: 'emoji', icon: '🎁', val: 'regalare' }, { type: 'emoji', icon: '🎮', val: 'giocare' }, { type: 'emoji', icon: '✈️', val: 'volare' }, { type: 'emoji', icon: '🔓', val: 'aprire' }
                 ]
             },
             abbigliamento: {
                 name: "Abbigliamento",
                 badge: '<i class="fa-solid fa-shirt"></i> Vestiti',
                 items: [
-                    { type: 'emoji', icon: '', val: 'maglietta' }, { type: 'emoji', icon: '', val: 'pantaloni' }, { type: 'emoji', icon: '', val: 'vestito' }, { type: 'emoji', icon: '', val: 'cappotto' }, { type: 'emoji', icon: '', val: 'scarpe' }, { type: 'emoji', icon: '', val: 'calzini' }, { type: 'emoji', icon: '', val: 'cappellino' }, { type: 'emoji', icon: '', val: 'cappello' }, { type: 'emoji', icon: '', val: 'sciarpa' }, { type: 'emoji', icon: '', val: 'guanti' }, { type: 'emoji', icon: '', val: 'cravatta' }, { type: 'emoji', icon: '', val: 'pantaloncini' }, { type: 'emoji', icon: '', val: 'costume' }, { type: 'emoji', icon: '', val: 'scarponi' }, { type: 'emoji', icon: '', val: 'tacchi' }, { type: 'emoji', icon: '', val: 'occhiali da sole' }, { type: 'emoji', icon: '', val: 'occhiali' }, { type: 'emoji', icon: '', val: 'borsa' }, { type: 'emoji', icon: '', val: 'zaino' }, { type: 'emoji', icon: '', val: 'ombrello' }, { type: 'emoji', icon: '', val: 'anello' }, { type: 'emoji', icon: '', val: 'orologio da polso' }, { type: 'emoji', icon: '', val: 'pigiama' }, { type: 'emoji', icon: '', val: 'camice' }, { type: 'emoji', icon: '', val: 'gilet' }, { type: 'emoji', icon: '', val: 'corona' }, { type: 'emoji', icon: '', val: 'pochette' }, { type: 'emoji', icon: '', val: 'portafoglio' }, { type: 'emoji', icon: '', val: 'canottiera' }, { type: 'emoji', icon: '', val: 'scarpette' }, { type: 'emoji', icon: '', val: 'infradito' }
+                    { type: 'emoji', icon: '👕', val: 'maglietta' }, { type: 'emoji', icon: '👖', val: 'pantaloni' }, { type: 'emoji', icon: '👗', val: 'vestito' }, { type: 'emoji', icon: '🧥', val: 'cappotto' }, { type: 'emoji', icon: '👟', val: 'scarpe' }, { type: 'emoji', icon: '🧦', val: 'calzini' }, { type: 'emoji', icon: '🧢', val: 'cappellino' }, { type: 'emoji', icon: '🎩', val: 'cappello' }, { type: 'emoji', icon: '🧣', val: 'sciarpa' }, { type: 'emoji', icon: '🧤', val: 'guanti' }, { type: 'emoji', icon: '👔', val: 'cravatta' }, { type: 'emoji', icon: '🩳', val: 'pantaloncini' }, { type: 'emoji', icon: '🩱', val: 'costume' }, { type: 'emoji', icon: '🥾', val: 'scarponi' }, { type: 'emoji', icon: '👠', val: 'tacchi' }, { type: 'emoji', icon: '🕶️', val: 'occhiali da sole' }, { type: 'emoji', icon: '👓', val: 'occhiali' }, { type: 'emoji', icon: '👜', val: 'borsa' }, { type: 'emoji', icon: '🎒', val: 'zaino' }, { type: 'emoji', icon: '☂️', val: 'ombrello' }, { type: 'emoji', icon: '💍', val: 'anello' }, { type: 'emoji', icon: '⌚', val: 'orologio da polso' }, { type: 'emoji', icon: '🥋', val: 'pigiama' }, { type: 'emoji', icon: '🥼', val: 'camice' }, { type: 'emoji', icon: '🪡', val: 'gilet' }, { type: 'emoji', icon: '👑', val: 'corona' }, { type: 'emoji', icon: '👛', val: 'pochette' }, { type: 'emoji', icon: '👛', val: 'portafoglio' }, { type: 'emoji', icon: '🎽', val: 'canottiera' }, { type: 'emoji', icon: '🥿', val: 'scarpette' }, { type: 'emoji', icon: '🩴', val: 'infradito' }
                 ]
             }
         };
@@ -495,7 +486,6 @@
         function selectPreset(presetKey) {
             state.currentPresetKey = presetKey;
             const preset = PRESETS[presetKey];
-            // Crea una copia dell'array per poterlo manipolare senza modificare l'originale salvato
             state.activeSymbols = preset.items.map(sym => ({ ...sym }));
             
             document.getElementById('current-preset-badge').innerHTML = preset.badge + " (" + state.activeSymbols.length + "+)";
@@ -507,8 +497,7 @@
                 btn.classList.add('border-slate-700', 'bg-slate-800/50');
             });
             
-            // Colora il pulsante attivo se esiste nel DOM
-            const activeBtn = Array.from(document.querySelectorAll('.preset-btn')).find(b => b.onclick.toString().includes(presetKey));
+            const activeBtn = Array.from(document.querySelectorAll('.preset-btn')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(presetKey));
             if(activeBtn) {
                 activeBtn.classList.add('border-emerald-500', 'bg-emerald-950/40', 'border-emerald-500/40');
                 activeBtn.classList.remove('border-slate-700', 'bg-slate-800/50');
@@ -579,7 +568,6 @@
             updateSymbolsPreviewGrid();
         }
 
-        // NUOVA FUNZIONE: Salva il set corrente come nuova categoria
         function saveAsNewCategory() {
             const nameInput = document.getElementById('new-category-name');
             const categoryName = nameInput.value.trim();
@@ -593,17 +581,14 @@
                 return;
             }
             
-            // Crea una chiave univoca basata sul tempo per non sovrascrivere niente
             const key = 'custom_' + Date.now();
             
-            // Salva nel dizionario dei Preset copiando i dati in profondità
             PRESETS[key] = {
                 name: categoryName,
                 badge: '<i class="fa-solid fa-star text-amber-400"></i> ' + categoryName,
                 items: state.activeSymbols.map(sym => ({ ...sym }))
             };
             
-            // Crea il bottone nella griglia delle categorie
             const grid = document.getElementById('presets-grid');
             const btn = document.createElement('button');
             btn.onclick = () => selectPreset(key);
@@ -614,7 +599,6 @@
             `;
             grid.appendChild(btn);
             
-            // Selezionala in automatico e ripulisci il campo
             nameInput.value = "";
             alert(`Fantastico! La categoria "${categoryName}" è stata salvata.`);
             selectPreset(key);
@@ -700,7 +684,11 @@
                 card2El.classList.add('animate-card');
             }
 
-           /* RENDERING CIRCOLARE SENZA SOVRAPPOSIZIONI CON SCRITTE FISSE ED UNIFORMI */
+            renderCard('card1', state.deckCards[idx1]);
+            renderCard('card2', state.deckCards[idx2]);
+        }
+
+        /* RENDERING CIRCOLARE PULITO ED UNIFORME */
         function renderCard(cardId, symbols) {
             const cardEl = document.getElementById(cardId);
             cardEl.innerHTML = '';
@@ -708,9 +696,8 @@
             const num = symbols.length;
             let positions = [];
 
-            // Posizionamento compatto al 24% dal centro
             if (num === 8) {
-                positions.push({ r: 0, angle: 0 }); // Centro
+                positions.push({ r: 0, angle: 0 });
                 for (let i = 0; i < 7; i++) {
                     let angle = (i * (360 / 7)) + (Math.random() * 6 - 3);
                     positions.push({ r: 24, angle: angle }); 
@@ -733,7 +720,6 @@
                 const symEl = document.createElement('div');
                 symEl.className = 'symbol-item hover:bg-slate-900/10 hover:shadow-lg rounded-full';
 
-                // Posizionamento fisso sullo sfondo della carta
                 const rad = (pos.angle * Math.PI) / 180;
                 const left = 50 + pos.r * Math.cos(rad);
                 const top = 50 + pos.r * Math.sin(rad);
@@ -742,7 +728,6 @@
                 symEl.style.top = `${top}%`;
                 symEl.style.transform = `translate(-50%, -50%)`;
 
-                // LA SCALA E LA ROTAZIONE VANNO SOLO SU GRAFICA/EMOJI, NON SUL TESTO!
                 const scale = (0.75 + Math.random() * 0.45).toFixed(2);
                 const rotation = Math.floor(Math.random() * 360) - 180;
                 const graphicTransform = `transform: scale(${scale}) rotate(${rotation}deg);`;
@@ -754,118 +739,8 @@
                     contentHtml = `<img src="${symbolObj.icon}" class="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain drop-shadow-md select-none pointer-events-none inline-block" style="${graphicTransform}">`;
                 }
 
-                // ETICHETTA DI TESTO: Dimensione fissa (text-xs/text-sm), mai ruotata, mai scalata!
                 let labelHtml = state.showLabels 
                     ? `<span class="text-[11px] sm:text-xs font-bold text-slate-900 bg-white/95 px-2 py-0.5 rounded-full shadow-md border border-slate-300 mt-1 whitespace-nowrap leading-none select-none z-10">${symbolObj.val}</span>` 
-                    : '';
-
-                symEl.innerHTML = `<div class="flex flex-col items-center justify-center">${contentHtml}${labelHtml}</div>`;
-
-                symEl.onclick = (e) => {
-                    e.stopPropagation();
-                    handleSymbolClick(symbolObj.val, symEl);
-                };
-
-                cardEl.appendChild(symEl);
-            });
-        }
-
-            let shuffledSymbols = symbols.map((sym, i) => ({ sym, pos: positions[i] }));
-            shuffledSymbols.sort(() => Math.random() - 0.5);
-
-            shuffledSymbols.forEach((item, index) => {
-                const symbolObj = item.sym;
-                const pos = item.pos;
-
-                const symEl = document.createElement('div');
-                symEl.className = 'symbol-item hover:bg-slate-900/10 hover:shadow-lg rounded-full';
-
-                // Scala bilanciata: Minimo 0.75 (mai troppo piccola) e Massimo 1.25 (mai gigante)
-                const scale = (0.75 + Math.random() * 0.50).toFixed(2);
-                const rotation = Math.floor(Math.random() * 360) - 180;
-
-                const rad = (pos.angle * Math.PI) / 180;
-                const left = 50 + pos.r * Math.cos(rad);
-                const top = 50 + pos.r * Math.sin(rad);
-
-                symEl.style.left = `${left}%`;
-                symEl.style.top = `${top}%`;
-                symEl.style.transform = `translate(-50%, -50%) scale(${scale}) rotate(${rotation}deg)`;
-
-                let contentHtml = '';
-                if (symbolObj.type === 'emoji') {
-                    contentHtml = `<span class="text-4xl sm:text-5xl md:text-6xl drop-shadow-md select-none">${symbolObj.icon}</span>`;
-                } else {
-                    contentHtml = `<img src="${symbolObj.icon}" class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain drop-shadow-md select-none pointer-events-none">`;
-                }
-
-                let labelHtml = state.showLabels 
-                    ? `<span class="text-[10px] sm:text-xs font-bold text-slate-800 bg-white/95 px-1.5 py-0.5 rounded-full shadow border border-slate-300 mt-0.5 whitespace-nowrap leading-none">${symbolObj.val}</span>` 
-                    : '';
-
-                symEl.innerHTML = `<div class="flex flex-col items-center justify-center">${contentHtml}${labelHtml}</div>`;
-
-                symEl.onclick = (e) => {
-                    e.stopPropagation();
-                    handleSymbolClick(symbolObj.val, symEl);
-                };
-
-                cardEl.appendChild(symEl);
-            });
-        }
-
-        /* RENDERING CIRCOLARE */
-        function renderCard(cardId, symbols) {
-            const cardEl = document.getElementById(cardId);
-            cardEl.innerHTML = '';
-
-            const num = symbols.length;
-            let positions = [];
-
-        if (num === 8) {
-                positions.push({ r: 0, angle: 0 }); // Centro
-                for (let i = 0; i < 7; i++) {
-                    let angle = (i * (360 / 7)) + (Math.random() * 10 - 5);
-                    positions.push({ r: 27, angle: angle }); // <-- MODIFICATO DA 35 A 27
-                }
-            } else {
-                positions.push({ r: 0, angle: 0 });
-                for (let i = 0; i < num - 1; i++) {
-                    let angle = (i * (360 / (num - 1)));
-                    positions.push({ r: 26, angle: angle }); // <-- MODIFICATO DA 34 A 26
-                }
-            }
-
-            let shuffledSymbols = symbols.map((sym, i) => ({ sym, pos: positions[i] }));
-            shuffledSymbols.sort(() => Math.random() - 0.5);
-
-            shuffledSymbols.forEach((item, index) => {
-                const symbolObj = item.sym;
-                const pos = item.pos;
-
-                const symEl = document.createElement('div');
-                symEl.className = 'symbol-item hover:bg-slate-900/10 hover:shadow-lg rounded-full';
-
-                const scale = (0.45 + Math.random() * 1.15).toFixed(2);
-                const rotation = Math.floor(Math.random() * 360) - 180;
-
-                const rad = (pos.angle * Math.PI) / 180;
-                const left = 50 + pos.r * Math.cos(rad);
-                const top = 50 + pos.r * Math.sin(rad);
-
-                symEl.style.left = `${left}%`;
-                symEl.style.top = `${top}%`;
-                symEl.style.transform = `translate(-50%, -50%) scale(${scale}) rotate(${rotation}deg)`;
-
-                let contentHtml = '';
-                if (symbolObj.type === 'emoji') {
-                    contentHtml = `<span class="text-4xl sm:text-5xl md:text-6xl drop-shadow-md select-none">${symbolObj.icon}</span>`;
-                } else {
-contentHtml = `<img src="${symbolObj.icon}" class="w-16 h-16 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain drop-shadow-md select-none pointer-events-none">`;
-                }
-
-                let labelHtml = state.showLabels 
-                    ? `<span class="text-[10px] sm:text-xs font-bold text-slate-800 bg-white/95 px-1.5 py-0.5 rounded-full shadow border border-slate-300 mt-0.5 whitespace-nowrap">${symbolObj.val}</span>` 
                     : '';
 
                 symEl.innerHTML = `<div class="flex flex-col items-center justify-center">${contentHtml}${labelHtml}</div>`;
