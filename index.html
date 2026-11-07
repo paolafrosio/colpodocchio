@@ -701,17 +701,17 @@
             const num = symbols.length;
             let positions = [];
 
-            if (num === 8) {
-                positions.push({ r: 0, angle: 0 });
+        if (num === 8) {
+                positions.push({ r: 0, angle: 0 }); // Centro
                 for (let i = 0; i < 7; i++) {
                     let angle = (i * (360 / 7)) + (Math.random() * 10 - 5);
-                    positions.push({ r: 35, angle: angle });
+                    positions.push({ r: 27, angle: angle }); // <-- MODIFICATO DA 35 A 27
                 }
             } else {
                 positions.push({ r: 0, angle: 0 });
                 for (let i = 0; i < num - 1; i++) {
                     let angle = (i * (360 / (num - 1)));
-                    positions.push({ r: 34, angle: angle });
+                    positions.push({ r: 26, angle: angle }); // <-- MODIFICATO DA 34 A 26
                 }
             }
 
@@ -740,7 +740,7 @@
                 if (symbolObj.type === 'emoji') {
                     contentHtml = `<span class="text-4xl sm:text-5xl md:text-6xl drop-shadow-md select-none">${symbolObj.icon}</span>`;
                 } else {
-                    contentHtml = `<img src="${symbolObj.icon}" class="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain drop-shadow-md select-none pointer-events-none">`;
+contentHtml = `<img src="${symbolObj.icon}" class="w-16 h-16 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain drop-shadow-md select-none pointer-events-none">`;
                 }
 
                 let labelHtml = state.showLabels 
