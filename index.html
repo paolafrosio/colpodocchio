@@ -688,7 +688,7 @@
             renderCard('card2', state.deckCards[idx2]);
         }
 
-       /* RENDERING CIRCOLARE: IMMAGINE RUOTA E SCALA, SCRITTA RUOTA MA HA FONT-SIZE FISSO E UNIFORME */
+       /* RENDERING CIRCOLARE CON IMMAGINI GIGANTI E PROPORZIONATE */
         function renderCard(cardId, symbols) {
             const cardEl = document.getElementById(cardId);
             cardEl.innerHTML = '';
@@ -728,21 +728,22 @@
                 symEl.style.top = `${top}%`;
                 symEl.style.transform = `translate(-50%, -50%)`;
 
-                // PARAMETRI CASUALI
-                const scale = (0.55 + Math.random() * 0.80).toFixed(2);
+                // PARAMETRI CASUALI DI SCALA PER L'IMMAGINE
+                const scale = (0.70 + Math.random() * 0.70).toFixed(2);
                 const rotation = Math.floor(Math.random() * 360) - 180;
 
-                // 1. LA GRAFICA (Foto/Emoji): RUOTA E SCALA INSIEME
+                // 1. GRAFICA (Foto/Emoji): RUOTA E SCALA
                 const graphicStyle = `transform: scale(${scale}) rotate(${rotation}deg); display: block; margin: 0 auto;`;
                 
-                // 2. LA SCRITTA: RUOTA SOLTANTO E MANTIENE DIMENSIONE FONT FISSA A 12px
+                // 2. SCRITTA: RUOTA MA MANTIENE DIMENSIONE FISSA DI 12px
                 const labelStyle = `transform: rotate(${rotation}deg); font-size: 12px !important; line-height: 1 !important; display: inline-block;`;
 
                 let contentHtml = '';
                 if (symbolObj.type === 'emoji') {
-                    contentHtml = `<span class="text-4xl sm:text-5xl md:text-6xl drop-shadow-md select-none" style="${graphicStyle}">${symbolObj.icon}</span>`;
+                    contentHtml = `<span class="text-4xl sm:text-6xl md:text-7xl drop-shadow-md select-none" style="${graphicStyle}">${symbolObj.icon}</span>`;
                 } else {
-                    contentHtml = `<img src="${symbolObj.icon}" class="w-14 h-14 sm:w-18 sm:h-18 md:w-22 md:h-22 object-contain drop-shadow-md select-none pointer-events-none" style="${graphicStyle}">`;
+                    /* INGRANDITE QUI: da w-14 a w-20 (mobile) e fino a w-28 (display grandi) */
+                    contentHtml = `<img src="${symbolObj.icon}" class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain drop-shadow-md select-none pointer-events-none" style="${graphicStyle}">`;
                 }
 
                 let labelHtml = state.showLabels 
