@@ -6,10 +6,10 @@
     <title>Colpo d'occhio CPIA - Giochiamo Insieme</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Script non bloccanti: la pagina compare subito; Tone.js viene caricato da codice, dopo -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -200,7 +200,7 @@
                 <i class="fa-solid fa-arrows-rotate"></i> Cambia Carte
             </button>
             <button id="start-timer-btn" onclick="toggleTimeAttack()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm">
-                <i class="fa-solid fa-play"></i> Avvia Sfida 60s
+                <i class="fa-solid fa-play"></i> <span id="timer-btn-label">Avvia Sfida 60s</span>
             </button>
             <button onclick="resetScore()" class="px-3.5 py-2 rounded-xl bg-purple-950 hover:bg-purple-900 text-purple-300 hover:text-white border border-purple-800 font-medium transition text-xs">
                 Azzera Punti
@@ -278,6 +278,26 @@
                     </div>
                 </div>
 
+                <div>
+                    <label class="block text-sm font-semibold text-purple-200 mb-2">Penalità per errore (solo alunni):</label>
+                    <div id="penalty-options" class="grid grid-cols-4 gap-2">
+                        <button data-v="0" onclick="setPenalita(0)" class="opt-btn p-2 rounded-xl border text-center font-bold text-sm">Nessuna</button>
+                        <button data-v="1" onclick="setPenalita(1)" class="opt-btn p-2 rounded-xl border text-center font-bold text-sm">1 s</button>
+                        <button data-v="3" onclick="setPenalita(3)" class="opt-btn p-2 rounded-xl border text-center font-bold text-sm">3 s</button>
+                        <button data-v="5" onclick="setPenalita(5)" class="opt-btn p-2 rounded-xl border text-center font-bold text-sm">5 s</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-purple-200 mb-2">Durata della sfida:</label>
+                    <div id="duration-options" class="grid grid-cols-4 gap-2">
+                        <button data-v="30" onclick="setDurata(30)" class="opt-btn p-2 rounded-xl border text-center font-bold text-sm">30 s</button>
+                        <button data-v="60" onclick="setDurata(60)" class="opt-btn p-2 rounded-xl border text-center font-bold text-sm">60 s</button>
+                        <button data-v="90" onclick="setDurata(90)" class="opt-btn p-2 rounded-xl border text-center font-bold text-sm">90 s</button>
+                        <button data-v="120" onclick="setDurata(120)" class="opt-btn p-2 rounded-xl border text-center font-bold text-sm">120 s</button>
+                    </div>
+                </div>
+
                 <div class="bg-purple-950/60 p-4 rounded-2xl border border-purple-800 space-y-4">
                     <div class="flex justify-between items-center">
                         <span class="text-xs font-semibold text-purple-300 uppercase tracking-wider">Simboli Mazzo Corrente (<span id="loaded-count">0</span>):</span>
@@ -345,7 +365,8 @@
         /* ==================== COSTANTI ==================== */
         const TEACHER_PIN = "1234";
         const PREFISSO_STANZA = 'colpo-docchio-';
-        const DELAY_ROUND = 800;   // pausa tra un round e l'altro (ms)
+        const DELAY_ROUND = 800;      // pausa tra un round e l'altro (ms)
+        const DEBUG_TEMPI = true;     // mostra sul telefono quanto ha impiegato l'ingresso; a fine misure metti false
 
         const CARTELLA_IMMAGINI = [
             { val: 'contagocce', file: 'img_corpoumano/contagocce.png' },
@@ -443,6 +464,8 @@
             showLabels: false,
             audioEnabled: true,
             touchEnabled: true,
+            penaltySec: 3,      // penalità per errore (0 = nessuna)
+            durataSec: 60,      // durata della sfida
             isTimeAttack: false,
             timerFine: 0,
             timerInterval: null,
@@ -515,11 +538,12 @@
         }
         function nascondiParola() { document.getElementById('word-flash').classList.add('hidden'); }
 
+        // Tiene acceso lo schermo (alunni e host)
         async function tieniSchermoAcceso() {
             try { if (navigator.wakeLock) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
         }
         document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible' && ruolounico === 'studente') tieniSchermoAcceso();
+            if (document.visibilityState === 'visible' && ruolounico !== 'standalone') tieniSchermoAcceso();
         });
 
         function showWarningBanner(msg, duration = 3000, isError = false) {
@@ -534,9 +558,39 @@
         }
 
         /* ==================== AVVIO E AUDIO ==================== */
-        window.onload = function () {
-            preloadImmagini();
-            initAudio();
+        const TEMPI = {};   // misure dei tempi di ingresso (per DEBUG_TEMPI)
+
+        // Tone.js si carica da codice, DOPO che la pagina è già utilizzabile
+        function caricaTone() {
+            return new Promise(res => {
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js';
+                s.onload = res; s.onerror = res;
+                document.head.appendChild(s);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            TEMPI.dom = performance.now();
+            const pinParam = new URLSearchParams(window.location.search).get('pin');
+            const campoNome = document.getElementById('student-name');
+            const campoPin = document.getElementById('room-pin-input');
+
+            campoNome.value = localStorage.getItem('colpodocchio_nome') || '';
+            campoNome.addEventListener('keydown', e => { if (e.key === 'Enter') connettiComeStudente(); });
+            campoPin.addEventListener('input', e => {
+                const v = e.target.value.trim();
+                if (v.length === 4) preparaStudente(v);   // anche col PIN digitato a mano si collega in anticipo
+            });
+
+            // Arrivo dal QR: il collegamento parte SUBITO, mentre l'alunno scrive il nome
+            if (pinParam) {
+                campoPin.value = pinParam;
+                mostraModalConnessione();
+                preparaStudente(pinParam);
+                if (!campoNome.value) campoNome.focus();
+            }
+
             initSpeechRecognition();
 
             // Un solo listener per carta, su pointerdown: più veloce del click
@@ -558,12 +612,13 @@
             document.getElementById('labels-icon').className = "fa-solid fa-font text-purple-400 opacity-40";
             document.getElementById('labels-status-text').textContent = "Testo: OFF";
 
-            const pinParam = new URLSearchParams(window.location.search).get('pin');
-            if (pinParam) {
-                document.getElementById('room-pin-input').value = pinParam;
-                mostraModalConnessione();
-            }
-        };
+            setPenalita(state.penaltySec);
+            setDurata(state.durataSec);
+
+            // Le cose pesanti DOPO, senza ritardare il collegamento
+            preloadImmagini();
+            caricaTone().then(initAudio);
+        });
 
         function initAudio() {
             try {
@@ -576,7 +631,10 @@
                     envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.1 }
                 }).toDestination();
                 try { Tone.getContext().lookAhead = 0.01; } catch (e) {}
-                document.addEventListener('pointerdown', () => Tone.start(), { once: true });
+                // Il browser sblocca l'audio solo dopo un tocco: ritenta finché non è attivo
+                document.addEventListener('pointerdown', () => {
+                    try { if (Tone.context.state !== 'running') Tone.start(); } catch (e) {}
+                });
             } catch (e) {}
         }
 
@@ -797,7 +855,8 @@
                 c1: state.carta1.map(s => s.val),
                 c2: state.carta2.map(s => s.val),
                 m: state.matchingSymbol,
-                touchEnabled: state.touchEnabled
+                touchEnabled: state.touchEnabled,
+                penaltySec: state.penaltySec
             };
         }
 
@@ -806,6 +865,7 @@
             roundBloccato = false;
             speechBase = speechLastLen;
             if (d.touchEnabled !== undefined) state.touchEnabled = d.touchEnabled;
+            if (d.penaltySec !== undefined) state.penaltySec = d.penaltySec;
             setMatching(d.m);
             const toSym = v => ({ val: v, icon: ICONE[v] });
             mostraCarte(d.c1.map(toSym), d.c2.map(toSym), true);
@@ -867,15 +927,16 @@
                 if (wrongSound) wrongSound.triggerAttackRelease("G2", "8n");
                 setTimeout(() => { if (element) element.classList.remove('symbol-wrong'); }, 500);
 
-                if (ruolounico === 'studente') {
+                if (ruolounico === 'studente' && state.penaltySec > 0) {
                     isPenalized = true;
+                    const ms = state.penaltySec * 1000;
                     const c1 = document.getElementById('card1'), c2 = document.getElementById('card2');
                     c1.classList.add('locked-card'); c2.classList.add('locked-card');
-                    showWarningBanner("⚠️ Errore! Attendi 3 secondi prima di poter riprovare...", 3000, true);
+                    showWarningBanner(`⚠️ Errore! Attendi ${state.penaltySec} ${state.penaltySec === 1 ? 'secondo' : 'secondi'} prima di riprovare...`, ms, true);
                     setTimeout(() => {
                         isPenalized = false;
                         c1.classList.remove('locked-card'); c2.classList.remove('locked-card');
-                    }, 3000);
+                    }, ms);
                 }
             }
         }
@@ -934,14 +995,18 @@
         /* ==================== LATO HOST ==================== */
         function avviaComeDocente(tentativo = 0) {
             if (ruolounico === 'docente' && peer && !peer.destroyed) return;   // niente doppie stanze
+            // se era partito un collegamento "da alunno" in anticipo, lo chiude
+            if (peer) { try { peer.destroy(); } catch (e) {} peer = null; }
+            preparazione = null;
             ruolounico = 'docente';
             const pinStanza = Math.floor(1000 + Math.random() * 9000).toString();
             stanzaPinCorrente = pinStanza;
             resetScore();
 
-            peer = new Peer(PREFISSO_STANZA + pinStanza);
+            const p = new Peer(PREFISSO_STANZA + pinStanza);
+            peer = p;
 
-            peer.on('open', () => {
+            p.on('open', () => {
                 document.getElementById('role-selection').classList.add('hidden');
                 document.getElementById('teacher-qr-view').classList.remove('hidden');
                 document.getElementById('teacher-qr-view').classList.add('flex');
@@ -953,19 +1018,20 @@
                 qrBox.innerHTML = '';
                 const base = window.location.href.split('?')[0];
                 new QRCode(qrBox, { text: `${base}?pin=${pinStanza}`, width: 180, height: 180 });
+                tieniSchermoAcceso();   // la LIM/PC non va in standby durante la stanza
             });
 
-            peer.on('error', (err) => {
+            p.on('error', (err) => {
                 if (err.type === 'unavailable-id' && tentativo < 5) {   // PIN occupato: ne genera un altro
-                    try { peer.destroy(); } catch (e) {}
+                    try { p.destroy(); } catch (e) {}
                     peer = null; ruolounico = 'standalone';
                     avviaComeDocente(tentativo + 1);
                 } else {
                     showWarningBanner("⚠️ Errore di rete: " + err.type, 5000, true);
                 }
             });
-            peer.on('disconnected', () => { try { peer.reconnect(); } catch (e) {} });
-            peer.on('connection', gestisciConnessioneAlunno);
+            p.on('disconnected', () => { try { p.reconnect(); } catch (e) {} });
+            p.on('connection', gestisciConnessioneAlunno);
 
             if (!intervalloStato) {
                 let apertiPrima = -1;
@@ -1032,80 +1098,132 @@
         }
 
         /* ==================== LATO STUDENTE ==================== */
+        let preparazione = null;       // { pin, fallita }: collegamento avviato in anticipo
+        let connAperta = false;        // la connessione con l'host è già aperta
+        let ingressoRichiesto = false; // l'alunno ha premuto "Entra"
+        let benvenutoRicevuto = false;
+
+        function testoTempi() {
+            const s = (a, b) => ((b - a) / 1000).toFixed(1) + 's';
+            return `⏱ pagina pronta ${s(0, TEMPI.dom)} · collegamento ${s(TEMPI.dom, TEMPI.conn)} · dopo "Entra" ${s(TEMPI.enter, TEMPI.welcome)}`;
+        }
+
+        function ripristinaBottoneIngresso() {
+            const b = document.getElementById('btn-enter-room');
+            b.disabled = false;
+            b.textContent = "Entra con PIN";
+        }
+
+        function erroreIngresso(msg) {
+            if (preparazione) preparazione.fallita = true;
+            if (!ingressoRichiesto) return;          // non ha ancora premuto "Entra": se ne accorge al tocco
+            if (inStanza) { showWarningBanner("⚠️ " + msg, 4000, true); return; }
+            ingressoRichiesto = false;
+            alert(msg);
+            ripristinaBottoneIngresso();
+        }
+
+        // Avvia il collegamento alla stanza prima che l'alunno prema "Entra"
+        function preparaStudente(pin, forza = false) {
+            if (ruolounico === 'docente' || inStanza) return;
+            if (!forza && preparazione && preparazione.pin === pin && !preparazione.fallita) return;
+            stanzaPinCorrente = pin;
+            preparazione = { pin, fallita: false };
+            connAperta = false;
+            benvenutoRicevuto = false;
+            creaPeerStudente();
+        }
+
         function connettiComeStudente() {
             const pin = document.getElementById('room-pin-input').value.trim();
-            mioNomeStudente = document.getElementById('student-name').value.trim().slice(0, 20) || "Alunno";
+            const nome = document.getElementById('student-name').value.trim().slice(0, 20);
+            mioNomeStudente = nome || "Alunno";
             if (!pin) { alert("Inserisci il PIN della Stanza!"); return; }
+            if (nome) localStorage.setItem('colpodocchio_nome', nome);
 
             const enterBtn = document.getElementById('btn-enter-room');
             enterBtn.disabled = true;
-            enterBtn.textContent = "Connessione in corso...";
+            enterBtn.textContent = "Entro nella stanza...";
 
+            TEMPI.enter = performance.now();
             state.score = 0;
             document.getElementById('score-display').textContent = "0";
-            stanzaPinCorrente = pin;
             ruolounico = 'studente';
             inStanza = false;
+            ingressoRichiesto = true;
             document.getElementById('start-timer-btn').classList.add('hidden');
             document.getElementById('btn-next-pair').classList.add('hidden');
 
-            creaPeerStudente(enterBtn);
+            const pronta = preparazione && preparazione.pin === pin && !preparazione.fallita;
+            if (!pronta) preparaStudente(pin, true);   // PIN diverso o collegamento fallito: riparte
+            else if (connAperta) inviaIngresso();      // già collegato: manda solo il nome
+            // altrimenti si sta ancora aprendo: l'ingresso parte da solo appena è pronto
         }
 
-        function creaPeerStudente(enterBtn) {
+        function creaPeerStudente() {
+            connDocente = null;   // evita che la chiusura della vecchia connessione scateni una riconnessione
             if (peer) { try { peer.destroy(); } catch (e) {} }
-            peer = new Peer(idDispositivo());
+            const p = new Peer(idDispositivo());
+            peer = p;
 
-            peer.on('open', () => collegaAlDocente(enterBtn));
-            peer.on('disconnected', () => { try { peer.reconnect(); } catch (e) {} });
-            peer.on('error', (err) => {
+            p.on('open', () => {
+                if (peer !== p) return;
+                TEMPI.peer = performance.now();
+                collegaAlDocente();
+            });
+            p.on('disconnected', () => { if (peer === p && !p.destroyed) { try { p.reconnect(); } catch (e) {} } });
+            p.on('error', (err) => {
+                if (peer !== p) return;
                 if (err.type === 'unavailable-id') {
                     sessionStorage.setItem('colpodocchio_device_id', 'alunno-' + Math.floor(Math.random() * 10000000));
-                    creaPeerStudente(enterBtn);
-                } else if (err.type === 'peer-unavailable' && inStanza) {
-                    setTimeout(() => collegaAlDocente(), 2000);   // stanza momentaneamente irraggiungibile
+                    creaPeerStudente();
+                } else if (err.type === 'peer-unavailable') {
+                    if (inStanza) setTimeout(collegaAlDocente, 2000);   // stanza momentaneamente irraggiungibile
+                    else erroreIngresso("Stanza non trovata. Verifica il PIN!");
                 } else {
-                    alert(err.type === 'peer-unavailable' ? "Stanza non trovata. Verifica il PIN!" : "Errore di rete durante la connessione. Riprova.");
-                    enterBtn.disabled = false;
-                    enterBtn.textContent = "Entra con PIN";
+                    erroreIngresso("Errore di rete durante la connessione. Riprova.");
                 }
             });
         }
 
-        function collegaAlDocente(enterBtn) {
-            if (connDocente) { try { connDocente.close(); } catch (e) {} }
+        function inviaIngresso() {
+            const conn = connDocente;
+            if (!conn || !conn.open) return;
+            let tentativi = 0;
+            const invia = () => {
+                if (benvenutoRicevuto || !conn.open || connDocente !== conn) return;
+                if (tentativi++ >= 6) { erroreIngresso("L'host non risponde. Riprova a entrare."); return; }
+                conn.send({ tipo: 'STUDENTE_PRONTO', studentId: idDispositivo(), nome: mioNomeStudente });
+                setTimeout(invia, 1200);   // si ripete solo se l'host non risponde
+            };
+            invia();
+        }
+
+        function collegaAlDocente() {
+            if (!peer || peer.destroyed) return;
+            if (connDocente) { const vecchia = connDocente; connDocente = null; try { vecchia.close(); } catch (e) {} }
+
             const conn = peer.connect(PREFISSO_STANZA + stanzaPinCorrente, { reliable: true });
             connDocente = conn;
-            let benvenuto = false;
+            connAperta = false;
+            benvenutoRicevuto = false;
 
             conn.on('open', () => {
-                chiudiModalConnessione();
-                document.getElementById('txt-multiplayer').textContent = `In Stanza: ${stanzaPinCorrente} • ${mioNomeStudente}`;
-                document.getElementById('repeat-speech-btn').classList.add('hidden');
-                document.getElementById('toggle-touch-btn').classList.add('hidden');
-                tieniSchermoAcceso();
-
-                // Un solo messaggio; si ripete solo se l'host non risponde entro 1,2 s
-                let tentativi = 0;
-                const invia = () => {
-                    if (benvenuto || !conn.open || connDocente !== conn) return;
-                    if (tentativi++ >= 6) { showWarningBanner("⚠️ L'host non risponde. Riprova a entrare.", 5000, true); return; }
-                    conn.send({ tipo: 'STUDENTE_PRONTO', studentId: idDispositivo(), nome: mioNomeStudente });
-                    setTimeout(invia, 1200);
-                };
-                invia();
+                if (connDocente !== conn) return;
+                connAperta = true;
+                TEMPI.conn = performance.now();
+                if (ingressoRichiesto) inviaIngresso();   // l'alunno aveva già premuto "Entra" (o è una riconnessione)
             });
 
             conn.on('error', () => {
-                if (enterBtn) {
-                    alert("Impossibile connettersi alla stanza. Verifica il PIN!");
-                    enterBtn.disabled = false;
-                    enterBtn.textContent = "Entra con PIN";
-                }
+                if (connDocente !== conn) return;
+                erroreIngresso("Impossibile connettersi alla stanza. Verifica il PIN!");
             });
 
             conn.on('close', () => {
-                if (connDocente !== conn || ruolounico !== 'studente') return;
+                if (connDocente !== conn) return;
+                connAperta = false;
+                if (ruolounico !== 'studente') { if (preparazione) preparazione.fallita = true; return; }
                 showWarningBanner("⚠️ Connessione persa, riprovo...", 3000, true);
                 setTimeout(() => {
                     if (peer && !peer.destroyed && (!connDocente || !connDocente.open)) collegaAlDocente();
@@ -1113,11 +1231,17 @@
             });
 
             conn.on('data', (d) => {
-                benvenuto = true;
+                benvenutoRicevuto = true;
                 switch (d.tipo) {
                     case 'BENVENUTO':
                         inStanza = true;
-                        showWarningBanner(`✅ Connesso alla stanza ${stanzaPinCorrente}!`, 2000, false);
+                        TEMPI.welcome = performance.now();
+                        chiudiModalConnessione();
+                        document.getElementById('txt-multiplayer').textContent = `In Stanza: ${stanzaPinCorrente} • ${mioNomeStudente}`;
+                        document.getElementById('repeat-speech-btn').classList.add('hidden');
+                        document.getElementById('toggle-touch-btn').classList.add('hidden');
+                        tieniSchermoAcceso();
+                        showWarningBanner(DEBUG_TEMPI ? testoTempi() : `✅ Connesso alla stanza ${stanzaPinCorrente}!`, DEBUG_TEMPI ? 8000 : 2000, false);
                         state.score = d.score || 0;
                         document.getElementById('score-display').textContent = state.score;
                         applicaCarte(d);
@@ -1189,15 +1313,15 @@
 
         function startTimeAttack() {
             state.isTimeAttack = true;
-            state.timerFine = Date.now() + 60000;
+            state.timerFine = Date.now() + state.durataSec * 1000;
             resetScore();
 
             document.getElementById('timer-box').classList.remove('hidden');
-            document.getElementById('timer-display').textContent = 60;
-            document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-stop"></i> Ferma Sfida`;
+            document.getElementById('timer-display').textContent = state.durataSec;
+            document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-stop"></i> <span id="timer-btn-label">Ferma Sfida</span>`;
             document.getElementById('start-timer-btn').className = "px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold transition flex items-center gap-2 shadow-lg text-sm";
 
-            if (ruolounico === 'docente') broadcast({ tipo: 'TIMER_START', restanteMs: 60000 });
+            if (ruolounico === 'docente') broadcast({ tipo: 'TIMER_START', restanteMs: state.durataSec * 1000 });
 
             state.timerInterval = setInterval(() => {
                 const sec = Math.max(0, Math.ceil((state.timerFine - Date.now()) / 1000));
@@ -1213,8 +1337,9 @@
             state.isTimeAttack = false;
             clearInterval(state.timerInterval);
             document.getElementById('timer-box').classList.add('hidden');
-            document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-play"></i> Avvia Sfida 60s`;
+            document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-play"></i> <span id="timer-btn-label"></span>`;
             document.getElementById('start-timer-btn').className = "px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm";
+            aggiornaEtichettaSfida();
             if (ruolounico === 'docente' && !finita) broadcast({ tipo: 'TIMER_STOP' });
         }
 
@@ -1302,8 +1427,36 @@
                 document.getElementById('teacher-pin').focus();
             }
         }
-        function openSettingsModal() { document.getElementById('settings-modal').classList.remove('hidden'); }
+        function openSettingsModal() {
+            evidenziaOpzioni('penalty-options', state.penaltySec);
+            evidenziaOpzioni('duration-options', state.durataSec);
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
         function closeSettingsModal() { document.getElementById('settings-modal').classList.add('hidden'); }
+
+        function evidenziaOpzioni(containerId, valore) {
+            const on  = "opt-btn p-2 rounded-xl border border-amber-400 bg-amber-400/20 text-center font-bold text-sm";
+            const off = "opt-btn p-2 rounded-xl border border-purple-700 bg-purple-950/60 hover:bg-purple-800 text-center font-bold text-sm";
+            document.querySelectorAll(`#${containerId} .opt-btn`).forEach(b => {
+                b.className = (Number(b.dataset.v) === valore) ? on : off;
+            });
+        }
+
+        function aggiornaEtichettaSfida() {
+            const el = document.getElementById('timer-btn-label');
+            if (el && !state.isTimeAttack) el.textContent = `Avvia Sfida ${state.durataSec}s`;
+        }
+
+        function setPenalita(s) {
+            state.penaltySec = s;
+            evidenziaOpzioni('penalty-options', s);
+        }
+
+        function setDurata(s) {
+            state.durataSec = s;
+            evidenziaOpzioni('duration-options', s);
+            aggiornaEtichettaSfida();
+        }
 
         function setDeckOrder(orderN) {
             state.n = orderN;
