@@ -200,7 +200,7 @@
                 <i class="fa-solid fa-arrows-rotate"></i> Cambia Carte
             </button>
             <button id="start-timer-btn" onclick="toggleTimeAttack()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm">
-                <i class="fa-solid fa-play"></i> Avvia Sfida 60s
+                <i class="fa-solid fa-play"></i> <span id="timer-btn-label">Avvia Sfida 60s</span>
             </button>
             <button onclick="resetScore()" class="px-3.5 py-2 rounded-xl bg-purple-950 hover:bg-purple-900 text-purple-300 hover:text-white border border-purple-800 font-medium transition text-xs">
                 Azzera Punti
@@ -275,6 +275,26 @@
                         <button onclick="setDeckOrder(7)" id="order-7-btn" class="p-3 rounded-xl border border-amber-400 bg-amber-400/20 text-center font-bold text-sm">
                             8 Figure per Carta<br><span class="text-xs font-normal text-purple-300">(Versione Classica • 57 carte)</span>
                         </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-purple-200 mb-2">Penalità per errore (solo alunni):</label>
+                    <div id="penalty-options" class="grid grid-cols-4 gap-2">
+                        <button data-v="0" onclick="setPenalita(0)" class="opt-btn p-2 rounded-xl border text-center font-bold text-sm">Nessuna</button>
+                        <button data-v="1" onclick="setPenalita(1)" class="opt-btn p-2 rounded-xl border text-center font-bold text-sm">1 s</button>
+                        <button data-v="3" onclick="setPenalita(3)" class="opt-btn p-2 rounded-xl border text-center font-bold text-sm">3 s</button>
+                        <button data-v="5" onclick="setPenalita(5)" class="opt-btn p-2 rounded-xl border text-center font-bold text-sm">5 s</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-purple-200 mb-2">Durata della sfida:</label>
+                    <div id="duration-options" class="grid grid-cols-4 gap-2">
+                        <button data-v="30" onclick="setDurata(30)" class="opt-btn p-2 rounded-xl border text-center font-bold text-sm">30 s</button>
+                        <button data-v="60" onclick="setDurata(60)" class="opt-btn p-2 rounded-xl border text-center font-bold text-sm">60 s</button>
+                        <button data-v="90" onclick="setDurata(90)" class="opt-btn p-2 rounded-xl border text-center font-bold text-sm">90 s</button>
+                        <button data-v="120" onclick="setDurata(120)" class="opt-btn p-2 rounded-xl border text-center font-bold text-sm">120 s</button>
                     </div>
                 </div>
 
@@ -443,6 +463,8 @@
             showLabels: false,
             audioEnabled: true,
             touchEnabled: true,
+            penaltySec: 3,      // penalità per errore (0 = nessuna)
+            durataSec: 60,      // durata della sfida
             isTimeAttack: false,
             timerFine: 0,
             timerInterval: null,
@@ -515,11 +537,12 @@
         }
         function nascondiParola() { document.getElementById('word-flash').classList.add('hidden'); }
 
+        // Tiene acceso lo schermo (alunni e host)
         async function tieniSchermoAcceso() {
             try { if (navigator.wakeLock) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
         }
         document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible' && ruolounico === 'studente') tieniSchermoAcceso();
+            if (document.visibilityState === 'visible' && ruolounico !== 'standalone') tieniSchermoAcceso();
         });
 
         function showWarningBanner(msg, duration = 3000, isError = false) {
@@ -557,6 +580,9 @@
 
             document.getElementById('labels-icon').className = "fa-solid fa-font text-purple-400 opacity-40";
             document.getElementById('labels-status-text').textContent = "Testo: OFF";
+
+            setPenalita(state.penaltySec);
+            setDurata(state.durataSec);
 
             const pinParam = new URLSearchParams(window.location.search).get('pin');
             if (pinParam) {
@@ -797,7 +823,8 @@
                 c1: state.carta1.map(s => s.val),
                 c2: state.carta2.map(s => s.val),
                 m: state.matchingSymbol,
-                touchEnabled: state.touchEnabled
+                touchEnabled: state.touchEnabled,
+                penaltySec: state.penaltySec
             };
         }
 
@@ -806,6 +833,7 @@
             roundBloccato = false;
             speechBase = speechLastLen;
             if (d.touchEnabled !== undefined) state.touchEnabled = d.touchEnabled;
+            if (d.penaltySec !== undefined) state.penaltySec = d.penaltySec;
             setMatching(d.m);
             const toSym = v => ({ val: v, icon: ICONE[v] });
             mostraCarte(d.c1.map(toSym), d.c2.map(toSym), true);
@@ -867,15 +895,16 @@
                 if (wrongSound) wrongSound.triggerAttackRelease("G2", "8n");
                 setTimeout(() => { if (element) element.classList.remove('symbol-wrong'); }, 500);
 
-                if (ruolounico === 'studente') {
+                if (ruolounico === 'studente' && state.penaltySec > 0) {
                     isPenalized = true;
+                    const ms = state.penaltySec * 1000;
                     const c1 = document.getElementById('card1'), c2 = document.getElementById('card2');
                     c1.classList.add('locked-card'); c2.classList.add('locked-card');
-                    showWarningBanner("⚠️ Errore! Attendi 3 secondi prima di poter riprovare...", 3000, true);
+                    showWarningBanner(`⚠️ Errore! Attendi ${state.penaltySec} ${state.penaltySec === 1 ? 'secondo' : 'secondi'} prima di riprovare...`, ms, true);
                     setTimeout(() => {
                         isPenalized = false;
                         c1.classList.remove('locked-card'); c2.classList.remove('locked-card');
-                    }, 3000);
+                    }, ms);
                 }
             }
         }
@@ -953,6 +982,7 @@
                 qrBox.innerHTML = '';
                 const base = window.location.href.split('?')[0];
                 new QRCode(qrBox, { text: `${base}?pin=${pinStanza}`, width: 180, height: 180 });
+                tieniSchermoAcceso();   // la LIM/PC non va in standby durante la stanza
             });
 
             peer.on('error', (err) => {
@@ -1189,15 +1219,15 @@
 
         function startTimeAttack() {
             state.isTimeAttack = true;
-            state.timerFine = Date.now() + 60000;
+            state.timerFine = Date.now() + state.durataSec * 1000;
             resetScore();
 
             document.getElementById('timer-box').classList.remove('hidden');
-            document.getElementById('timer-display').textContent = 60;
-            document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-stop"></i> Ferma Sfida`;
+            document.getElementById('timer-display').textContent = state.durataSec;
+            document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-stop"></i> <span id="timer-btn-label">Ferma Sfida</span>`;
             document.getElementById('start-timer-btn').className = "px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold transition flex items-center gap-2 shadow-lg text-sm";
 
-            if (ruolounico === 'docente') broadcast({ tipo: 'TIMER_START', restanteMs: 60000 });
+            if (ruolounico === 'docente') broadcast({ tipo: 'TIMER_START', restanteMs: state.durataSec * 1000 });
 
             state.timerInterval = setInterval(() => {
                 const sec = Math.max(0, Math.ceil((state.timerFine - Date.now()) / 1000));
@@ -1213,8 +1243,9 @@
             state.isTimeAttack = false;
             clearInterval(state.timerInterval);
             document.getElementById('timer-box').classList.add('hidden');
-            document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-play"></i> Avvia Sfida 60s`;
+            document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-play"></i> <span id="timer-btn-label"></span>`;
             document.getElementById('start-timer-btn').className = "px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm";
+            aggiornaEtichettaSfida();
             if (ruolounico === 'docente' && !finita) broadcast({ tipo: 'TIMER_STOP' });
         }
 
@@ -1302,8 +1333,36 @@
                 document.getElementById('teacher-pin').focus();
             }
         }
-        function openSettingsModal() { document.getElementById('settings-modal').classList.remove('hidden'); }
+        function openSettingsModal() {
+            evidenziaOpzioni('penalty-options', state.penaltySec);
+            evidenziaOpzioni('duration-options', state.durataSec);
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
         function closeSettingsModal() { document.getElementById('settings-modal').classList.add('hidden'); }
+
+        function evidenziaOpzioni(containerId, valore) {
+            const on  = "opt-btn p-2 rounded-xl border border-amber-400 bg-amber-400/20 text-center font-bold text-sm";
+            const off = "opt-btn p-2 rounded-xl border border-purple-700 bg-purple-950/60 hover:bg-purple-800 text-center font-bold text-sm";
+            document.querySelectorAll(`#${containerId} .opt-btn`).forEach(b => {
+                b.className = (Number(b.dataset.v) === valore) ? on : off;
+            });
+        }
+
+        function aggiornaEtichettaSfida() {
+            const el = document.getElementById('timer-btn-label');
+            if (el && !state.isTimeAttack) el.textContent = `Avvia Sfida ${state.durataSec}s`;
+        }
+
+        function setPenalita(s) {
+            state.penaltySec = s;
+            evidenziaOpzioni('penalty-options', s);
+        }
+
+        function setDurata(s) {
+            state.durataSec = s;
+            evidenziaOpzioni('duration-options', s);
+            aggiornaEtichettaSfida();
+        }
 
         function setDeckOrder(orderN) {
             state.n = orderN;
