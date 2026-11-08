@@ -46,22 +46,8 @@
             padding: 0; 
         }
 
-        .symbol-item span.font-bold {
-            max-width: 110px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            display: inline-block;
-        }
-
         .symbol-item:hover {
             z-index: 40 !important;
-        }
-
-        .symbol-item img {
-            object-fit: contain !important;
-            border-radius: 50%;
-            display: block;
         }
 
         .symbol-correct {
@@ -80,15 +66,15 @@
         }
 
         @keyframes pulse-green {
-            0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
-            50% { transform: translate(-50%, -50%) scale(1.6) rotate(15deg); }
-            100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.5); }
+            100% { transform: translate(-50%, -50%) scale(1); }
         }
 
         @keyframes shake-red {
             0%, 100% { transform: translate(-50%, -50%) translateX(0); }
-            20%, 60% { transform: translate(-50%, -50%) translateX(-10px) rotate(-8deg); }
-            40%, 80% { transform: translate(-50%, -50%) translateX(10px) rotate(8deg); }
+            20%, 60% { transform: translate(-50%, -50%) translateX(-10px); }
+            40%, 80% { transform: translate(-50%, -50%) translateX(10px); }
         }
 
         @keyframes card-appear {
@@ -139,8 +125,8 @@
                 <span id="txt-multiplayer">Modalità Classe</span>
             </button>
             <button id="toggle-labels-btn" onclick="toggleLabels()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Mostra o nascondi il testo scritto">
-                <i id="labels-icon" class="fa-solid fa-font text-amber-400"></i>
-                <span id="labels-status-text" class="hidden md:inline font-medium">Testo: ON</span>
+                <i id="labels-icon" class="fa-solid fa-font text-purple-400 opacity-40"></i>
+                <span id="labels-status-text" class="hidden md:inline font-medium">Testo: OFF</span>
             </button>
             <button id="toggle-voice-btn" onclick="toggleSpeech()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva pronuncia vocale">
                 <i id="voice-icon" class="fa-solid fa-volume-high text-amber-400"></i>
@@ -454,7 +440,7 @@
             card2Index: -1,
             matchingSymbol: null,
             score: 0,
-            showLabels: true,
+            showLabels: false, // DESELEZIONATO DI DEFAULT
             audioEnabled: true,
             isTimeAttack: false,
             timeLeft: 60,
@@ -469,6 +455,10 @@
             initAudio();
             initSpeechRecognition();
             caricaMazzoCorpoUmano();
+            
+            // Pulsante testo grafico disattivato all'avvio
+            document.getElementById('labels-icon').className = "fa-solid fa-font text-purple-400 opacity-40";
+            document.getElementById('labels-status-text').textContent = "Testo: OFF";
         };
 
         function caricaMazzoCorpoUmano() {
@@ -525,7 +515,8 @@
                 const cleanedTranscript = transcript.replace(/\b(il|lo|la|i|gli|le|un|uno|una|del|della|degli)\b/gi, '').trim();
 
                 if (transcript.includes(wordTarget) || cleanedTranscript.includes(wordTarget)) {
-                    const targetEl = document.querySelector('.symbol-item') || document.getElementById('card1');
+                    // Trova l'elemento esatto che contiene il simbolo vincente
+                    const targetEl = document.querySelector(`.symbol-item[data-val="${state.matchingSymbol}"]`);
                     handleSymbolClick(state.matchingSymbol, targetEl);
                 }
             };
@@ -634,9 +625,8 @@
             });
         }
 
-function speakWord(text) {
-            // BLOCCO ANTI-ECO: Se chi esegue il codice è uno studente in multiplayer, NON pronunciare la parola!
-            // La pronuncia verrà gestita unicamente dalla LIM (Docente).
+        function speakWord(text) {
+            // BLOCCO ECO: gli studenti non usano la sintesi vocale (parla solo la LIM)
             if (ruolounico === 'studente') return;
 
             if (!state.audioEnabled || !text) return;
@@ -754,6 +744,7 @@ function speakWord(text) {
 
                 const symEl = document.createElement('div');
                 symEl.className = 'symbol-item hover:bg-purple-900/15 hover:shadow-lg rounded-full';
+                symEl.setAttribute('data-val', symbolObj.val); // Tracciamento esatto figura
 
                 const rad = (pos.angle * Math.PI) / 180;
                 const left = 50 + pos.r * Math.cos(rad);
@@ -762,14 +753,13 @@ function speakWord(text) {
                 symEl.style.left = `${left}%`;
                 symEl.style.top = `${top}%`;
 
-                // Valori casuali di rotazione e scala
+                // Scala e rotazione
                 const scale = (0.75 + Math.random() * 0.65).toFixed(2);
                 const rotation = Math.floor(Math.random() * 360) - 180;
 
-                // 1. L'immagine viene ingrandita/rimpicciolita, SENZA ruotare da sola
                 const imgStyle = `transform: scale(${scale}); display: block; margin: 0 auto; transition: transform 0.2s;`;
 
-                // 2. L'etichetta testo rimane fissa a 12px, SENZA ereditare lo scale dell'immagine
+                // Testo inclinato con la figura ma bloccato fisso a 12px
                 let labelHtml = state.showLabels 
                     ? `<span class="font-bold text-purple-950 bg-white/95 px-2 py-0.5 rounded-full shadow border border-purple-300 mt-1 whitespace-nowrap select-none z-10 block text-center" style="font-size: 12px !important; line-height: 1.2 !important;">${symbolObj.val}</span>` 
                     : '';
@@ -779,7 +769,7 @@ function speakWord(text) {
                         <img src="${symbolObj.icon}" class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain drop-shadow-md select-none pointer-events-none" style="${imgStyle}">
                     </div>`;
 
-                // 3. Il contenitore ruota Tutto (immagine + etichetta) mantenendo la struttura verticale a colonna
+                // Rotazione del blocco figura + etichetta
                 symEl.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
                 symEl.innerHTML = `<div class="flex flex-col items-center justify-center w-full">${contentHtml}${labelHtml}</div>`;
 
@@ -792,12 +782,12 @@ function speakWord(text) {
             });
         }
 
-function handleSymbolClick(val, element) {
+        function handleSymbolClick(val, element) {
             if (isTransitioning || isPenalized) return;
 
             if (val === state.matchingSymbol) {
                 isTransitioning = true;
-                element.classList.add('symbol-correct');
+                if (element) element.classList.add('symbol-correct');
                 
                 if (ruolounico === 'studente' && connDocente && connDocente.open) {
                     state.score += 1;
@@ -805,7 +795,6 @@ function handleSymbolClick(val, element) {
                     if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
                     confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
                     
-                    // Invia il punto alla LIM (la LIM riceverà il dato ed eseguirà speakWord per tutta la classe)
                     connDocente.send({
                         tipo: 'RISPOSTA_CORRETTA',
                         valore: val,
@@ -820,11 +809,10 @@ function handleSymbolClick(val, element) {
                 }
 
                 registraEsitoPositivo(val, element, "LIM", true);
+
             } else {
-                element.classList.add('symbol-wrong');
-                if (wrongSound) {
-                    wrongSound.triggerAttackRelease("G2", "8n");
-                }
+                if (element) element.classList.add('symbol-wrong');
+                if (wrongSound) wrongSound.triggerAttackRelease("G2", "8n");
                 
                 if (ruolounico === 'studente') {
                     isPenalized = true;
@@ -837,11 +825,11 @@ function handleSymbolClick(val, element) {
                         document.getElementById('card1').classList.remove('locked-card');
                         document.getElementById('card2').classList.remove('locked-card');
                         document.getElementById('penalty-banner').classList.add('hidden');
-                        element.classList.remove('symbol-wrong');
+                        if (element) element.classList.remove('symbol-wrong');
                     }, 3000);
                 } else {
                     setTimeout(() => {
-                        element.classList.remove('symbol-wrong');
+                        if (element) element.classList.remove('symbol-wrong');
                     }, 500);
                 }
             }
@@ -849,9 +837,7 @@ function handleSymbolClick(val, element) {
 
         function registraEsitoPositivo(val, element, nomeVincitore, incrementaPuntiHost = false) {
             isTransitioning = true;
-            if (synthSound) {
-                synthSound.triggerAttackRelease("C5", "8n");
-            }
+            if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
 
             confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
             speakWord(val);
@@ -928,7 +914,7 @@ function handleSymbolClick(val, element) {
                 conn.on('data', (dati) => {
                     if (dati.tipo === 'RISPOSTA_CORRETTA' && dati.valore === state.matchingSymbol) {
                         punteggiClasse[dati.nome] = dati.score;
-                        const targetEl = document.querySelector('.symbol-correct') || document.getElementById('card1');
+                        const targetEl = document.querySelector(`.symbol-item[data-val="${state.matchingSymbol}"]`);
                         registraEsitoPositivo(dati.valore, targetEl, dati.nome, false);
                     }
                 });
@@ -969,11 +955,11 @@ function handleSymbolClick(val, element) {
 
                 connDocente.on('data', (dati) => {
                     if (dati.tipo === 'AGGIORNA_CARTE') {
-                        // Se la LIM ha cambiato il numero di figure per carta (es. da 8 a 6)
+                        // Sincronizzazione automatica mazzo a 6 o 8 figure
                         if (dati.n && (state.n !== dati.n || state.symbolsPerCard !== dati.symbolsPerCard)) {
                             state.n = dati.n;
                             state.symbolsPerCard = dati.symbolsPerCard;
-                            buildDeck(); // Rigenera il mazzo con la nuova difficoltà sul tablet
+                            buildDeck();
                         }
 
                         state.card1Index = dati.card1Index;
@@ -991,7 +977,7 @@ function handleSymbolClick(val, element) {
             });
         }
 
-function inviaStatoAGliStudenti() {
+        function inviaStatoAGliStudenti() {
             connessioniStudenti.forEach(conn => {
                 if (conn.open) {
                     conn.send({
