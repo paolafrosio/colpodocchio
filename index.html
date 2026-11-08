@@ -12,7 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <!-- Tone.js for Sound Effects -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-    <!-- PeerJS e QR Code da CDN ufficiali per funzionamento online garantito -->
+    <!-- PeerJS e QR Code da CDN ufficiali -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <!-- Google Fonts -->
@@ -827,12 +827,19 @@
             });
         }
 
-        /* --- CLIC SUL SIMBOLO & VERIFICA CORRETTEZZA --- */
+        /* --- CLIC SUL SIMBOLO & VERIFICA CORRETTEZZA (CON FIX PUNTI STUDENTE) --- */
         function handleSymbolClick(val, element) {
             if (val === state.matchingSymbol) {
                 element.classList.add('symbol-correct');
                 
+                // SE SONO LO STUDENTE: AGGIORNO SUBITO I MIEI PUNTI SULLO SCHERMO
                 if (ruolounico === 'studente' && connDocente && connDocente.open) {
+                    state.score += 1;
+                    document.getElementById('score-display').textContent = state.score;
+                    if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
+                    confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
+                    speakWord(val);
+
                     connDocente.send({
                         tipo: 'RISPOSTA_CORRETTA',
                         valore: val,
@@ -841,6 +848,7 @@
                     return;
                 }
 
+                // IN LOCALE O SULLA LIM:
                 registraEsitoPositivo(val, element, "LIM");
 
             } else {
@@ -906,7 +914,7 @@
                 document.getElementById('connected-players-badge').classList.remove('hidden');
                 document.getElementById('txt-multiplayer').textContent = "LIM (Host)";
 
-                // Genera QR Code con controllo di fallback per evitare che non funzioni
+                // Genera QR Code con controllo di fallback
                 const qrBox = document.getElementById('qrcode-box');
                 qrBox.innerHTML = '';
                 if (typeof QRCode !== 'undefined') {
