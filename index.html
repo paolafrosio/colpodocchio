@@ -26,7 +26,7 @@
 
         .dobble-card {
             aspect-ratio: 1 / 1;
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.35), 0 0 25px inset rgba(255, 255, 255, 0.85);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 0 30px inset rgba(255, 255, 255, 0.9);
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             overflow: visible !important;
         }
@@ -104,45 +104,45 @@
             width: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #0f172a;
+            background: #2e1065;
             border-radius: 8px;
         }
         ::-webkit-scrollbar-thumb {
-            background: #334155;
+            background: #6b21a8;
             border-radius: 8px;
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 overflow-x-hidden">
+<body class="bg-purple-950 text-slate-100 min-h-screen flex flex-col justify-between bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 overflow-x-hidden">
 
     <!-- HEADER / BARRA SUPERIORE -->
-    <header class="w-full bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex justify-between items-center z-10 shadow-lg">
+    <header class="w-full bg-purple-900/90 backdrop-blur-md border-b border-purple-700/50 px-4 py-3 flex justify-between items-center z-10 shadow-lg">
         <div class="flex items-center gap-3">
-            <div class="bg-emerald-500 text-slate-950 p-2.5 rounded-2xl shadow-lg flex items-center justify-center font-bold text-xl">
+            <div class="bg-amber-400 text-purple-950 p-2.5 rounded-2xl shadow-lg flex items-center justify-center font-bold text-xl">
                 <i class="fa-solid fa-comments"></i>
             </div>
             <div>
                 <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide flex items-center gap-2">
-                    Colpo d'occhio <span class="bg-emerald-500/20 text-emerald-400 text-xs px-2.5 py-0.5 rounded-full border border-emerald-500/40 font-mono">CPIA</span>
+                    Colpo d'occhio <span class="bg-amber-400/20 text-amber-300 text-xs px-2.5 py-0.5 rounded-full border border-amber-400/40 font-mono">CPIA</span>
                 </h1>
-                <p class="text-xs text-slate-400 hidden sm:block">Individua l'unica figura in comune, dilla a voce alta e ascolta la pronuncia!</p>
+                <p class="text-xs text-purple-200 hidden sm:block">Individua l'unica figura in comune, dilla a voce alta e ascolta la pronuncia!</p>
             </div>
         </div>
 
         <div class="flex items-center gap-2 md:gap-3">
-            <button id="btn-multiplayer" onclick="mostraModalConnessione()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
+            <button id="btn-multiplayer" onclick="mostraModalConnessione()" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
                 <i class="fa-solid fa-users"></i>
                 <span id="txt-multiplayer">Modalità Classe</span>
             </button>
-            <button id="toggle-labels-btn" onclick="toggleLabels()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition flex items-center gap-2 text-xs md:text-sm border border-slate-700 shadow-sm" title="Mostra o nascondi il testo scritto">
-                <i id="labels-icon" class="fa-solid fa-font text-emerald-400"></i>
+            <button id="toggle-labels-btn" onclick="toggleLabels()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Mostra o nascondi il testo scritto">
+                <i id="labels-icon" class="fa-solid fa-font text-amber-400"></i>
                 <span id="labels-status-text" class="hidden md:inline font-medium">Testo: ON</span>
             </button>
-            <button id="toggle-voice-btn" onclick="toggleSpeech()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition flex items-center gap-2 text-xs md:text-sm border border-slate-700 shadow-sm" title="Attiva/Disattiva pronuncia vocale">
+            <button id="toggle-voice-btn" onclick="toggleSpeech()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva pronuncia vocale">
                 <i id="voice-icon" class="fa-solid fa-volume-high text-amber-400"></i>
                 <span id="voice-status-text" class="hidden md:inline font-medium">Voce: ON</span>
             </button>
-            <button onclick="requireSettingsAccess()" class="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
+            <button onclick="requireSettingsAccess()" class="px-3.5 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
                 <i class="fa-solid fa-lock"></i>
                 <span>Area Docente</span>
             </button>
@@ -152,35 +152,35 @@
     <!-- AREA DI GIOCO PRINCIPALE -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-2 flex flex-col justify-center items-center gap-3">
         <!-- STATUS BAR & FEEDBACK VOCALE -->
-        <div class="w-full flex flex-col sm:flex-row justify-between items-center bg-slate-900/90 backdrop-blur-md rounded-2xl p-3 border border-slate-800 text-white shadow-xl gap-3">
+        <div class="w-full flex flex-col sm:flex-row justify-between items-center bg-purple-900/80 backdrop-blur-md rounded-2xl p-3 border border-purple-700/50 text-white shadow-xl gap-3">
             <div class="flex items-center gap-2">
-                <span id="current-preset-badge" class="bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-xs sm:text-sm font-semibold px-3 py-1 rounded-full flex items-center gap-2">
+                <span id="current-preset-badge" class="bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-semibold px-3 py-1 rounded-full flex items-center gap-2">
                     <i class="fa-solid fa-user"></i> Il Corpo Umano (30+ parti)
                 </span>
-                <span id="symbols-count-badge" class="bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full">
+                <span id="symbols-count-badge" class="bg-fuchsia-500/20 border border-fuchsia-400/40 text-fuchsia-300 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full">
                     8 Figure/Carta
                 </span>
-                <span id="connected-players-badge" class="bg-blue-500/20 border border-blue-500/40 text-blue-300 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full hidden">
+                <span id="connected-players-badge" class="bg-purple-500/20 border border-purple-400/40 text-purple-200 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full hidden">
                     <i class="fa-solid fa-user-group"></i> Alunni: <b id="players-count">0</b>
                 </span>
             </div>
 
-            <div id="last-word-container" class="flex items-center gap-3 bg-slate-950/80 px-4 py-1.5 rounded-xl border border-slate-800 min-h-[44px]">
-                <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Parola:</span>
-                <span id="last-word-display" class="text-lg md:text-xl font-bold text-emerald-400">---</span>
-                <button id="repeat-speech-btn" onclick="speakCurrentWord()" class="p-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 transition text-sm" title="Riascolta pronuncia">
+            <div id="last-word-container" class="flex items-center gap-3 bg-purple-950/80 px-4 py-1.5 rounded-xl border border-purple-800 min-h-[44px]">
+                <span class="text-xs text-purple-300 uppercase tracking-wider font-semibold">Parola:</span>
+                <span id="last-word-display" class="text-lg md:text-xl font-bold text-amber-300">---</span>
+                <button id="repeat-speech-btn" onclick="speakCurrentWord()" class="p-1.5 rounded-lg bg-amber-400/20 hover:bg-amber-400/40 text-amber-300 transition text-sm" title="Riascolta pronuncia">
                     <i class="fa-solid fa-bullhorn"></i>
                 </button>
             </div>
 
             <div class="flex items-center gap-6">
                 <div id="timer-box" class="hidden flex items-center gap-2">
-                    <i class="fa-solid fa-stopwatch text-amber-400 text-xl"></i>
-                    <span id="timer-display" class="text-2xl font-bold font-mono text-amber-400">60</span>s
+                    <i class="fa-solid fa-stopwatch text-amber-300 text-xl"></i>
+                    <span id="timer-display" class="text-2xl font-bold font-mono text-amber-300">60</span>s
                 </div>
-                <div class="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-1 rounded-xl">
-                    <i class="fa-solid fa-star text-amber-400"></i>
-                    <span class="text-xs font-semibold uppercase text-emerald-300">Punti:</span>
+                <div class="flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 px-3.5 py-1 rounded-xl">
+                    <i class="fa-solid fa-star text-amber-300"></i>
+                    <span class="text-xs font-semibold uppercase text-amber-200">Punti:</span>
                     <span id="score-display" class="text-xl font-bold text-white">0</span>
                 </div>
             </div>
@@ -193,59 +193,59 @@
 
         <!-- LE DUE CARTE CIRCOLARI -->
         <div class="w-full flex-1 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 my-1">
-            <div id="card1" class="dobble-card animate-card w-full max-w-[340px] sm:max-w-[420px] md:max-w-[460px] bg-gradient-to-b from-slate-100 to-slate-200 rounded-full border-8 border-emerald-400 relative overflow-hidden flex items-center justify-center">
+            <div id="card1" class="dobble-card animate-card w-full max-w-[340px] sm:max-w-[420px] md:max-w-[460px] bg-gradient-to-b from-yellow-100 via-amber-200 to-yellow-300 rounded-full border-8 border-purple-900 relative overflow-hidden flex items-center justify-center">
             </div>
             <div class="flex md:flex-col items-center justify-center gap-1 my-[-10px] md:my-0">
-                <div class="bg-emerald-400 text-slate-950 w-12 h-12 rounded-full flex items-center justify-center font-black text-2xl shadow-xl border-4 border-slate-900 z-10">
+                <div class="bg-amber-400 text-purple-950 w-12 h-12 rounded-full flex items-center justify-center font-black text-2xl shadow-xl border-4 border-purple-950 z-10">
                     <i class="fa-solid fa-equals"></i>
                 </div>
             </div>
-            <div id="card2" class="dobble-card animate-card w-full max-w-[340px] sm:max-w-[420px] md:max-w-[460px] bg-gradient-to-b from-slate-100 to-slate-200 rounded-full border-8 border-emerald-400 relative overflow-hidden flex items-center justify-center">
+            <div id="card2" class="dobble-card animate-card w-full max-w-[340px] sm:max-w-[420px] md:max-w-[460px] bg-gradient-to-b from-yellow-100 via-amber-200 to-yellow-300 rounded-full border-8 border-purple-900 relative overflow-hidden flex items-center justify-center">
             </div>
         </div>
 
         <!-- CONTROLLI DI GIOCO -->
         <div class="flex flex-wrap justify-center gap-3 mt-1">
-            <button id="btn-next-pair" onclick="nextPair(true)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold transition flex items-center gap-2 border border-slate-700 text-sm">
+            <button id="btn-next-pair" onclick="nextPair(true)" class="px-4 py-2 rounded-xl bg-purple-800 hover:bg-purple-700 text-purple-100 font-semibold transition flex items-center gap-2 border border-purple-600/50 text-sm">
                 <i class="fa-solid fa-arrows-rotate"></i> Cambia Carte
             </button>
-            <button id="start-timer-btn" onclick="toggleTimeAttack()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 text-slate-950 font-bold transition flex items-center gap-2 shadow-lg text-sm">
+            <button id="start-timer-btn" onclick="toggleTimeAttack()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm">
                 <i class="fa-solid fa-play"></i> Avvia Sfida 60s
             </button>
-            <button onclick="resetScore()" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 font-medium transition text-xs">
+            <button onclick="resetScore()" class="px-3.5 py-2 rounded-xl bg-purple-950 hover:bg-purple-900 text-purple-300 hover:text-white border border-purple-800 font-medium transition text-xs">
                 Azzera Punti
             </button>
         </div>
     </main>
 
-    <footer class="text-center py-2 text-xs text-slate-500">
+    <footer class="text-center py-2 text-xs text-purple-300/60">
         Colpo d'occhio Didattico • Generatore Matematico Proiettivo • Per LIM e Tablet
     </footer>
 
     <!-- MODALE CONNETTIVITÀ MULTIPLAYER (PEERJS) -->
-    <div id="connection-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-3xl p-6 text-white shadow-2xl flex flex-col">
-            <h2 class="text-xl font-bold mb-4 text-indigo-400 flex items-center gap-2">
+    <div id="connection-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-purple-900 border border-purple-700 w-full max-w-md rounded-3xl p-6 text-white shadow-2xl flex flex-col">
+            <h2 class="text-xl font-bold mb-4 text-amber-300 flex items-center gap-2">
                 <i class="fa-solid fa-network-wired"></i> Modalità Classe in Tempo Reale
             </h2>
             
             <div id="role-selection" class="space-y-4">
-                <button onclick="avviaComeDocente()" class="w-full p-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 font-bold flex items-center gap-4 transition text-left">
+                <button onclick="avviaComeDocente()" class="w-full p-4 rounded-2xl bg-fuchsia-600 hover:bg-fuchsia-500 font-bold flex items-center gap-4 transition text-left">
                     <i class="fa-solid fa-desktop text-3xl"></i>
                     <div>
                         <div class="text-base">Sono sulla LIM (Crea Stanza)</div>
-                        <div class="text-xs font-normal text-indigo-200">Genera il PIN a 4 cifre per far collegare gli alunni</div>
+                        <div class="text-xs font-normal text-purple-200">Genera il PIN a 4 cifre per far collegare gli alunni</div>
                     </div>
                 </button>
                 <div class="relative flex py-1 items-center">
-                    <div class="flex-grow border-t border-slate-700"></div>
-                    <span class="flex-shrink mx-4 text-slate-500 text-xs uppercase font-semibold">oppure</span>
-                    <div class="flex-grow border-t border-slate-700"></div>
+                    <div class="flex-grow border-t border-purple-700"></div>
+                    <span class="flex-shrink mx-4 text-purple-300 text-xs uppercase font-semibold">oppure</span>
+                    <div class="flex-grow border-t border-purple-700"></div>
                 </div>
                 <div class="space-y-2">
-                    <input type="text" id="student-name" placeholder="Il tuo Nome" class="w-full bg-slate-950 border border-slate-700 p-3 rounded-xl text-center text-white focus:border-emerald-400 outline-none">
-                    <input type="text" id="room-pin-input" placeholder="PIN Stanza (es. 1234)" maxlength="4" class="w-full bg-slate-950 border border-slate-700 p-3 rounded-xl text-center text-lg tracking-widest text-white focus:border-emerald-400 outline-none">
-                    <button onclick="connettiComeStudente()" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition">
+                    <input type="text" id="student-name" placeholder="Il tuo Nome" class="w-full bg-purple-950 border border-purple-700 p-3 rounded-xl text-center text-white focus:border-amber-400 outline-none">
+                    <input type="text" id="room-pin-input" placeholder="PIN Stanza (es. 1234)" maxlength="4" class="w-full bg-purple-950 border border-purple-700 p-3 rounded-xl text-center text-lg tracking-widest text-white focus:border-amber-400 outline-none">
+                    <button onclick="connettiComeStudente()" class="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition">
                         Entra nel Gioco (Studente)
                     </button>
                 </div>
@@ -253,25 +253,25 @@
 
             <div id="teacher-qr-view" class="hidden flex-col items-center text-center space-y-4">
                 <div class="bg-white p-3 rounded-2xl inline-block shadow-lg" id="qrcode-box"></div>
-                <div class="text-lg font-bold text-emerald-400">
-                    PIN Stanza: <span id="display-pin-code" class="text-2xl font-mono text-white bg-slate-800 px-3 py-1 rounded-xl">----</span>
+                <div class="text-lg font-bold text-amber-300">
+                    PIN Stanza: <span id="display-pin-code" class="text-2xl font-mono text-white bg-purple-950 px-3 py-1 rounded-xl">----</span>
                 </div>
-                <p class="text-xs text-slate-400">Inquadra il QR con il tablet o inserisci il PIN per giocare!</p>
+                <p class="text-xs text-purple-200">Inquadra il QR con il tablet o inserisci il PIN per giocare!</p>
             </div>
 
-            <button onclick="chiudiModalConnessione()" class="mt-6 w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 text-sm font-semibold">Chiudi</button>
+            <button onclick="chiudiModalConnessione()" class="mt-6 w-full py-2 rounded-xl bg-purple-950 hover:bg-purple-800 text-purple-300 text-sm font-semibold">Chiudi</button>
         </div>
     </div>
 
     <!-- MODALE IMPOSTAZIONI E CARICAMENTO SIMBOLI -->
-    <div id="settings-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-3xl p-6 text-white shadow-2xl flex flex-col max-h-[90vh]">
+    <div id="settings-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-purple-900 border border-purple-700 w-full max-w-2xl rounded-3xl p-6 text-white shadow-2xl flex flex-col max-h-[90vh]">
             
-            <div class="flex justify-between items-center pb-4 border-b border-slate-800">
-                <h2 class="text-xl font-bold flex items-center gap-2 text-emerald-400">
+            <div class="flex justify-between items-center pb-4 border-b border-purple-800">
+                <h2 class="text-xl font-bold flex items-center gap-2 text-amber-300">
                     <i class="fa-solid fa-sliders"></i> Pannello di Configurazione Docente CPIA
                 </h2>
-                <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white p-2 rounded-lg text-xl">
+                <button onclick="closeSettingsModal()" class="text-purple-300 hover:text-white p-2 rounded-lg text-xl">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
@@ -279,81 +279,81 @@
             <div class="overflow-y-auto flex-1 my-4 space-y-6 pr-2">
                 <!-- SELEZIONE DIFFICOLTÀ -->
                 <div>
-                    <label class="block text-sm font-semibold text-slate-300 mb-2">Numero di Figure per Carta:</label>
+                    <label class="block text-sm font-semibold text-purple-200 mb-2">Numero di Figure per Carta:</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <button onclick="setDeckOrder(5)" id="order-5-btn" class="p-3 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-center font-bold text-sm">
-                            6 Figure per Carta<br><span class="text-xs font-normal text-slate-400">(Intermedio • 31 carte)</span>
+                        <button onclick="setDeckOrder(5)" id="order-5-btn" class="p-3 rounded-xl border border-purple-700 bg-purple-950/60 hover:bg-purple-800 text-center font-bold text-sm">
+                            6 Figure per Carta<br><span class="text-xs font-normal text-purple-300">(Intermedio • 31 carte)</span>
                         </button>
-                        <button onclick="setDeckOrder(7)" id="order-7-btn" class="p-3 rounded-xl border border-emerald-500 bg-emerald-500/20 text-center font-bold text-sm">
-                            8 Figure per Carta<br><span class="text-xs font-normal text-slate-400">(Versione Classica • 57 carte)</span>
+                        <button onclick="setDeckOrder(7)" id="order-7-btn" class="p-3 rounded-xl border border-amber-400 bg-amber-400/20 text-center font-bold text-sm">
+                            8 Figure per Carta<br><span class="text-xs font-normal text-purple-300">(Versione Classica • 57 carte)</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- SELEZIONE SET PREDEFINITO CPIA -->
                 <div>
-                    <label class="block text-sm font-semibold text-slate-300 mb-3">Scegli la Categoria / Vocabolario:</label>
+                    <label class="block text-sm font-semibold text-purple-200 mb-3">Scegli la Categoria / Vocabolario:</label>
                     <div id="presets-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        <button onclick="selectPreset('corpo')" class="preset-btn p-3 rounded-2xl border-2 border-emerald-500/40 bg-emerald-950/40 hover:bg-emerald-900/50 flex flex-col items-center gap-2 text-center transition">
+                        <button onclick="selectPreset('corpo')" class="preset-btn p-3 rounded-2xl border-2 border-amber-400/40 bg-amber-400/10 hover:bg-amber-400/20 flex flex-col items-center gap-2 text-center transition">
                             <span class="text-2xl">👄</span>
-                            <span class="font-bold text-xs sm:text-sm text-emerald-200">Il Corpo Umano</span>
+                            <span class="font-bold text-xs sm:text-sm text-amber-200">Il Corpo Umano</span>
                         </button>
-                        <button onclick="selectPreset('casa')" class="preset-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 hover:bg-slate-800 flex flex-col items-center gap-2 text-center transition">
+                        <button onclick="selectPreset('casa')" class="preset-btn p-3 rounded-2xl border-2 border-purple-700 bg-purple-950/60 hover:bg-purple-800 flex flex-col items-center gap-2 text-center transition">
                             <span class="text-2xl">🏠</span>
-                            <span class="font-bold text-xs sm:text-sm text-slate-200">La Casa & Oggetti</span>
+                            <span class="font-bold text-xs sm:text-sm text-purple-200">La Casa & Oggetti</span>
                         </button>
-                        <button onclick="selectPreset('citta')" class="preset-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 hover:bg-slate-800 flex flex-col items-center gap-2 text-center transition">
+                        <button onclick="selectPreset('citta')" class="preset-btn p-3 rounded-2xl border-2 border-purple-700 bg-purple-950/60 hover:bg-purple-800 flex flex-col items-center gap-2 text-center transition">
                             <span class="text-2xl">🚌</span>
-                            <span class="font-bold text-xs sm:text-sm text-slate-200">La Città & Servizi</span>
+                            <span class="font-bold text-xs sm:text-sm text-purple-200">La Città & Servizi</span>
                         </button>
-                        <button onclick="selectPreset('cibo')" class="preset-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 hover:bg-slate-800 flex flex-col items-center gap-2 text-center transition">
+                        <button onclick="selectPreset('cibo')" class="preset-btn p-3 rounded-2xl border-2 border-purple-700 bg-purple-950/60 hover:bg-purple-800 flex flex-col items-center gap-2 text-center transition">
                             <span class="text-2xl">🍎</span>
-                            <span class="font-bold text-xs sm:text-sm text-slate-200">Cibo & Bevande</span>
+                            <span class="font-bold text-xs sm:text-sm text-purple-200">Cibo & Bevande</span>
                         </button>
-                        <button onclick="selectPreset('azioni')" class="preset-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 hover:bg-slate-800 flex flex-col items-center gap-2 text-center transition">
+                        <button onclick="selectPreset('azioni')" class="preset-btn p-3 rounded-2xl border-2 border-purple-700 bg-purple-950/60 hover:bg-purple-800 flex flex-col items-center gap-2 text-center transition">
                             <span class="text-2xl">🏃</span>
-                            <span class="font-bold text-xs sm:text-sm text-slate-200">Verbi d'Azione</span>
+                            <span class="font-bold text-xs sm:text-sm text-purple-200">Verbi d'Azione</span>
                         </button>
-                        <button onclick="selectPreset('abbigliamento')" class="preset-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 hover:bg-slate-800 flex flex-col items-center gap-2 text-center transition">
+                        <button onclick="selectPreset('abbigliamento')" class="preset-btn p-3 rounded-2xl border-2 border-purple-700 bg-purple-950/60 hover:bg-purple-800 flex flex-col items-center gap-2 text-center transition">
                             <span class="text-2xl">👕</span>
-                            <span class="font-bold text-xs sm:text-sm text-slate-200">Abbigliamento</span>
+                            <span class="font-bold text-xs sm:text-sm text-purple-200">Abbigliamento</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- CARICAMENTO IMMAGINI PERSONALIZZATE -->
-                <div id="custom-symbols-container" class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800 space-y-4">
+                <div id="custom-symbols-container" class="bg-purple-950/60 p-4 rounded-2xl border border-purple-800 space-y-4">
                     <div>
-                        <label class="block text-sm font-semibold text-emerald-400 mb-1">
+                        <label class="block text-sm font-semibold text-amber-300 mb-1">
                             <i class="fa-solid fa-cloud-arrow-up"></i> Crea il tuo mazzo personalizzato:
                         </label>
-                        <p class="text-xs text-slate-400 mb-3">
+                        <p class="text-xs text-purple-300 mb-3">
                             1. Carica le immagini. 2. Modifica i nomi per la pronuncia. 3. Salva la nuova categoria.
                         </p>
                         
                         <input type="file" id="image-file-input" multiple accept="image/*" class="hidden" onchange="handleFileUpload(event)">
-                        <button onclick="document.getElementById('image-file-input').click()" class="w-full py-3 px-4 border-2 border-dashed border-slate-700 hover:border-emerald-400 bg-slate-900/50 hover:bg-slate-900 text-slate-300 rounded-xl transition flex items-center justify-center gap-2 text-sm font-semibold">
-                            <i class="fa-solid fa-plus text-emerald-400"></i> Seleziona Immagini dal Computer
+                        <button onclick="document.getElementById('image-file-input').click()" class="w-full py-3 px-4 border-2 border-dashed border-purple-700 hover:border-amber-400 bg-purple-900/50 hover:bg-purple-900 text-purple-200 rounded-xl transition flex items-center justify-center gap-2 text-sm font-semibold">
+                            <i class="fa-solid fa-plus text-amber-300"></i> Seleziona Immagini dal Computer
                         </button>
                     </div>
 
                     <!-- GRIGLIA ANTEPRIMA CON EDITING PAROLA -->
                     <div>
                         <div class="flex justify-between items-center mb-2">
-                            <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Immagini Caricate (<span id="loaded-count">0</span>):</span>
+                            <span class="text-xs font-semibold text-purple-300 uppercase tracking-wider">Immagini Caricate (<span id="loaded-count">0</span>):</span>
                             <button onclick="clearCustomSymbols()" class="text-xs text-red-400 hover:text-red-300 transition">Svuota Elenco</button>
                         </div>
-                        <div id="symbols-preview-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto p-2 bg-slate-900 rounded-xl border border-slate-800">
+                        <div id="symbols-preview-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto p-2 bg-purple-950 rounded-xl border border-purple-800">
                         </div>
                     </div>
 
-                    <div class="mt-4 pt-4 border-t border-slate-800">
-                        <label class="block text-sm font-semibold text-emerald-400 mb-2">
+                    <div class="mt-4 pt-4 border-t border-purple-800">
+                        <label class="block text-sm font-semibold text-amber-300 mb-2">
                             <i class="fa-solid fa-floppy-disk"></i> Salva come Nuova Categoria:
                         </label>
                         <div class="flex gap-2">
-                            <input type="text" id="new-category-name" placeholder="Nome (es. Frutta, Scuola...)" class="flex-1 bg-slate-900 border border-slate-700 px-3 py-2 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-400">
-                            <button onclick="saveAsNewCategory()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-sm transition">
+                            <input type="text" id="new-category-name" placeholder="Nome (es. Frutta, Scuola...)" class="flex-1 bg-purple-950 border border-purple-700 px-3 py-2 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
+                            <button onclick="saveAsNewCategory()" class="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold rounded-xl text-sm transition">
                                 Salva
                             </button>
                         </div>
@@ -361,8 +361,8 @@
                 </div>
             </div>
 
-            <div class="pt-4 border-t border-slate-800 flex justify-end gap-3">
-                <button onclick="applySettings()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition shadow-lg">
+            <div class="pt-4 border-t border-purple-800 flex justify-end gap-3">
+                <button onclick="applySettings()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition shadow-lg">
                     Chiudi e Genera Mazzo
                 </button>
             </div>
@@ -370,47 +370,47 @@
     </div>
 
     <!-- MODALE GAMEOVER & CLASSIFICA -->
-    <div id="gameover-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-emerald-500/40 w-full max-w-md rounded-3xl p-6 text-white text-center shadow-2xl flex flex-col items-center">
-            <div class="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-4xl mb-4">
+    <div id="gameover-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-purple-900 border border-amber-400/40 w-full max-w-md rounded-3xl p-6 text-white text-center shadow-2xl flex flex-col items-center">
+            <div class="w-20 h-20 bg-amber-400/20 text-amber-300 rounded-full flex items-center justify-center text-4xl mb-4">
                 <i class="fa-solid fa-trophy"></i>
             </div>
             <h2 class="text-2xl font-bold mb-1">Tempo Scaduto!</h2>
-            <p class="text-sm text-slate-300 mb-4" id="gameover-sub">Ottimo esercizio di lettura e pronuncia!</p>
+            <p class="text-sm text-purple-200 mb-4" id="gameover-sub">Ottimo esercizio di lettura e pronuncia!</p>
             
             <!-- VISTA CLASSIFICA LIM -->
             <div id="leaderboard-view" class="w-full mb-6 hidden">
-                <h3 class="text-sm font-bold uppercase tracking-wider text-amber-400 mb-3"><i class="fa-solid fa-award"></i> Classifica Finale Classe</h3>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-amber-300 mb-3"><i class="fa-solid fa-award"></i> Classifica Finale Classe</h3>
                 <div id="leaderboard-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
                     <!-- Generato via JS -->
                 </div>
             </div>
 
             <!-- VISTA PUNTEGGIO SINGOLO STUDENTE -->
-            <div id="single-score-view" class="bg-slate-950 border border-slate-800 rounded-2xl p-4 w-full mb-6">
-                <span class="text-xs uppercase tracking-wider text-slate-400 block mb-1">I tuoi punti finali</span>
-                <span id="final-score-display" class="text-5xl font-black text-emerald-400">0</span>
+            <div id="single-score-view" class="bg-purple-950 border border-purple-800 rounded-2xl p-4 w-full mb-6">
+                <span class="text-xs uppercase tracking-wider text-purple-300 block mb-1">I tuoi punti finali</span>
+                <span id="final-score-display" class="text-5xl font-black text-amber-300">0</span>
             </div>
 
-            <button onclick="closeGameOverModal()" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition shadow-lg">
+            <button onclick="closeGameOverModal()" class="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition shadow-lg">
                 Gioca Ancora
             </button>
         </div>
     </div>
 
     <!-- MODALE PIN DOCENTE -->
-    <div id="pin-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-3xl p-6 text-white shadow-2xl flex flex-col">
-            <h2 class="text-xl font-bold mb-2 text-emerald-400 flex items-center gap-2">
+    <div id="pin-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-purple-900 border border-purple-700 w-full max-w-sm rounded-3xl p-6 text-white shadow-2xl flex flex-col">
+            <h2 class="text-xl font-bold mb-2 text-amber-300 flex items-center gap-2">
                 <i class="fa-solid fa-user-shield"></i> Accesso Riservato
             </h2>
-            <p class="text-sm text-slate-300 mb-6">Inserisci la password docente per accedere alle impostazioni e caricare immagini.</p>
+            <p class="text-sm text-purple-200 mb-6">Inserisci la password docente per accedere alle impostazioni e caricare immagini.</p>
             
-            <input type="password" id="teacher-pin" class="bg-slate-950 border border-slate-700 p-3 rounded-xl mb-4 text-center text-2xl tracking-[0.5em] focus:border-emerald-400 outline-none transition" placeholder="****" onkeydown="if(event.key === 'Enter') checkPin()">
+            <input type="password" id="teacher-pin" class="bg-purple-950 border border-purple-700 p-3 rounded-xl mb-4 text-center text-2xl tracking-[0.5em] focus:border-amber-400 outline-none transition" placeholder="****" onkeydown="if(event.key === 'Enter') checkPin()">
             
             <div class="flex gap-3">
-                <button onclick="closePinModal()" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 transition font-semibold text-sm">Annulla</button>
-                <button onclick="checkPin()" class="flex-1 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition text-sm">Sblocca</button>
+                <button onclick="closePinModal()" class="flex-1 py-3 rounded-xl bg-purple-950 hover:bg-purple-800 transition font-semibold text-sm">Annulla</button>
+                <button onclick="checkPin()" class="flex-1 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition text-sm">Sblocca</button>
             </div>
             <p id="pin-error" class="text-red-400 text-sm font-semibold text-center mt-4 hidden animate-pulse">Password errata!</p>
         </div>
@@ -429,7 +429,7 @@
         let mioNomeStudente = "Alunno";
         let isTransitioning = false;
         let isPenalized = false;
-        let punteggiClasse = {}; // Mantiene i punteggi di tutti gli studenti sulla LIM
+        let punteggiClasse = {}; 
 
         /* --- SET PREDEFINITI VOCABOLARIO CPIA COMPLETI --- */
         const PRESETS = {
@@ -573,14 +573,14 @@
             buildDeck();
             
             document.querySelectorAll('.preset-btn').forEach(btn => {
-                btn.classList.remove('border-emerald-500', 'bg-emerald-950/40', 'border-emerald-500/40');
-                btn.classList.add('border-slate-700', 'bg-slate-800/50');
+                btn.classList.remove('border-amber-400', 'bg-amber-400/20', 'border-amber-400/40');
+                btn.classList.add('border-purple-700', 'bg-purple-950/60');
             });
             
             const activeBtn = Array.from(document.querySelectorAll('.preset-btn')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(presetKey));
             if(activeBtn) {
-                activeBtn.classList.add('border-emerald-500', 'bg-emerald-950/40', 'border-emerald-500/40');
-                activeBtn.classList.remove('border-slate-700', 'bg-slate-800/50');
+                activeBtn.classList.add('border-amber-400', 'bg-amber-400/20', 'border-amber-400/40');
+                activeBtn.classList.remove('border-purple-700', 'bg-purple-950/60');
             }
         }
 
@@ -619,7 +619,7 @@
 
             state.activeSymbols.forEach((sym, idx) => {
                 const item = document.createElement('div');
-                item.className = "flex items-center gap-2 bg-slate-950 p-1.5 rounded-lg border border-slate-800 text-xs";
+                item.className = "flex items-center gap-2 bg-purple-900 p-1.5 rounded-lg border border-purple-700 text-xs";
                 
                 let iconHtml = sym.type === 'emoji' 
                     ? `<span class="text-xl w-6 text-center">${sym.icon}</span>` 
@@ -627,8 +627,8 @@
 
                 item.innerHTML = `
                     ${iconHtml}
-                    <input type="text" value="${sym.val}" onchange="updateSymbolVal(${idx}, this.value)" class="bg-slate-900 border border-slate-700 px-1.5 py-0.5 rounded text-slate-200 text-xs w-full focus:outline-none focus:border-emerald-400">
-                    <button onclick="removeSymbol(${idx})" class="text-slate-500 hover:text-red-400 px-1"><i class="fa-solid fa-trash-can"></i></button>
+                    <input type="text" value="${sym.val}" onchange="updateSymbolVal(${idx}, this.value)" class="bg-purple-950 border border-purple-700 px-1.5 py-0.5 rounded text-purple-200 text-xs w-full focus:outline-none focus:border-amber-400">
+                    <button onclick="removeSymbol(${idx})" class="text-purple-400 hover:text-red-400 px-1"><i class="fa-solid fa-trash-can"></i></button>
                 `;
                 grid.appendChild(item);
             });
@@ -667,17 +667,17 @@
             
             PRESETS[key] = {
                 name: categoryName,
-                badge: '<i class="fa-solid fa-star text-amber-400"></i> ' + categoryName,
+                badge: '<i class="fa-solid fa-star text-amber-300"></i> ' + categoryName,
                 items: state.activeSymbols.map(sym => ({ ...sym }))
             };
             
             const grid = document.getElementById('presets-grid');
             const btn = document.createElement('button');
             btn.onclick = () => selectPreset(key);
-            btn.className = "preset-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 hover:bg-slate-800 flex flex-col items-center gap-2 text-center transition";
+            btn.className = "preset-btn p-3 rounded-2xl border-2 border-purple-700 bg-purple-950/60 hover:bg-purple-800 flex flex-col items-center gap-2 text-center transition";
             btn.innerHTML = `
-                <span class="text-2xl"><i class="fa-solid fa-star text-amber-400"></i></span>
-                <span class="font-bold text-xs sm:text-sm text-slate-200">${categoryName}</span>
+                <span class="text-2xl"><i class="fa-solid fa-star text-amber-300"></i></span>
+                <span class="font-bold text-xs sm:text-sm text-purple-200">${categoryName}</span>
             `;
             grid.appendChild(btn);
             
@@ -718,7 +718,7 @@
                 icon.className = "fa-solid fa-volume-high text-amber-400";
                 text.textContent = "Voce: ON";
             } else {
-                icon.className = "fa-solid fa-volume-xmark text-slate-500";
+                icon.className = "fa-solid fa-volume-xmark text-purple-400";
                 text.textContent = "Voce: OFF";
             }
         }
@@ -728,10 +728,10 @@
             const icon = document.getElementById('labels-icon');
             const text = document.getElementById('labels-status-text');
             if (state.showLabels) {
-                icon.className = "fa-solid fa-font text-emerald-400";
+                icon.className = "fa-solid fa-font text-amber-400";
                 text.textContent = "Testo: ON";
             } else {
-                icon.className = "fa-solid fa-font text-slate-500 opacity-40";
+                icon.className = "fa-solid fa-font text-purple-400 opacity-40";
                 text.textContent = "Testo: OFF";
             }
             renderCard('card1', state.deckCards[state.card1Index]);
@@ -804,7 +804,7 @@
                 const pos = item.pos;
 
                 const symEl = document.createElement('div');
-                symEl.className = 'symbol-item hover:bg-slate-900/10 hover:shadow-lg rounded-full';
+                symEl.className = 'symbol-item hover:bg-purple-900/15 hover:shadow-lg rounded-full';
 
                 const rad = (pos.angle * Math.PI) / 180;
                 const left = 50 + pos.r * Math.cos(rad);
@@ -831,7 +831,7 @@
                 }
 
                 let labelHtml = state.showLabels 
-                    ? `<span class="font-bold text-slate-800 bg-white/95 px-2 py-0.5 rounded-full shadow border border-slate-300 mt-1 whitespace-nowrap select-none z-10" style="${labelStyle}">${symbolObj.val}</span>` 
+                    ? `<span class="font-bold text-purple-950 bg-white/95 px-2 py-0.5 rounded-full shadow border border-purple-300 mt-1 whitespace-nowrap select-none z-10" style="${labelStyle}">${symbolObj.val}</span>` 
                     : '';
 
                 symEl.innerHTML = `<div class="flex flex-col items-center justify-center">${contentHtml}${labelHtml}</div>`;
@@ -942,7 +942,6 @@
 
         function avviaComeDocente() {
             ruolounico = 'docente';
-            // Genera PIN a 4 cifre
             const pinStanza = Math.floor(1000 + Math.random() * 9000).toString();
             
             if (typeof Peer === 'undefined') {
@@ -970,7 +969,7 @@
                         height: 180
                     });
                 } else {
-                    qrBox.innerHTML = '<p class="text-xs text-slate-800 font-bold p-2">QR Code non disponibile.<br>Usa il PIN qui sotto per connetterti!</p>';
+                    qrBox.innerHTML = '<p class="text-xs text-purple-950 font-bold p-2">QR Code non disponibile.<br>Usa il PIN qui sotto per connetterti!</p>';
                 }
             });
 
@@ -1079,7 +1078,7 @@
 
             document.getElementById('timer-box').classList.remove('hidden');
             document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-stop"></i> Ferma Sfida`;
-            document.getElementById('start-timer-btn').className = "px-5 py-2 rounded-xl bg-red-500 hover:bg-red-400 text-white font-bold transition flex items-center gap-2 shadow-lg text-sm";
+            document.getElementById('start-timer-btn').className = "px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold transition flex items-center gap-2 shadow-lg text-sm";
 
             state.timerInterval = setInterval(() => {
                 state.timeLeft--;
@@ -1101,7 +1100,7 @@
             clearInterval(state.timerInterval);
             document.getElementById('timer-box').classList.add('hidden');
             document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-play"></i> Avvia Sfida 60s`;
-            document.getElementById('start-timer-btn').className = "px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 text-slate-950 font-bold transition flex items-center gap-2 shadow-lg text-sm";
+            document.getElementById('start-timer-btn').className = "px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm";
         }
 
         /* --- MOSTRA CLASSIFICA O GAMEOVER --- */
@@ -1118,17 +1117,17 @@
                 const sorted = Object.entries(punteggiClasse).sort((a, b) => b[1] - a[1]);
                 
                 if (sorted.length === 0) {
-                    listEl.innerHTML = '<p class="text-xs text-slate-400 italic">Nessun punto registrato dagli alunni.</p>';
+                    listEl.innerHTML = '<p class="text-xs text-purple-300 italic">Nessun punto registrato dagli alunni.</p>';
                 } else {
                     sorted.forEach(([nome, punti], idx) => {
-                        let badgeColor = "bg-slate-800 text-slate-300";
+                        let badgeColor = "bg-purple-950 text-purple-200 border-purple-700";
                         let rankIcon = `#${idx + 1}`;
-                        if (idx === 0) { badgeColor = "bg-amber-500 text-slate-950 font-bold"; rankIcon = "🥇 1°"; }
-                        else if (idx === 1) { badgeColor = "bg-slate-300 text-slate-950 font-bold"; rankIcon = "🥈 2°"; }
-                        else if (idx === 2) { badgeColor = "bg-amber-700 text-white font-bold"; rankIcon = "🥉 3°"; }
+                        if (idx === 0) { badgeColor = "bg-amber-400 text-purple-950 font-bold border-amber-300"; rankIcon = "🥇 1°"; }
+                        else if (idx === 1) { badgeColor = "bg-slate-300 text-purple-950 font-bold border-white"; rankIcon = "🥈 2°"; }
+                        else if (idx === 2) { badgeColor = "bg-amber-700 text-white font-bold border-amber-600"; rankIcon = "🥉 3°"; }
 
                         const item = document.createElement('div');
-                        item.className = `flex justify-between items-center p-2.5 rounded-xl border border-slate-800 ${badgeColor}`;
+                        item.className = `flex justify-between items-center p-2.5 rounded-xl border ${badgeColor}`;
                         item.innerHTML = `
                             <span class="text-sm font-semibold">${rankIcon} ${nome}</span>
                             <span class="text-base font-extrabold font-mono">${punti} pt</span>
@@ -1193,11 +1192,11 @@
             const btn7 = document.getElementById('order-7-btn');
 
             if (orderN === 5) {
-                btn5.className = "p-3 rounded-xl border border-emerald-500 bg-emerald-500/20 text-center font-bold text-sm";
-                btn7.className = "p-3 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-center font-bold text-sm";
+                btn5.className = "p-3 rounded-xl border border-amber-400 bg-amber-400/20 text-center font-bold text-sm";
+                btn7.className = "p-3 rounded-xl border border-purple-700 bg-purple-950/60 hover:bg-purple-800 text-center font-bold text-sm";
             } else {
-                btn7.className = "p-3 rounded-xl border border-emerald-500 bg-emerald-500/20 text-center font-bold text-sm";
-                btn5.className = "p-3 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-center font-bold text-sm";
+                btn7.className = "p-3 rounded-xl border border-amber-400 bg-amber-400/20 text-center font-bold text-sm";
+                btn5.className = "p-3 rounded-xl border border-purple-700 bg-purple-950/60 hover:bg-purple-800 text-center font-bold text-sm";
             }
         }
 
