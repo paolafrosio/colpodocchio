@@ -969,6 +969,13 @@ function handleSymbolClick(val, element) {
 
                 connDocente.on('data', (dati) => {
                     if (dati.tipo === 'AGGIORNA_CARTE') {
+                        // Se la LIM ha cambiato il numero di figure per carta (es. da 8 a 6)
+                        if (dati.n && (state.n !== dati.n || state.symbolsPerCard !== dati.symbolsPerCard)) {
+                            state.n = dati.n;
+                            state.symbolsPerCard = dati.symbolsPerCard;
+                            buildDeck(); // Rigenera il mazzo con la nuova difficoltà sul tablet
+                        }
+
                         state.card1Index = dati.card1Index;
                         state.card2Index = dati.card2Index;
                         state.matchingSymbol = dati.matchingSymbol;
@@ -984,14 +991,16 @@ function handleSymbolClick(val, element) {
             });
         }
 
-        function inviaStatoAGliStudenti() {
+function inviaStatoAGliStudenti() {
             connessioniStudenti.forEach(conn => {
                 if (conn.open) {
                     conn.send({
                         tipo: 'AGGIORNA_CARTE',
                         card1Index: state.card1Index,
                         card2Index: state.card2Index,
-                        matchingSymbol: state.matchingSymbol
+                        matchingSymbol: state.matchingSymbol,
+                        n: state.n,
+                        symbolsPerCard: state.symbolsPerCard
                     });
                 }
             });
