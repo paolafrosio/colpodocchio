@@ -839,25 +839,31 @@ function handleSymbolClick(val, element) {
             }
         }
 
-        function registraEsitoPositivo(val, element, nomeVincitore, incrementaPuntiHost = false) {
-            isTransitioning = true;
-            if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
+ /* --- 2. REGISTRAZIONE ESITO E POP-UP SU ENTRAMBE LE CARTE --- */
+function registraEsitoPositivo(val, element, nomeVincitore, incrementaPuntiHost = false) {
+    isTransitioning = true;
+    
+    // Forza l'animazione di ingrandimento verde su ENTRAMBI i cerchi della schermata
+    const targetEls = document.querySelectorAll(`.symbol-item[data-val="${val}"]`);
+    targetEls.forEach(el => el.classList.add('symbol-correct'));
 
-            confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
-            speakWord(val);
+    if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
 
-            if (incrementaPuntiHost || ruolounico === 'standalone') {
-                state.score += 1;
-                document.getElementById('score-display').textContent = state.score;
-            }
+    confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
+    speakWord(val);
 
-            document.getElementById('last-word-display').textContent = `${val} (${nomeVincitore})`;
+    if (incrementaPuntiHost || ruolounico === 'standalone') {
+        state.score += 1;
+        document.getElementById('score-display').textContent = state.score;
+    }
 
-            setTimeout(() => {
-                nextPair(true);
-                isTransitioning = false;
-            }, 1500);
-        }
+    document.getElementById('last-word-display').textContent = `${val} (${nomeVincitore})`;
+
+    setTimeout(() => {
+        nextPair(true);
+        isTransitioning = false;
+    }, 1500);
+}
 
         function resetScore() {
             state.score = 0;
@@ -907,27 +913,32 @@ function handleSymbolClick(val, element) {
                 }
             });
 
-            peer.on('connection', (conn) => {
-                connessioniStudenti.push(conn);
-                aggiornaContatoreAlunni();
+/* --- 1. GESTIONE RICEZIONE PUNTI STUDENTE NELLA LIM --- */
+peer.on('connection', (conn) => {
+    connessioniStudenti.push(conn);
+    aggiornaContatoreAlunni();
 
-                conn.on('open', () => {
-                    inviaStatoAGliStudenti();
-                });
+    conn.on('open', () => {
+        inviaStatoAGliStudenti();
+    });
 
-                conn.on('data', (dati) => {
-if (dati.tipo === 'RISPOSTA_CORRETTA' && dati.valore === state.matchingSymbol) {
-        punteggiClasse[dati.nome] = dati.score;
-        const targetEl = document.querySelector(`.symbol-item[data-val="${state.matchingSymbol}"]`);
-        registraEsitoPositivo(dati.valore, targetEl, dati.nome, false);
-    }
-                });
+    conn.on('data', (dati) => {
+        if (dati.tipo === 'RISPOSTA_CORRETTA' && dati.valore === state.matchingSymbol) {
+            punteggiClasse[dati.nome] = dati.score;
+            
+            // Trova e anima ENTRAMBE le figure corrispondenti sulla LIM
+            const targetEls = document.querySelectorAll(`.symbol-item[data-val="${state.matchingSymbol}"]`);
+            targetEls.forEach(el => el.classList.add('symbol-correct'));
 
-                conn.on('close', () => {
-                    connessioniStudenti = connessioniStudenti.filter(c => c !== conn);
-                    aggiornaContatoreAlunni();
-                });
-            });
+            registraEsitoPositivo(dati.valore, targetEls[0], dati.nome, false);
+        }
+    });
+
+    conn.on('close', () => {
+        connessioniStudenti = connessioniStudenti.filter(c => c !== conn);
+        aggiornaContatoreAlunni();
+    });
+});
         }
 
         function connettiComeStudente() {
