@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Colpo d'occhio CPIA - Live Class</title>
+    <title>Colpo d'occhio - Giochiamo Insieme</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -109,20 +109,25 @@
             </div>
             <div>
                 <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide flex items-center gap-2">
-                    Colpo d'occhio <span class="bg-amber-400/20 text-amber-300 text-xs px-2.5 py-0.5 rounded-full border border-amber-400/40 font-mono">CPIA</span>
+                    Colpo d'occhio
                 </h1>
                 <p class="text-xs text-purple-200 hidden sm:block">Pronuncia la figura in comune al microfono o selezionala toccando lo schermo!</p>
             </div>
         </div>
 
-        <div class="flex items-center gap-2 md:gap-3">
+        <div class="flex items-center gap-2 md:gap-3 flex-wrap justify-end">
+            <!-- Pulsante Multi-uso: In classe (Multiplayer) o Sfida amici -->
+            <button id="btn-multiplayer" onclick="mostraModalConnessione()" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
+                <i class="fa-solid fa-users"></i>
+                <span id="txt-multiplayer">Giochiamo insieme</span>
+            </button>
+            <button id="toggle-touch-btn" onclick="toggleTouch()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva Touch">
+                <i id="touch-icon" class="fa-solid fa-hand-pointer text-amber-400"></i>
+                <span id="touch-status-text" class="hidden md:inline font-medium">Touch: ON</span>
+            </button>
             <button id="btn-mic-toggle" onclick="toggleSpeechRecognition()" class="px-3.5 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva Microfono per Risposta Vocale">
                 <i id="mic-icon" class="fa-solid fa-microphone-slash text-purple-400"></i>
                 <span id="mic-status-text" class="hidden md:inline font-medium">Mic: OFF</span>
-            </button>
-            <button id="btn-multiplayer" onclick="mostraModalConnessione()" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
-                <i class="fa-solid fa-users"></i>
-                <span id="txt-multiplayer">Modalità Classe</span>
             </button>
             <button id="toggle-labels-btn" onclick="toggleLabels()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Mostra o nascondi il testo scritto">
                 <i id="labels-icon" class="fa-solid fa-font text-purple-400 opacity-40"></i>
@@ -134,7 +139,7 @@
             </button>
             <button onclick="requireSettingsAccess()" class="px-3.5 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
                 <i class="fa-solid fa-lock"></i>
-                <span>Area Docente</span>
+                <span class="hidden md:inline">Area Docente</span>
             </button>
         </div>
     </header>
@@ -176,9 +181,9 @@
             </div>
         </div>
 
-        <!-- INDICATORE PENALITÀ ERRORE (STUDENTE) -->
-        <div id="penalty-banner" class="hidden w-full bg-red-600/90 text-white text-center py-1.5 px-4 rounded-xl text-xs font-bold animate-bounce shadow-md">
-            ⚠️ Errore! Attendi 3 secondi prima di poter riprovare...
+        <!-- INDICATORE WARNING / PENALITÀ (STUDENTE / TOUCH BLOCCATO) -->
+        <div id="penalty-banner" class="hidden w-full bg-red-600/90 text-white text-center py-1.5 px-4 rounded-xl text-xs font-bold shadow-md transition-all duration-300">
+             Errore! Attendi 3 secondi prima di poter riprovare...
         </div>
 
         <!-- BARRA RICONOSCIMENTO VOCALE IN TEMPO REALE -->
@@ -206,7 +211,7 @@
                 <i class="fa-solid fa-arrows-rotate"></i> Cambia Carte
             </button>
             <button id="start-timer-btn" onclick="toggleTimeAttack()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm">
-                <i class="fa-solid fa-play"></i> Avvia Sfida 60s
+                <i class="fa-solid fa-play"></i> Allenamento 60s
             </button>
             <button onclick="resetScore()" class="px-3.5 py-2 rounded-xl bg-purple-950 hover:bg-purple-900 text-purple-300 hover:text-white border border-purple-800 font-medium transition text-xs">
                 Azzera Punti
@@ -215,22 +220,22 @@
     </main>
 
     <footer class="text-center py-2 text-xs text-purple-300/60">
-        Colpo d'occhio Didattico • Generatore Matematico Proiettivo • Per LIM e Tablet
+        Colpo d'occhio Didattico • Generatore Matematico Proiettivo • Gamification & Multiplayer
     </footer>
 
     <!-- MODALE CONNETTIVITÀ MULTIPLAYER (PEERJS) -->
     <div id="connection-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-purple-900 border border-purple-700 w-full max-w-md rounded-3xl p-6 text-white shadow-2xl flex flex-col">
             <h2 class="text-xl font-bold mb-4 text-amber-300 flex items-center gap-2">
-                <i class="fa-solid fa-network-wired"></i> Modalità Classe in Tempo Reale
+                <i class="fa-solid fa-users"></i> Giochiamo Insieme (Stanza)
             </h2>
             
             <div id="role-selection" class="space-y-4">
-                <button onclick="avviaComeDocente()" class="w-full p-4 rounded-2xl bg-fuchsia-600 hover:bg-fuchsia-500 font-bold flex items-center gap-4 transition text-left">
+                <button onclick="avviaComeDocente()" class="w-full p-4 rounded-2xl bg-fuchsia-600 hover:bg-fuchsia-500 font-bold flex items-center gap-4 transition text-left shadow-md">
                     <i class="fa-solid fa-desktop text-3xl"></i>
                     <div>
-                        <div class="text-base">Sono sulla LIM (Crea Stanza)</div>
-                        <div class="text-xs font-normal text-purple-200">Genera il PIN a 4 cifre per far collegare gli alunni</div>
+                        <div class="text-base">Crea una Stanza (Host)</div>
+                        <div class="text-xs font-normal text-purple-200">Genera il PIN a 4 cifre per invitare gli altri a giocare</div>
                     </div>
                 </button>
                 <div class="relative flex py-1 items-center">
@@ -241,8 +246,8 @@
                 <div class="space-y-2">
                     <input type="text" id="student-name" placeholder="Il tuo Nome" class="w-full bg-purple-950 border border-purple-700 p-3 rounded-xl text-center text-white focus:border-amber-400 outline-none">
                     <input type="text" id="room-pin-input" placeholder="PIN Stanza (es. 1234)" maxlength="4" class="w-full bg-purple-950 border border-purple-700 p-3 rounded-xl text-center text-lg tracking-widest text-white focus:border-amber-400 outline-none">
-                    <button onclick="connettiComeStudente()" class="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition">
-                        Entra nel Gioco (Studente)
+                    <button onclick="connettiComeStudente()" class="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition shadow-md">
+                        Entra con PIN
                     </button>
                 </div>
             </div>
@@ -250,12 +255,12 @@
             <div id="teacher-qr-view" class="hidden flex-col items-center text-center space-y-4">
                 <div class="bg-white p-3 rounded-2xl inline-block shadow-lg" id="qrcode-box"></div>
                 <div class="text-lg font-bold text-amber-300">
-                    PIN Stanza: <span id="display-pin-code" class="text-2xl font-mono text-white bg-purple-950 px-3 py-1 rounded-xl">----</span>
+                    PIN Stanza: <span id="display-pin-code" class="text-2xl font-mono text-white bg-purple-950 px-3 py-1 rounded-xl shadow-inner">----</span>
                 </div>
-                <p class="text-xs text-purple-200">Inquadra il QR con il tablet o inserisci il PIN per giocare!</p>
+                <p class="text-xs text-purple-200">Inquadra il QR con il telefono/tablet o inserisci il PIN per unirti alla sfida!</p>
             </div>
 
-            <button onclick="chiudiModalConnessione()" class="mt-6 w-full py-2 rounded-xl bg-purple-950 hover:bg-purple-800 text-purple-300 text-sm font-semibold">Chiudi</button>
+            <button onclick="chiudiModalConnessione()" class="mt-6 w-full py-2 rounded-xl bg-purple-950 hover:bg-purple-800 text-purple-300 text-sm font-semibold transition">Chiudi</button>
         </div>
     </div>
 
@@ -265,7 +270,7 @@
             
             <div class="flex justify-between items-center pb-4 border-b border-purple-800">
                 <h2 class="text-xl font-bold flex items-center gap-2 text-amber-300">
-                    <i class="fa-solid fa-sliders"></i> Pannello di Configurazione Docente CPIA
+                    <i class="fa-solid fa-sliders"></i> Pannello di Configurazione Docente
                 </h2>
                 <button onclick="closeSettingsModal()" class="text-purple-300 hover:text-white p-2 rounded-lg text-xl">
                     <i class="fa-solid fa-xmark"></i>
@@ -313,17 +318,24 @@
             <h2 class="text-2xl font-bold mb-1">Tempo Scaduto!</h2>
             <p class="text-sm text-purple-200 mb-4" id="gameover-sub">Ottimo esercizio di lettura e pronuncia!</p>
             
-            <!-- VISTA CLASSIFICA LIM -->
+            <!-- VISTA CLASSIFICA (HOST/LIM) -->
             <div id="leaderboard-view" class="w-full mb-6 hidden">
-                <h3 class="text-sm font-bold uppercase tracking-wider text-amber-300 mb-3"><i class="fa-solid fa-award"></i> Classifica Finale Classe</h3>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-amber-300 mb-3"><i class="fa-solid fa-award"></i> Classifica Finale</h3>
                 <div id="leaderboard-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
                 </div>
             </div>
 
-            <!-- VISTA PUNTEGGIO SINGOLO STUDENTE -->
-            <div id="single-score-view" class="bg-purple-950 border border-purple-800 rounded-2xl p-4 w-full mb-6">
+            <!-- VISTA PUNTEGGIO SINGOLO (STUDENTE / STANDALONE) & PERSONAL BEST -->
+            <div id="single-score-view" class="bg-purple-950 border border-purple-800 rounded-2xl p-4 w-full mb-6 relative">
                 <span class="text-xs uppercase tracking-wider text-purple-300 block mb-1">I tuoi punti finali</span>
-                <span id="final-score-display" class="text-5xl font-black text-amber-300">0</span>
+                <span id="final-score-display" class="text-5xl font-black text-white">0</span>
+                
+                <div id="new-record-badge" class="hidden mt-3 text-sm font-bold text-emerald-400 animate-pulse bg-emerald-900/40 py-1 px-3 rounded-full inline-block border border-emerald-500/50">
+                    🏆 Nuovo Record Personale!
+                </div>
+                <div class="mt-3 text-xs text-purple-300 border-t border-purple-800 pt-2">
+                    Miglior Punteggio di sempre: <b id="best-score-display" class="text-amber-300 text-sm">0</b>
+                </div>
             </div>
 
             <button onclick="closeGameOverModal()" class="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition shadow-lg">
@@ -338,7 +350,7 @@
             <h2 class="text-xl font-bold mb-2 text-amber-300 flex items-center gap-2">
                 <i class="fa-solid fa-user-shield"></i> Accesso Riservato
             </h2>
-            <p class="text-sm text-purple-200 mb-6">Inserisci la password docente per accedere alle impostazioni.</p>
+            <p class="text-sm text-purple-200 mb-6">Inserisci la password per accedere alle impostazioni avanzate.</p>
             
             <input type="password" id="teacher-pin" class="bg-purple-950 border border-purple-700 p-3 rounded-xl mb-4 text-center text-2xl tracking-[0.5em] focus:border-amber-400 outline-none transition" placeholder="****" onkeydown="if(event.key === 'Enter') checkPin()">
             
@@ -355,7 +367,7 @@
         const TEACHER_PIN = "1234";
         const PREFISSO_STANZA = 'colpo-docchio-';
 
-        /* --- 57 IMMAGINI DALLA CARTELLA img_corpoumano --- */
+        /* --- IMMAGINI --- */
         const CARTELLA_IMMAGINI = [
             { val: 'contagocce', file: 'img_corpoumano/contagocce.png' },
             { val: 'alluce', file: 'img_corpoumano/alluce.png' },
@@ -440,8 +452,9 @@
             card2Index: -1,
             matchingSymbol: null,
             score: 0,
-            showLabels: false, // DESELEZIONATO DI DEFAULT
+            showLabels: false, 
             audioEnabled: true,
+            touchEnabled: true, // Nuova flag blocco tocco
             isTimeAttack: false,
             timeLeft: 60,
             timerInterval: null,
@@ -456,10 +469,42 @@
             initSpeechRecognition();
             caricaMazzoCorpoUmano();
             
-            // Pulsante testo grafico disattivato all'avvio
             document.getElementById('labels-icon').className = "fa-solid fa-font text-purple-400 opacity-40";
             document.getElementById('labels-status-text').textContent = "Testo: OFF";
         };
+
+        // --- SISTEMA DI WARNING / PENALITÀ UI ---
+        function showWarningBanner(msg, duration = 3000, isError = false) {
+            const banner = document.getElementById('penalty-banner');
+            banner.innerHTML = msg;
+            if (isError) {
+                banner.className = "w-full bg-red-600/90 text-white text-center py-1.5 px-4 rounded-xl text-xs font-bold animate-bounce shadow-md";
+            } else {
+                banner.className = "w-full bg-amber-500/90 text-white text-center py-1.5 px-4 rounded-xl text-xs font-bold animate-pulse shadow-md";
+            }
+            banner.classList.remove('hidden');
+            setTimeout(() => {
+                banner.classList.add('hidden');
+            }, duration);
+        }
+
+        // --- BLOCCO TOCCO (SOLO VOCE) ---
+        function toggleTouch() {
+            state.touchEnabled = !state.touchEnabled;
+            const icon = document.getElementById('touch-icon');
+            const text = document.getElementById('touch-status-text');
+            if (state.touchEnabled) {
+                icon.className = "fa-solid fa-hand-pointer text-amber-400";
+                text.textContent = "Touch: ON";
+            } else {
+                icon.className = "fa-solid fa-hand-pointer text-purple-400 opacity-40";
+                text.textContent = "Touch: OFF";
+            }
+            
+            if (ruolounico === 'docente') {
+                inviaEventoSistemaStudenti('SET_INPUT_MODE', { touchEnabled: state.touchEnabled });
+            }
+        }
 
         function caricaMazzoCorpoUmano() {
             state.activeSymbols = CARTELLA_IMMAGINI.map(item => ({
@@ -514,12 +559,13 @@
                 const wordTarget = state.matchingSymbol.toLowerCase();
                 const cleanedTranscript = transcript.replace(/\b(il|lo|la|i|gli|le|un|uno|una|del|della|degli)\b/gi, '').trim();
 
-if (transcript.includes(wordTarget) || cleanedTranscript.includes(wordTarget)) {
-        // Seleziona TUTTI gli elementi corrispondenti (sia su card1 che su card2)
-        const targetEls = document.querySelectorAll(`.symbol-item[data-val="${state.matchingSymbol}"]`);
-        targetEls.forEach(el => el.classList.add('symbol-correct'));
-        handleSymbolClick(state.matchingSymbol, targetEls[0]);
-    }
+                if (transcript.includes(wordTarget) || cleanedTranscript.includes(wordTarget)) {
+                    const targetEls = document.querySelectorAll(`.symbol-item[data-val="${state.matchingSymbol}"]`);
+                    targetEls.forEach(el => el.classList.add('symbol-correct'));
+                    
+                    // La chiamata da microfono bypassa il controllo Touch
+                    handleSymbolClick(state.matchingSymbol, targetEls[0]);
+                }
             };
 
             recognition.onerror = function(event) {
@@ -550,9 +596,7 @@ if (transcript.includes(wordTarget) || cleanedTranscript.includes(wordTarget)) {
                     icon.className = "fa-solid fa-microphone text-emerald-400";
                     text.textContent = "Mic: ON";
                     liveBar.classList.remove('hidden');
-                } catch(e) {
-                    console.log("Errore avvio microfono", e);
-                }
+                } catch(e) {}
             } else {
                 try {
                     recognition.stop();
@@ -627,7 +671,7 @@ if (transcript.includes(wordTarget) || cleanedTranscript.includes(wordTarget)) {
         }
 
         function speakWord(text) {
-            // BLOCCO ECO: gli studenti non usano la sintesi vocale (parla solo la LIM)
+            // BLOCCO ECO
             if (ruolounico === 'studente') return;
 
             if (!state.audioEnabled || !text) return;
@@ -745,7 +789,7 @@ if (transcript.includes(wordTarget) || cleanedTranscript.includes(wordTarget)) {
 
                 const symEl = document.createElement('div');
                 symEl.className = 'symbol-item hover:bg-purple-900/15 hover:shadow-lg rounded-full';
-                symEl.setAttribute('data-val', symbolObj.val); // Tracciamento esatto figura
+                symEl.setAttribute('data-val', symbolObj.val);
 
                 const rad = (pos.angle * Math.PI) / 180;
                 const left = 50 + pos.r * Math.cos(rad);
@@ -754,13 +798,11 @@ if (transcript.includes(wordTarget) || cleanedTranscript.includes(wordTarget)) {
                 symEl.style.left = `${left}%`;
                 symEl.style.top = `${top}%`;
 
-                // Scala e rotazione
                 const scale = (0.75 + Math.random() * 0.65).toFixed(2);
                 const rotation = Math.floor(Math.random() * 360) - 180;
 
                 const imgStyle = `transform: scale(${scale}); display: block; margin: 0 auto; transition: transform 0.2s;`;
 
-                // Testo inclinato con la figura ma bloccato fisso a 12px
                 let labelHtml = state.showLabels 
                     ? `<span class="font-bold text-purple-950 bg-white/95 px-2 py-0.5 rounded-full shadow border border-purple-300 mt-1 whitespace-nowrap select-none z-10 block text-center" style="font-size: 12px !important; line-height: 1.2 !important;">${symbolObj.val}</span>` 
                     : '';
@@ -770,12 +812,16 @@ if (transcript.includes(wordTarget) || cleanedTranscript.includes(wordTarget)) {
                         <img src="${symbolObj.icon}" class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain drop-shadow-md select-none pointer-events-none" style="${imgStyle}">
                     </div>`;
 
-                // Rotazione del blocco figura + etichetta
                 symEl.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
                 symEl.innerHTML = `<div class="flex flex-col items-center justify-center w-full">${contentHtml}${labelHtml}</div>`;
 
+                // Controllo tocco e inoltro gestore
                 symEl.onclick = (e) => {
                     e.stopPropagation();
+                    if (!state.touchEnabled) {
+                        showWarningBanner("🎙️ In questa partita vale solo la voce! Pronuncia la figura al microfono.", 3000, false);
+                        return;
+                    }
                     handleSymbolClick(symbolObj.val, symEl);
                 };
 
@@ -783,13 +829,12 @@ if (transcript.includes(wordTarget) || cleanedTranscript.includes(wordTarget)) {
             });
         }
 
-function handleSymbolClick(val, element) {
+        function handleSymbolClick(val, element) {
             if (isTransitioning || isPenalized) return;
 
             if (val === state.matchingSymbol) {
                 isTransitioning = true;
                 
-                // Anima lo zoom verde su ENTRAMBE le carte contemporaneamente!
                 const targets = document.querySelectorAll(`.symbol-item[data-val="${val}"]`);
                 targets.forEach(el => el.classList.add('symbol-correct'));
                 
@@ -822,13 +867,12 @@ function handleSymbolClick(val, element) {
                     isPenalized = true;
                     document.getElementById('card1').classList.add('locked-card');
                     document.getElementById('card2').classList.add('locked-card');
-                    document.getElementById('penalty-banner').classList.remove('hidden');
+                    showWarningBanner("⚠️ Errore! Attendi 3 secondi prima di poter riprovare...", 3000, true);
 
                     setTimeout(() => {
                         isPenalized = false;
                         document.getElementById('card1').classList.remove('locked-card');
                         document.getElementById('card2').classList.remove('locked-card');
-                        document.getElementById('penalty-banner').classList.add('hidden');
                         if (element) element.classList.remove('symbol-wrong');
                     }, 3000);
                 } else {
@@ -839,31 +883,29 @@ function handleSymbolClick(val, element) {
             }
         }
 
- /* --- 2. REGISTRAZIONE ESITO E POP-UP SU ENTRAMBE LE CARTE --- */
-function registraEsitoPositivo(val, element, nomeVincitore, incrementaPuntiHost = false) {
-    isTransitioning = true;
-    
-    // Forza l'animazione di ingrandimento verde su ENTRAMBI i cerchi della schermata
-    const targetEls = document.querySelectorAll(`.symbol-item[data-val="${val}"]`);
-    targetEls.forEach(el => el.classList.add('symbol-correct'));
+        function registraEsitoPositivo(val, element, nomeVincitore, incrementaPuntiHost = false) {
+            isTransitioning = true;
+            
+            const targetEls = document.querySelectorAll(`.symbol-item[data-val="${val}"]`);
+            targetEls.forEach(el => el.classList.add('symbol-correct'));
 
-    if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
+            if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
 
-    confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
-    speakWord(val);
+            confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
+            speakWord(val);
 
-    if (incrementaPuntiHost || ruolounico === 'standalone') {
-        state.score += 1;
-        document.getElementById('score-display').textContent = state.score;
-    }
+            if (incrementaPuntiHost || ruolounico === 'standalone') {
+                state.score += 1;
+                document.getElementById('score-display').textContent = state.score;
+            }
 
-    document.getElementById('last-word-display').textContent = `${val} (${nomeVincitore})`;
+            document.getElementById('last-word-display').textContent = `${val} (${nomeVincitore})`;
 
-    setTimeout(() => {
-        nextPair(true);
-        isTransitioning = false;
-    }, 1500);
-}
+            setTimeout(() => {
+                nextPair(true);
+                isTransitioning = false;
+            }, 1500);
+        }
 
         function resetScore() {
             state.score = 0;
@@ -898,7 +940,7 @@ function registraEsitoPositivo(val, element, nomeVincitore, incrementaPuntiHost 
                 document.getElementById('display-pin-code').textContent = pinStanza;
                 
                 document.getElementById('connected-players-badge').classList.remove('hidden');
-                document.getElementById('txt-multiplayer').textContent = "LIM (Host)";
+                document.getElementById('txt-multiplayer').textContent = "Host: " + pinStanza;
 
                 const qrBox = document.getElementById('qrcode-box');
                 qrBox.innerHTML = '';
@@ -913,32 +955,28 @@ function registraEsitoPositivo(val, element, nomeVincitore, incrementaPuntiHost 
                 }
             });
 
-/* --- 1. GESTIONE RICEZIONE PUNTI STUDENTE NELLA LIM --- */
-peer.on('connection', (conn) => {
-    connessioniStudenti.push(conn);
-    aggiornaContatoreAlunni();
+            peer.on('connection', (conn) => {
+                connessioniStudenti.push(conn);
+                aggiornaContatoreAlunni();
 
-    conn.on('open', () => {
-        inviaStatoAGliStudenti();
-    });
+                conn.on('open', () => {
+                    inviaStatoAGliStudenti();
+                });
 
-    conn.on('data', (dati) => {
-        if (dati.tipo === 'RISPOSTA_CORRETTA' && dati.valore === state.matchingSymbol) {
-            punteggiClasse[dati.nome] = dati.score;
-            
-            // Trova e anima ENTRAMBE le figure corrispondenti sulla LIM
-            const targetEls = document.querySelectorAll(`.symbol-item[data-val="${state.matchingSymbol}"]`);
-            targetEls.forEach(el => el.classList.add('symbol-correct'));
+                conn.on('data', (dati) => {
+                    if (dati.tipo === 'RISPOSTA_CORRETTA' && dati.valore === state.matchingSymbol) {
+                        punteggiClasse[dati.nome] = dati.score;
+                        const targetEls = document.querySelectorAll(`.symbol-item[data-val="${state.matchingSymbol}"]`);
+                        targetEls.forEach(el => el.classList.add('symbol-correct'));
+                        registraEsitoPositivo(dati.valore, targetEls[0], dati.nome, false);
+                    }
+                });
 
-            registraEsitoPositivo(dati.valore, targetEls[0], dati.nome, false);
-        }
-    });
-
-    conn.on('close', () => {
-        connessioniStudenti = connessioniStudenti.filter(c => c !== conn);
-        aggiornaContatoreAlunni();
-    });
-});
+                conn.on('close', () => {
+                    connessioniStudenti = connessioniStudenti.filter(c => c !== conn);
+                    aggiornaContatoreAlunni();
+                });
+            });
         }
 
         function connettiComeStudente() {
@@ -959,22 +997,30 @@ peer.on('connection', (conn) => {
                 
                 connDocente.on('open', () => {
                     chiudiModalConnessione();
-                    document.getElementById('txt-multiplayer').textContent = mioNomeStudente;
+                    document.getElementById('txt-multiplayer').textContent = "In Stanza: " + mioNomeStudente;
                     
+                    // DISATTIVA TASTO RIASCOLTO ALLO STUDENTE
+                    document.getElementById('repeat-speech-btn').classList.add('hidden');
+                    // DISATTIVA IL TOGGLE DEL TOUCH SE STUDENTE
+                    document.getElementById('toggle-touch-btn').classList.add('hidden');
+
                     if (recognition) {
                         toggleSpeechRecognition();
                     }
 
-                    alert("Connesso alla LIM! Guarda il tuo schermo: puoi rispondere dicendo la parola a voce alta al microfono o toccando la figura!");
+                    alert("Connesso al gioco! Buona fortuna!");
                 });
 
                 connDocente.on('data', (dati) => {
                     if (dati.tipo === 'AGGIORNA_CARTE') {
-                        // Sincronizzazione automatica mazzo a 6 o 8 figure
                         if (dati.n && (state.n !== dati.n || state.symbolsPerCard !== dati.symbolsPerCard)) {
                             state.n = dati.n;
                             state.symbolsPerCard = dati.symbolsPerCard;
                             buildDeck();
+                        }
+                        // Sincronizza stato input (nel caso fosse entrato a partita iniziata)
+                        if (dati.touchEnabled !== undefined) {
+                            state.touchEnabled = dati.touchEnabled;
                         }
 
                         state.card1Index = dati.card1Index;
@@ -982,10 +1028,20 @@ peer.on('connection', (conn) => {
                         state.matchingSymbol = dati.matchingSymbol;
                         renderCard('card1', state.deckCards[dati.card1Index]);
                         renderCard('card2', state.deckCards[dati.card2Index]);
-                    } else if (dati.tipo === 'TIMER_TICK') {
+                    } 
+                    else if (dati.tipo === 'SET_INPUT_MODE') {
+                        state.touchEnabled = dati.touchEnabled;
+                        if (!state.touchEnabled) {
+                            showWarningBanner("🎙️ L'Host ha attivato la modalità Solo Voce! Il tocco è disabilitato.", 4500, false);
+                        } else {
+                            showWarningBanner("👆 Modalità Touch riattivata dall'Host!", 3000, false);
+                        }
+                    }
+                    else if (dati.tipo === 'TIMER_TICK') {
                         document.getElementById('timer-box').classList.remove('hidden');
                         document.getElementById('timer-display').textContent = dati.timeLeft;
-                    } else if (dati.tipo === 'GAMEOVER') {
+                    } 
+                    else if (dati.tipo === 'GAMEOVER') {
                         showGameOverModal();
                     }
                 });
@@ -1001,7 +1057,8 @@ peer.on('connection', (conn) => {
                         card2Index: state.card2Index,
                         matchingSymbol: state.matchingSymbol,
                         n: state.n,
-                        symbolsPerCard: state.symbolsPerCard
+                        symbolsPerCard: state.symbolsPerCard,
+                        touchEnabled: state.touchEnabled
                     });
                 }
             });
@@ -1057,14 +1114,13 @@ peer.on('connection', (conn) => {
             state.isTimeAttack = false;
             clearInterval(state.timerInterval);
             document.getElementById('timer-box').classList.add('hidden');
-            document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-play"></i> Avvia Sfida 60s`;
+            document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-play"></i> Allenamento 60s`;
             document.getElementById('start-timer-btn').className = "px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm";
         }
 
         function showGameOverModal() {
             if (ruolounico === 'docente') {
                 inviaEventoSistemaStudenti('GAMEOVER');
-                
                 document.getElementById('single-score-view').classList.add('hidden');
                 document.getElementById('leaderboard-view').classList.remove('hidden');
                 
@@ -1096,6 +1152,20 @@ peer.on('connection', (conn) => {
                 document.getElementById('single-score-view').classList.remove('hidden');
                 document.getElementById('leaderboard-view').classList.add('hidden');
                 document.getElementById('final-score-display').textContent = state.score;
+                
+                // GAMIFICATION: Gestione Record Personale
+                let bestScore = parseInt(localStorage.getItem('colpodocchio_best_score')) || 0;
+                
+                if (state.score > bestScore) {
+                    bestScore = state.score;
+                    localStorage.setItem('colpodocchio_best_score', bestScore);
+                    document.getElementById('new-record-badge').classList.remove('hidden');
+                    confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
+                } else {
+                    document.getElementById('new-record-badge').classList.add('hidden');
+                }
+                
+                document.getElementById('best-score-display').textContent = bestScore;
             }
 
             document.getElementById('gameover-modal').classList.remove('hidden');
