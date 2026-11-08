@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colpo d'occhio CPIA - Live Class</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Tone.js for Sound Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- PeerJS e QR Code -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Lexend', 'Fredoka', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .dobble-card {
+            aspect-ratio: 1 / 1;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 0 30px inset rgba(255, 255, 255, 0.9);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: visible !important;
+        }
+
+        .dobble-card:hover {
+            transform: scale(1.02);
+        }
+        
+        .symbol-item {
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            padding: 0; 
+        }
+
+        .symbol-item span.font-bold {
+            max-width: 110px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: inline-block;
+        }
+
+        .symbol-item:hover {
+            z-index: 40 !important;
+        }
+
+        .symbol-item img {
+            object-fit: contain !important;
+            border-radius: 50%;
+            display: block;
+        }
+
+        .symbol-correct {
+            animation: pulse-green 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 50 !important;
+        }
+
+        .symbol-wrong {
+            animation: shake-red 0.5s ease-in-out;
+        }
+
+        .locked-card {
+            opacity: 0.35 !important;
+            pointer-events: none !important;
+            filter: grayscale(80%);
+        }
+
+        @keyframes pulse-green {
+            0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+            50% { transform: translate(-50%, -50%) scale(1.6) rotate(15deg); }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+        }
+
+        @keyframes shake-red {
+            0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+            20%, 60% { transform: translate(-50%, -50%) translateX(-10px) rotate(-8deg); }
+            40%, 80% { transform: translate(-50%, -50%) translateX(10px) rotate(8deg); }
+        }
+
+        @keyframes card-appear {
+            0% { opacity: 0; transform: scale(0.65) rotate(-12deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+
+        .animate-card {
+            animation: card-appear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #2e1065;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #6b21a8;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="bg-purple-950 text-slate-100 min-h-screen flex flex-col justify-between bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 overflow-x-hidden">
+
+    <!-- HEADER / BARRA SUPERIORE -->
+    <header class="w-full bg-purple-900/90 backdrop-blur-md border-b border-purple-700/50 px-4 py-3 flex justify-between items-center z-10 shadow-lg">
+        <div class="flex items-center gap-3">
+            <div class="bg-amber-400 text-purple-950 p-2.5 rounded-2xl shadow-lg flex items-center justify-center font-bold text-xl">
+                <i class="fa-solid fa-comments"></i>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide flex items-center gap-2">
+                    Colpo d'occhio <span class="bg-amber-400/20 text-amber-300 text-xs px-2.5 py-0.5 rounded-full border border-amber-400/40 font-mono">CPIA</span>
+                </h1>
+                <p class="text-xs text-purple-200 hidden sm:block">Pronuncia la figura in comune al microfono o selezionala toccando lo schermo!</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 md:gap-3">
+            <button id="btn-mic-toggle" onclick="toggleSpeechRecognition()" class="px-3.5 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva Microfono per Risposta Vocale">
+                <i id="mic-icon" class="fa-solid fa-microphone-slash text-purple-400"></i>
+                <span id="mic-status-text" class="hidden md:inline font-medium">Mic: OFF</span>
+            </button>
+            <button id="btn-multiplayer" onclick="mostraModalConnessione()" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
+                <i class="fa-solid fa-users"></i>
+                <span id="txt-multiplayer">Modalità Classe</span>
+            </button>
+            <button id="toggle-labels-btn" onclick="toggleLabels()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Mostra o nascondi il testo scritto">
+                <i id="labels-icon" class="fa-solid fa-font text-amber-400"></i>
+                <span id="labels-status-text" class="hidden md:inline font-medium">Testo: ON</span>
+            </button>
+            <button id="toggle-voice-btn" onclick="toggleSpeech()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva pronuncia vocale">
+                <i id="voice-icon" class="fa-solid fa-volume-high text-amber-400"></i>
+                <span id="voice-status-text" class="hidden md:inline font-medium">Voce: ON</span>
+            </button>
+            <button onclick="requireSettingsAccess()" class="px-3.5 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
+                <i class="fa-solid fa-lock"></i>
+                <span>Area Docente</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- AREA DI GIOCO PRINCIPALE -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-2 flex flex-col justify-center items-center gap-3">
+        <!-- STATUS BAR & FEEDBACK VOCALE -->
+        <div class="w-full flex flex-col sm:flex-row justify-between items-center bg-purple-900/80 backdrop-blur-md rounded-2xl p-3 border border-purple-700/50 text-white shadow-xl gap-3">
+            <div class="flex items-center gap-2">
+                <span id="current-preset-badge" class="bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-semibold px-3 py-1 rounded-full flex items-center gap-2">
+                    <i class="fa-solid fa-user"></i> Il Corpo Umano (30+ parti)
+                </span>
+                <span id="symbols-count-badge" class="bg-fuchsia-500/20 border border-fuchsia-400/40 text-fuchsia-300 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full">
+                    8 Figure/Carta
+                </span>
+                <span id="connected-players-badge" class="bg-purple-500/20 border border-purple-400/40 text-purple-200 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full hidden">
+                    <i class="fa-solid fa-user-group"></i> Alunni: <b id="players-count">0</b>
+                </span>
+            </div>
+
+            <div id="last-word-container" class="flex items-center gap-3 bg-purple-950/80 px-4 py-1.5 rounded-xl border border-purple-800 min-h-[44px]">
+                <span class="text-xs text-purple-300 uppercase tracking-wider font-semibold">Parola:</span>
+                <span id="last-word-display" class="text-lg md:text-xl font-bold text-amber-300">---</span>
+                <button id="repeat-speech-btn" onclick="speakCurrentWord()" class="p-1.5 rounded-lg bg-amber-400/20 hover:bg-amber-400/40 text-amber-300 transition text-sm" title="Riascolta pronuncia">
+                    <i class="fa-solid fa-bullhorn"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <div id="timer-box" class="hidden flex items-center gap-2">
+                    <i class="fa-solid fa-stopwatch text-amber-300 text-xl"></i>
+                    <span id="timer-display" class="text-2xl font-bold font-mono text-amber-300">60</span>s
+                </div>
+                <div class="flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 px-3.5 py-1 rounded-xl">
+                    <i class="fa-solid fa-star text-amber-300"></i>
+                    <span class="text-xs font-semibold uppercase text-amber-200">Punti:</span>
+                    <span id="score-display" class="text-xl font-bold text-white">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- INDICATORE PENALITÀ ERRORE (STUDENTE) -->
+        <div id="penalty-banner" class="hidden w-full bg-red-600/90 text-white text-center py-1.5 px-4 rounded-xl text-xs font-bold animate-bounce shadow-md">
+            ⚠️ Errore! Attendi 3 secondi prima di poter riprovare...
+        </div>
+
+        <!-- BARRA RICONOSCIMENTO VOCALE IN TEMPO REALE -->
+        <div id="speech-live-bar" class="hidden w-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 text-center py-1.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 animate-pulse">
+            <i class="fa-solid fa-microphone text-emerald-400 text-sm"></i>
+            <span>Microfono attivo. Dì a voce alta la parola: <b id="speech-heard-text" class="text-amber-300 font-bold">"..."</b></span>
+        </div>
+
+        <!-- LE DUE CARTE CIRCOLARI -->
+        <div class="w-full flex-1 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 my-1">
+            <div id="card1" class="dobble-card animate-card w-full max-w-[340px] sm:max-w-[420px] md:max-w-[460px] bg-gradient-to-b from-yellow-100 via-amber-200 to-yellow-300 rounded-full border-8 border-purple-900 relative overflow-hidden flex items-center justify-center">
+            </div>
+            <div class="flex md:flex-col items-center justify-center gap-1 my-[-10px] md:my-0">
+                <div class="bg-amber-400 text-purple-950 w-12 h-12 rounded-full flex items-center justify-center font-black text-2xl shadow-xl border-4 border-purple-950 z-10">
+                    <i class="fa-solid fa-equals"></i>
+                </div>
+            </div>
+            <div id="card2" class="dobble-card animate-card w-full max-w-[340px] sm:max-w-[420px] md:max-w-[460px] bg-gradient-to-b from-yellow-100 via-amber-200 to-yellow-300 rounded-full border-8 border-purple-900 relative overflow-hidden flex items-center justify-center">
+            </div>
+        </div>
+
+        <!-- CONTROLLI DI GIOCO -->
+        <div class="flex flex-wrap justify-center gap-3 mt-1">
+            <button id="btn-next-pair" onclick="nextPair(true)" class="px-4 py-2 rounded-xl bg-purple-800 hover:bg-purple-700 text-purple-100 font-semibold transition flex items-center gap-2 border border-purple-600/50 text-sm">
+                <i class="fa-solid fa-arrows-rotate"></i> Cambia Carte
+            </button>
+            <button id="start-timer-btn" onclick="toggleTimeAttack()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm">
+                <i class="fa-solid fa-play"></i> Avvia Sfida 60s
+            </button>
+            <button onclick="resetScore()" class="px-3.5 py-2 rounded-xl bg-purple-950 hover:bg-purple-900 text-purple-300 hover:text-white border border-purple-800 font-medium transition text-xs">
+                Azzera Punti
+            </button>
+        </div>
+    </main>
+
+    <footer class="text-center py-2 text-xs text-purple-300/60">
+        Colpo d'occhio Didattico • Generatore Matematico Proiettivo • Per LIM e Tablet
+    </footer>
+
+    <!-- MODALE CONNETTIVITÀ MULTIPLAYER (PEERJS) -->
+    <div id="connection-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-purple-900 border border-purple-700 w-full max-w-md rounded-3xl p-6 text-white shadow-2xl flex flex-col">
+            <h2 class="text-xl font-bold mb-4 text-amber-300 flex items-center gap-2">
+                <i class="fa-solid fa-network-wired"></i> Modalità Classe in Tempo Reale
+            </h2>
+            
+            <div id="role-selection" class="space-y-4">
+                <button onclick="avviaComeDocente()" class="w-full p-4 rounded-2xl bg-fuchsia-600 hover:bg-fuchsia-500 font-bold flex items-center gap-4 transition text-left">
+                    <i class="fa-solid fa-desktop text-3xl"></i>
+                    <div>
+                        <div class="text-base">Sono sulla LIM (Crea Stanza)</div>
+                        <div class="text-xs font-normal text-purple-200">Genera il PIN a 4 cifre per far collegare gli alunni</div>
+                    </div>
+                </button>
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t border-purple-700"></div>
+                    <span class="flex-shrink mx-4 text-purple-300 text-xs uppercase font-semibold">oppure</span>
+                    <div class="flex-grow border-t border-purple-700"></div>
+                </div>
+                <div class="space-y-2">
+                    <input type="text" id="student-name" placeholder="Il tuo Nome" class="w-full bg-purple-950 border border-purple-700 p-3 rounded-xl text-center text-white focus:border-amber-400 outline-none">
+                    <input type="text" id="room-pin-input" placeholder="PIN Stanza (es. 1234)" maxlength="4" class="w-full bg-purple-950 border border-purple-700 p-3 rounded-xl text-center text-lg tracking-widest text-white focus:border-amber-400 outline-none">
+                    <button onclick="connettiComeStudente()" class="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition">
+                        Entra nel Gioco (Studente)
+                    </button>
+                </div>
+            </div>
+
+            <div id="teacher-qr-view" class="hidden flex-col items-center text-center space-y-4">
+                <div class="bg-white p-3 rounded-2xl inline-block shadow-lg" id="qrcode-box"></div>
+                <div class="text-lg font-bold text-amber-300">
+                    PIN Stanza: <span id="display-pin-code" class="text-2xl font-mono text-white bg-purple-950 px-3 py-1 rounded-xl">----</span>
+                </div>
+                <p class="text-xs text-purple-200">Inquadra il QR con il tablet o inserisci il PIN per giocare!</p>
+            </div>
+
+            <button onclick="chiudiModalConnessione()" class="mt-6 w-full py-2 rounded-xl bg-purple-950 hover:bg-purple-800 text-purple-300 text-sm font-semibold">Chiudi</button>
+        </div>
+    </div>
+
+    <!-- MODALE IMPOSTAZIONI E CARICAMENTO SIMBOLI -->
+    <div id="settings-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-purple-900 border border-purple-700 w-full max-w-2xl rounded-3xl p-6 text-white shadow-2xl flex flex-col max-h-[90vh]">
+            
+            <div class="flex justify-between items-center pb-4 border-b border-purple-800">
+                <h2 class="text-xl font-bold flex items-center gap-2 text-amber-300">
+                    <i class="fa-solid fa-sliders"></i> Pannello di Configurazione Docente CPIA
+                </h2>
+                <button onclick="closeSettingsModal()" class="text-purple-300 hover:text-white p-2 rounded-lg text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto flex-1 my-4 space-y-6 pr-2">
+                <!-- SELEZIONE DIFFICOLTÀ -->
+                <div>
+                    <label class="block text-sm font-semibold text-purple-200 mb-2">Numero di Figure per Carta:</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="setDeckOrder(5)" id="order-5-btn" class="p-3 rounded-xl border border-purple-700 bg-purple-950/60 hover:bg-purple-800 text-center font-bold text-sm">
+                            6 Figure per Carta<br><span class="text-xs font-normal text-purple-300">(Intermedio • 31 carte)</span>
+                        </button>
+                        <button onclick="setDeckOrder(7)" id="order-7-btn" class="p-3 rounded-xl border border-amber-400 bg-amber-400/20 text-center font-bold text-sm">
+                            8 Figure per Carta<br><span class="text-xs font-normal text-purple-300">(Versione Classica • 57 carte)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SELEZIONE SET PREDEFINITO CPIA -->
+                <div>
+                    <label class="block text-sm font-semibold text-purple-200 mb-3">Scegli la Categoria / Vocabolario:</label>
+                    <div id="presets-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <button onclick="selectPreset('corpo')" class="preset-btn p-3 rounded-2xl border-2 border-amber-400/40 bg-amber-400/10 hover:bg-amber-400/20 flex flex-col items-center gap-2 text-center transition">
+                            <span class="text-2xl">👄</span>
+                            <span class="font-bold text-xs sm:text-sm text-amber-200">Il Corpo Umano</span>
+                        </button>
+                        <button onclick="selectPreset('casa')" class="preset-btn p-3 rounded-2xl border-2 border-purple-700 bg-purple-950/60 hover:bg-purple-800 flex flex-col items-center gap-2 text-center transition">
+                            <span class="text-2xl">🏠</span>
+                            <span class="font-bold text-xs sm:text-sm text-purple-200">La Casa & Oggetti</span>
+                        </button>
+                        <button onclick="selectPreset('citta')" class="preset-btn p-3 rounded-2xl border-2 border-purple-700 bg-purple-950/60 hover:bg-purple-800 flex flex-col items-center gap-2 text-center transition">
+                            <span class="text-2xl">🚌</span>
+                            <span class="font-bold text-xs sm:text-sm text-purple-200">La Città & Servizi</span>
+                        </button>
+                        <button onclick="selectPreset('cibo')" class="preset-btn p-3 rounded-2xl border-2 border-purple-700 bg-purple-950/60 hover:bg-purple-800 flex flex-col items-center gap-2 text-center transition">
+                            <span class="text-2xl">🍎</span>
+                            <span class="font-bold text-xs sm:text-sm text-purple-200">Cibo & Bevande</span>
+                        </button>
+                        <button onclick="selectPreset('azioni')" class="preset-btn p-3 rounded-2xl border-2 border-purple-700 bg-purple-950/60 hover:bg-purple-800 flex flex-col items-center gap-2 text-center transition">
+                            <span class="text-2xl">🏃</span>
+                            <span class="font-bold text-xs sm:text-sm text-purple-200">Verbi d'Azione</span>
+                        </button>
+                        <button onclick="selectPreset('abbigliamento')" class="preset-btn p-3 rounded-2xl border-2 border-purple-700 bg-purple-950/60 hover:bg-purple-800 flex flex-col items-center gap-2 text-center transition">
+                            <span class="text-2xl">👕</span>
+                            <span class="font-bold text-xs sm:text-sm text-purple-200">Abbigliamento</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CARICAMENTO IMMAGINI PERSONALIZZATE -->
+                <div id="custom-symbols-container" class="bg-purple-950/60 p-4 rounded-2xl border border-purple-800 space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-amber-300 mb-1">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Crea il tuo mazzo personalizzato:
+                        </label>
+                        <p class="text-xs text-purple-300 mb-3">
+                            1. Carica le immagini. 2. Modifica i nomi per la pronuncia. 3. Salva la nuova categoria.
+                        </p>
+                        
+                        <input type="file" id="image-file-input" multiple accept="image/*" class="hidden" onchange="handleFileUpload(event)">
+                        <button onclick="document.getElementById('image-file-input').click()" class="w-full py-3 px-4 border-2 border-dashed border-purple-700 hover:border-amber-400 bg-purple-900/50 hover:bg-purple-900 text-purple-200 rounded-xl transition flex items-center justify-center gap-2 text-sm font-semibold">
+                            <i class="fa-solid fa-plus text-amber-300"></i> Seleziona Immagini dal Computer
+                        </button>
+                    </div>
+
+                    <!-- GRIGLIA ANTEPRIMA CON EDITING PAROLA -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-semibold text-purple-300 uppercase tracking-wider">Immagini Caricate (<span id="loaded-count">0</span>):</span>
+                            <button onclick="clearCustomSymbols()" class="text-xs text-red-400 hover:text-red-300 transition">Svuota Elenco</button>
+                        </div>
+                        <div id="symbols-preview-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto p-2 bg-purple-950 rounded-xl border border-purple-800">
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-purple-800">
+                        <label class="block text-sm font-semibold text-amber-300 mb-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Salva come Nuova Categoria:
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="text" id="new-category-name" placeholder="Nome (es. Frutta, Scuola...)" class="flex-1 bg-purple-950 border border-purple-700 px-3 py-2 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
+                            <button onclick="saveAsNewCategory()" class="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold rounded-xl text-sm transition">
+                                Salva
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-purple-800 flex justify-end gap-3">
+                <button onclick="applySettings()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition shadow-lg">
+                    Chiudi e Genera Mazzo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE GAMEOVER & CLASSIFICA -->
+    <div id="gameover-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-purple-900 border border-amber-400/40 w-full max-w-md rounded-3xl p-6 text-white text-center shadow-2xl flex flex-col items-center">
+            <div class="w-20 h-20 bg-amber-400/20 text-amber-300 rounded-full flex items-center justify-center text-4xl mb-4">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-1">Tempo Scaduto!</h2>
+            <p class="text-sm text-purple-200 mb-4" id="gameover-sub">Ottimo esercizio di lettura e pronuncia!</p>
+            
+            <!-- VISTA CLASSIFICA LIM -->
+            <div id="leaderboard-view" class="w-full mb-6 hidden">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-amber-300 mb-3"><i class="fa-solid fa-award"></i> Classifica Finale Classe</h3>
+                <div id="leaderboard-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    <!-- Generato via JS -->
+                </div>
+            </div>
+
+            <!-- VISTA PUNTEGGIO SINGOLO STUDENTE -->
+            <div id="single-score-view" class="bg-purple-950 border border-purple-800 rounded-2xl p-4 w-full mb-6">
+                <span class="text-xs uppercase tracking-wider text-purple-300 block mb-1">I tuoi punti finali</span>
+                <span id="final-score-display" class="text-5xl font-black text-amber-300">0</span>
+            </div>
+
+            <button onclick="closeGameOverModal()" class="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition shadow-lg">
+                Gioca Ancora
+            </button>
+        </div>
+    </div>
+
+    <!-- MODALE PIN DOCENTE -->
+    <div id="pin-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-purple-900 border border-purple-700 w-full max-w-sm rounded-3xl p-6 text-white shadow-2xl flex flex-col">
+            <h2 class="text-xl font-bold mb-2 text-amber-300 flex items-center gap-2">
+                <i class="fa-solid fa-user-shield"></i> Accesso Riservato
+            </h2>
+            <p class="text-sm text-purple-200 mb-6">Inserisci la password docente per accedere alle impostazioni e caricare immagini.</p>
+            
+            <input type="password" id="teacher-pin" class="bg-purple-950 border border-purple-700 p-3 rounded-xl mb-4 text-center text-2xl tracking-[0.5em] focus:border-amber-400 outline-none transition" placeholder="****" onkeydown="if(event.key === 'Enter') checkPin()">
+            
+            <div class="flex gap-3">
+                <button onclick="closePinModal()" class="flex-1 py-3 rounded-xl bg-purple-950 hover:bg-purple-800 transition font-semibold text-sm">Annulla</button>
+                <button onclick="checkPin()" class="flex-1 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition text-sm">Sblocca</button>
+            </div>
+            <p id="pin-error" class="text-red-400 text-sm font-semibold text-center mt-4 hidden animate-pulse">Password errata!</p>
+        </div>
+    </div>
+
+    <script>
+        /* --- COSTANTI SICUREZZA --- */
+        const TEACHER_PIN = "1234";
+        const PREFISSO_STANZA = 'colpo-docchio-';
+
+        /* --- STATO PEERJS / MULTIPLAYER --- */
+        let peer = null;
+        let ruolounico = 'standalone'; // 'docente', 'studente', 'standalone'
+        let connessioniStudenti = [];
+        let connDocente = null;
+        let mioNomeStudente = "Alunno";
+        let isTransitioning = false;
+        let isPenalized = false;
+        let punteggiClasse = {}; 
+
+        /* --- SPEECH RECOGNITION (RICONOSCIMENTO VOCALE) --- */
+        let recognition = null;
+        let isSpeechRecognitionActive = false;
+
+        /* --- SET PREDEFINITI VOCABOLARIO CPIA COMPLETI --- */
+        const PRESETS = {
+            corpo: {
+                name: "Il Corpo Umano (30+ Parti)",
+                badge: '<i class="fa-solid fa-user"></i> Corpo Umano',
+                items: [
+                    { type: 'emoji', icon: '👄', val: 'bocca' }, { type: 'emoji', icon: '👃', val: 'naso' }, { type: 'emoji', icon: '👁️', val: 'occhio' }, { type: 'emoji', icon: '👂', val: 'orecchio' }, { type: 'emoji', icon: '✋', val: 'mano' }, { type: 'emoji', icon: '🦶', val: 'piede' }, { type: 'emoji', icon: '🗣️', val: 'testa' }, { type: 'emoji', icon: '💪', val: 'braccio' }, { type: 'emoji', icon: '🦵', val: 'gamba' }, { type: 'emoji', icon: '🤰', val: 'pancia' }, { type: 'emoji', icon: '🦷', val: 'dente' }, { type: 'emoji', icon: '👅', val: 'lingua' }, { type: 'emoji', icon: '❤️', val: 'cuore' }, { type: 'emoji', icon: '🧠', val: 'cervello' }, { type: 'emoji', icon: '🦴', val: 'osso' }, { type: 'emoji', icon: '💇', val: 'capelli' }, { type: 'emoji', icon: '👆', val: 'dito' }, { type: 'emoji', icon: '🫁', val: 'polmoni' }, { type: 'emoji', icon: '🦵', val: 'ginocchio' }, { type: 'emoji', icon: '🤷', val: 'spalla' }, { type: 'emoji', icon: '🦒', val: 'collo' }, { type: 'emoji', icon: '🚶', val: 'schiena' }, { type: 'emoji', icon: '💪', val: 'gomito' }, { type: 'emoji', icon: '👕', val: 'petto' }, { type: 'emoji', icon: '👣', val: 'impronta' }, { type: 'emoji', icon: '👀', val: 'occhi' }, { type: 'emoji', icon: '💅', val: 'unghia' }, { type: 'emoji', icon: '🧔', val: 'barba' }, { type: 'emoji', icon: '👨', val: 'baffi' }, { type: 'emoji', icon: '🩸', val: 'sangue' }, { type: 'emoji', icon: '🏥', val: 'salute' }, { type: 'emoji', icon: '🩹', val: 'cerotto' }, { type: 'emoji', icon: '🧍', val: 'corpo' }, { type: 'emoji', icon: '😀', val: 'faccia' }, { type: 'emoji', icon: '👊', val: 'pugno' }, { type: 'emoji', icon: '🦿', val: 'gamba artificiale' }, { type: 'emoji', icon: '🦾', val: 'braccio robotico' }, { type: 'emoji', icon: '🩻', val: 'radiografia' }, { type: 'emoji', icon: '🤒', val: 'febbre' }, { type: 'emoji', icon: '😷', val: 'mascherina' }, { type: 'emoji', icon: '💉', val: 'siringa' }
+                ]
+            },
+            casa: {
+                name: "La Casa & Oggetti",
+                badge: '<i class="fa-solid fa-house"></i> La Casa',
+                items: [
+                    { type: 'emoji', icon: '🏠', val: 'casa' }, { type: 'emoji', icon: '🪑', val: 'sedia' }, { type: 'emoji', icon: '🛋️', val: 'divano' }, { type: 'emoji', icon: '🛏️', val: 'letto' }, { type: 'emoji', icon: '🚪', val: 'porta' }, { type: 'emoji', icon: '🪟', val: 'finestra' }, { type: 'emoji', icon: '🔑', val: 'chiave' }, { type: 'emoji', icon: '📞', val: 'telefono' }, { type: 'emoji', icon: '📺', val: 'televisione' }, { type: 'emoji', icon: '💡', val: 'lampada' }, { type: 'emoji', icon: '⏰', val: 'orologio' }, { type: 'emoji', icon: '🍽️', val: 'piatto' }, { type: 'emoji', icon: '🥄', val: 'cucchiaio' }, { type: 'emoji', icon: '🍴', val: 'forchetta' }, { type: 'emoji', icon: '🔪', val: 'coltello' }, { type: 'emoji', icon: '🥛', val: 'bicchiere' }, { type: 'emoji', icon: '🧹', val: 'scopa' }, { type: 'emoji', icon: '🧼', val: 'sapone' }, { type: 'emoji', icon: '🪞', val: 'specchio' }, { type: 'emoji', icon: '🖼️', val: 'quadro' }, { type: 'emoji', icon: '🚿', val: 'doccia' }, { type: 'emoji', icon: '🛁', val: 'bagno' }, { type: 'emoji', icon: '🗝️', val: 'chiavi' }, { type: 'emoji', icon: '📦', val: 'scatola' }, { type: 'emoji', icon: '📻', val: 'radio' }, { type: 'emoji', icon: '🕯️', val: 'candela' }, { type: 'emoji', icon: '💻', val: 'computer' }, { type: 'emoji', icon: '📚', val: 'libri' }, { type: 'emoji', icon: '🗑️', val: 'cestino' }, { type: 'emoji', icon: '🪴', val: 'pianta' }, { type: 'emoji', icon: '🧥', val: 'cappotto' }
+                ]
+            },
+            citta: {
+                name: "La Città & Servizi",
+                badge: '<i class="fa-solid fa-city"></i> La Città',
+                items: [
+                    { type: 'emoji', icon: '🚌', val: 'autobus' }, { type: 'emoji', icon: '🚆', val: 'treno' }, { type: 'emoji', icon: '🏥', val: 'ospedale' }, { type: 'emoji', icon: '🏫', val: 'scuola' }, { type: 'emoji', icon: '🛒', val: 'supermercato' }, { type: 'emoji', icon: '🏣', val: 'posta' }, { type: 'emoji', icon: '🏦', val: 'banca' }, { type: 'emoji', icon: '💊', val: 'farmacia' }, { type: 'emoji', icon: '🚓', val: 'polizia' }, { type: 'emoji', icon: '🚒', val: 'pompieri' }, { type: 'emoji', icon: '🚏', val: 'fermata' }, { type: 'emoji', icon: '🚕', val: 'taxi' }, { type: 'emoji', icon: '🚲', val: 'bicicletta' }, { type: 'emoji', icon: '🚗', val: 'macchina' }, { type: 'emoji', icon: '🚦', val: 'semaforo' }, { type: 'emoji', icon: '🏢', val: 'palazzo' }, { type: 'emoji', icon: '🏪', val: 'negozio' }, { type: 'emoji', icon: '☕', val: 'bar' }, { type: 'emoji', icon: '🍕', val: 'pizzeria' }, { type: 'emoji', icon: '🛝', val: 'parco' }, { type: 'emoji', icon: '✈️', val: 'aeroporto' }, { type: 'emoji', icon: '⛽', val: 'benzinaio' }, { type: 'emoji', icon: '🌉', val: 'ponte' }, { type: 'emoji', icon: '🎟️', val: 'biglietto' }, { type: 'emoji', icon: '🗺️', val: 'mappa' }, { type: 'emoji', icon: '🚶', val: 'pedone' }, { type: 'emoji', icon: '⚓', val: 'porto' }, { type: 'emoji', icon: '🏨', val: 'albergo' }, { type: 'emoji', icon: '⛲', val: 'fontana' }, { type: 'emoji', icon: '🏛️', val: 'museo' }, { type: 'emoji', icon: '🏟️', val: 'stadio' }
+                ]
+            },
+            cibo: {
+                name: "Cibo & Bevande",
+                badge: '<i class="fa-solid fa-utensils"></i> Cibo',
+                items: [
+                    { type: 'emoji', icon: '🍎', val: 'mela' }, { type: 'emoji', icon: '🍌', val: 'banana' }, { type: 'emoji', icon: '🍞', val: 'pane' }, { type: 'emoji', icon: '🧀', val: 'formaggio' }, { type: 'emoji', icon: '🥛', val: 'latte' }, { type: 'emoji', icon: '🥩', val: 'carne' }, { type: 'emoji', icon: '🐟', val: 'pesce' }, { type: 'emoji', icon: '🥚', val: 'uovo' }, { type: 'emoji', icon: '🍕', val: 'pizza' }, { type: 'emoji', icon: '🍝', val: 'pasta' }, { type: 'emoji', icon: '🥗', val: 'insalata' }, { type: 'emoji', icon: '🍅', val: 'pomodoro' }, { type: 'emoji', icon: '🥔', val: 'patata' }, { type: 'emoji', icon: '🥕', val: 'carota' }, { type: 'emoji', icon: '🍊', val: 'arancia' }, { type: 'emoji', icon: '🍇', val: 'uva' }, { type: 'emoji', icon: '☕', val: 'caffè' }, { type: 'emoji', icon: '🍵', val: 'tè' }, { type: 'emoji', icon: '💧', val: 'acqua' }, { type: 'emoji', icon: '🍨', val: 'gelato' }, { type: 'emoji', icon: '🍰', val: 'torta' }, { type: 'emoji', icon: '🍫', val: 'cioccolato' }, { type: 'emoji', icon: '🍚', val: 'riso' }, { type: 'emoji', icon: '🍋', val: 'limone' }, { type: 'emoji', icon: '🍓', val: 'fragola' }, { type: 'emoji', icon: '🥒', val: 'cetriolo' }, { type: 'emoji', icon: '🧅', val: 'cipolla' }, { type: 'emoji', icon: '🥖', val: 'baguette' }, { type: 'emoji', icon: '🥐', val: 'cornetto' }, { type: 'emoji', icon: '🧃', val: 'succo' }, { type: 'emoji', icon: '🧂', val: 'sale' }
+                ]
+            },
+            azioni: {
+                name: "Verbi d'Azione",
+                badge: '<i class="fa-solid fa-person-running"></i> Azioni',
+                items: [
+                    { type: 'emoji', icon: '🏃', val: 'correre' }, { type: 'emoji', icon: '🚶', val: 'camminare' }, { type: 'emoji', icon: '🍽️', val: 'mangiare' }, { type: 'emoji', icon: '🥤', val: 'bere' }, { type: 'emoji', icon: '😴', val: 'dormire' }, { type: 'emoji', icon: '📖', val: 'leggere' }, { type: 'emoji', icon: '✍️', val: 'scrivere' }, { type: 'emoji', icon: '🗣️', val: 'parlare' }, { type: 'emoji', icon: '👂', val: 'ascoltare' }, { type: 'emoji', icon: '👀', val: 'guardare' }, { type: 'emoji', icon: '🎤', val: 'cantare' }, { type: 'emoji', icon: '💃', val: 'ballare' }, { type: 'emoji', icon: '🧼', val: 'lavare' }, { type: 'emoji', icon: '🍳', val: 'cucinare' }, { type: 'emoji', icon: '🧹', val: 'pulire' }, { type: 'emoji', icon: '🛍️', val: 'comprare' }, { type: 'emoji', icon: '💼', val: 'lavorare' }, { type: 'emoji', icon: '📝', val: 'studiare' }, { type: 'emoji', icon: '🚗', val: 'guidare' }, { type: 'emoji', icon: '🏊', val: 'nuotare' }, { type: 'emoji', icon: '👋', val: 'salutare' }, { type: 'emoji', icon: '🤔', val: 'pensare' }, { type: 'emoji', icon: '📞', val: 'chiamare' }, { type: 'emoji', icon: '🚴', val: 'pedalare' }, { type: 'emoji', icon: '✂️', val: 'tagliare' }, { type: 'emoji', icon: '🧹', val: 'spazzare' }, { type: 'emoji', icon: '🛋️', val: 'riposare' }, { type: 'emoji', icon: '🎁', val: 'regalare' }, { type: 'emoji', icon: '🎮', val: 'giocare' }, { type: 'emoji', icon: '✈️', val: 'volare' }, { type: 'emoji', icon: '🔓', val: 'aprire' }
+                ]
+            },
+            abbigliamento: {
+                name: "Abbigliamento",
+                badge: '<i class="fa-solid fa-shirt"></i> Vestiti',
+                items: [
+                    { type: 'emoji', icon: '👕', val: 'maglietta' }, { type: 'emoji', icon: '👖', val: 'pantaloni' }, { type: 'emoji', icon: '👗', val: 'vestito' }, { type: 'emoji', icon: '🧥', val: 'cappotto' }, { type: 'emoji', icon: '👟', val: 'scarpe' }, { type: 'emoji', icon: '🧦', val: 'calzini' }, { type: 'emoji', icon: '🧢', val: 'cappellino' }, { type: 'emoji', icon: '👒', val: 'cappello' }, { type: 'emoji', icon: '🧣', val: 'sciarpa' }, { type: 'emoji', icon: '🧤', val: 'guanti' }, { type: 'emoji', icon: '👔', val: 'cravatta' }, { type: 'emoji', icon: '🩳', val: 'pantaloncini' }, { type: 'emoji', icon: '🩱', val: 'costume' }, { type: 'emoji', icon: '🥾', val: 'scarponi' }, { type: 'emoji', icon: '👠', val: 'tacchi' }, { type: 'emoji', icon: '🕶️', val: 'occhiali da sole' }, { type: 'emoji', icon: '👓', val: 'occhiali' }, { type: 'emoji', icon: '👜', val: 'borsa' }, { type: 'emoji', icon: '🎒', val: 'zaino' }, { type: 'emoji', icon: '☂️', val: 'ombrello' }, { type: 'emoji', icon: '💍', val: 'anello' }, { type: 'emoji', icon: '⌚', val: 'orologio da polso' }, { type: 'emoji', icon: '🥋', val: 'pigiama' }, { type: 'emoji', icon: '🥼', val: 'camice' }, { type: 'emoji', icon: '🤹', val: 'gilet' }, { type: 'emoji', icon: '👑', val: 'corona' }, { type: 'emoji', icon: '👛', val: 'pochette' }, { type: 'emoji', icon: '👛', val: 'portafoglio' }, { type: 'emoji', icon: '🎽', val: 'canottiera' }, { type: 'emoji', icon: '🩰', val: 'scarpette' }, { type: 'emoji', icon: '🩴', val: 'infradito' }
+                ]
+            }
+        };
+
+        /* --- STATO DEL GIOCO --- */
+        let state = {
+            n: 7, 
+            symbolsPerCard: 8,
+            currentPresetKey: 'corpo',
+            activeSymbols: [], 
+            deckCards: [], 
+            card1Index: -1,
+            card2Index: -1,
+            matchingSymbol: null,
+            score: 0,
+            showLabels: true,
+            audioEnabled: true,
+            isTimeAttack: false,
+            timeLeft: 60,
+            timerInterval: null,
+            synth: window.speechSynthesis,
+            lastSpokenWord: ''
+        };
+
+        let synthSound, wrongSound;
+
+        window.onload = function() {
+            initAudio();
+            initSpeechRecognition();
+            selectPreset('corpo');
+        };
+
+        function initAudio() {
+            try {
+                synthSound = new Tone.Synth({
+                    oscillator: { type: "triangle" },
+                    envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.1 }
+                }).toDestination();
+
+                wrongSound = new Tone.MembraneSynth({
+                    pitchDecay: 0.05,
+                    octaves: 2,
+                    oscillator: { type: "sine" },
+                    envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.1 }
+                }).toDestination();
+            } catch (e) {
+                console.log("Audio Web API non avviata direttamente");
+            }
+        }
+
+        /* --- INIZIALIZZAZIONE RICONOSCIMENTO VOCALE (SPEECH-TO-TEXT) --- */
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                console.warn("Riconoscimento vocale non supportato in questo browser.");
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.lang = 'it-IT';
+            recognition.continuous = true;
+            recognition.interimResults = true;
+
+            recognition.onresult = function(event) {
+                if (isTransitioning || isPenalized || !state.matchingSymbol) return;
+
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    transcript += event.results[i][0].transcript.toLowerCase() + ' ';
+                }
+
+                document.getElementById('speech-heard-text').textContent = `"${transcript.trim()}"`;
+
+                // TOLERANZA VOCALE CPIA (rimuove articoli e spazi)
+                const wordTarget = state.matchingSymbol.toLowerCase();
+                const cleanedTranscript = transcript.replace(/\b(il|lo|la|i|gli|le|un|uno|una)\b/gi, '').trim();
+
+                if (transcript.includes(wordTarget) || cleanedTranscript.includes(wordTarget)) {
+                    // Trovata corrispondenza vocale!
+                    const targetEl = document.querySelector('.symbol-item') || document.getElementById('card1');
+                    handleSymbolClick(state.matchingSymbol, targetEl);
+                }
+            };
+
+            recognition.onerror = function(event) {
+                console.log("Speech recognition error: ", event.error);
+            };
+
+            recognition.onend = function() {
+                if (isSpeechRecognitionActive) {
+                    try { recognition.start(); } catch(e) {}
+                }
+            };
+        }
+
+        function toggleSpeechRecognition() {
+            if (!recognition) {
+                alert("Il tuo browser non supporta il riconoscimento vocale. Usa Google Chrome o Microsoft Edge.");
+                return;
+            }
+
+            isSpeechRecognitionActive = !isSpeechRecognitionActive;
+            const icon = document.getElementById('mic-icon');
+            const text = document.getElementById('mic-status-text');
+            const liveBar = document.getElementById('speech-live-bar');
+
+            if (isSpeechRecognitionActive) {
+                try {
+                    recognition.start();
+                    icon.className = "fa-solid fa-microphone text-emerald-400";
+                    text.textContent = "Mic: ON";
+                    liveBar.classList.remove('hidden');
+                } catch(e) {
+                    console.log("Errore avvio microfono", e);
+                }
+            } else {
+                try {
+                    recognition.stop();
+                    icon.className = "fa-solid fa-microphone-slash text-purple-400";
+                    text.textContent = "Mic: OFF";
+                    liveBar.classList.add('hidden');
+                } catch(e) {}
+            }
+        }
+
+        /* --- GENERATORE DI PIANI PROIETTIVI FINITI --- */
+        function generateProjectivePlaneDeck(n, symbols) {
+            const cards = [];
+            const numSymbolsNeeded = n * n + n + 1;
+
+            if (symbols.length < numSymbolsNeeded) {
+                let extended = [...symbols];
+                let counter = 1;
+                while (extended.length < numSymbolsNeeded) {
+                    let base = symbols[(counter - 1) % symbols.length];
+                    extended.push({
+                        ...base,
+                        val: `${base.val} ${counter}`
+                    });
+                    counter++;
+                }
+                symbols = extended;
+            }
+
+            for (let i = 0; i <= n; i++) {
+                let card = [0];
+                for (let j = 0; j < n; j++) {
+                    card.push((j + 1) + (i * n));
+                }
+                cards.push(card);
+            }
+
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    let card = [i + 1];
+                    for (let k = 0; k < n; k++) {
+                        card.push(n + 1 + k * n + (i * k + j) % n);
+                    }
+                    cards.push(card);
+                }
+            }
+
+            return cards.map(c => c.map(idx => symbols[idx % symbols.length]));
+        }
+
+        /* --- SELEZIONE PRESET --- */
+        function selectPreset(presetKey) {
+            state.currentPresetKey = presetKey;
+            const preset = PRESETS[presetKey];
+            state.activeSymbols = preset.items.map(sym => ({ ...sym }));
+            
+            document.getElementById('current-preset-badge').innerHTML = preset.badge + " (" + state.activeSymbols.length + "+)";
+            updateSymbolsPreviewGrid();
+            buildDeck();
+            
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.remove('border-amber-400', 'bg-amber-400/20', 'border-amber-400/40');
+                btn.classList.add('border-purple-700', 'bg-purple-950/60');
+            });
+            
+            const activeBtn = Array.from(document.querySelectorAll('.preset-btn')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(presetKey));
+            if(activeBtn) {
+                activeBtn.classList.add('border-amber-400', 'bg-amber-400/20', 'border-amber-400/40');
+                activeBtn.classList.remove('border-purple-700', 'bg-purple-950/60');
+            }
+        }
+
+        function buildDeck() {
+            state.deckCards = generateProjectivePlaneDeck(state.n, state.activeSymbols);
+            document.getElementById('symbols-count-badge').textContent = state.symbolsPerCard + " Figure/Carta";
+            if (ruolounico !== 'studente') {
+                nextPair(false);
+            }
+        }
+
+        /* --- CARICAMENTO E SALVATAGGIO SIMBOLI PERSONALIZZATI --- */
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const fileNameName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                    state.activeSymbols.unshift({
+                        type: 'image',
+                        icon: e.target.result,
+                        val: fileNameName.toLowerCase()
+                    });
+                    updateSymbolsPreviewGrid();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function updateSymbolsPreviewGrid() {
+            const grid = document.getElementById('symbols-preview-grid');
+            document.getElementById('loaded-count').textContent = state.activeSymbols.length;
+            grid.innerHTML = '';
+
+            state.activeSymbols.forEach((sym, idx) => {
+                const item = document.createElement('div');
+                item.className = "flex items-center gap-2 bg-purple-900 p-1.5 rounded-lg border border-purple-700 text-xs";
+                
+                let iconHtml = sym.type === 'emoji' 
+                    ? `<span class="text-xl w-6 text-center">${sym.icon}</span>` 
+                    : `<img src="${sym.icon}" class="w-6 h-6 object-contain rounded">`;
+
+                item.innerHTML = `
+                    ${iconHtml}
+                    <input type="text" value="${sym.val}" onchange="updateSymbolVal(${idx}, this.value)" class="bg-purple-950 border border-purple-700 px-1.5 py-0.5 rounded text-purple-200 text-xs w-full focus:outline-none focus:border-amber-400">
+                    <button onclick="removeSymbol(${idx})" class="text-purple-400 hover:text-red-400 px-1"><i class="fa-solid fa-trash-can"></i></button>
+                `;
+                grid.appendChild(item);
+            });
+        }
+
+        function updateSymbolVal(index, newVal) {
+            if (state.activeSymbols[index]) {
+                state.activeSymbols[index].val = newVal.trim();
+            }
+        }
+
+        function removeSymbol(index) {
+            state.activeSymbols.splice(index, 1);
+            updateSymbolsPreviewGrid();
+        }
+
+        function clearCustomSymbols() {
+            state.activeSymbols = [];
+            updateSymbolsPreviewGrid();
+        }
+
+        function saveAsNewCategory() {
+            const nameInput = document.getElementById('new-category-name');
+            const categoryName = nameInput.value.trim();
+            
+            if (!categoryName) {
+                alert("Per favore, inserisci un nome per la tua nuova categoria!");
+                return;
+            }
+            if (state.activeSymbols.length === 0) {
+                alert("Non ci sono immagini caricate. Carica prima le immagini per creare una categoria!");
+                return;
+            }
+            
+            const key = 'custom_' + Date.now();
+            
+            PRESETS[key] = {
+                name: categoryName,
+                badge: '<i class="fa-solid fa-star text-amber-300"></i> ' + categoryName,
+                items: state.activeSymbols.map(sym => ({ ...sym }))
+            };
+            
+            const grid = document.getElementById('presets-grid');
+            const btn = document.createElement('button');
+            btn.onclick = () => selectPreset(key);
+            btn.className = "preset-btn p-3 rounded-2xl border-2 border-purple-700 bg-purple-950/60 hover:bg-purple-800 flex flex-col items-center gap-2 text-center transition";
+            btn.innerHTML = `
+                <span class="text-2xl"><i class="fa-solid fa-star text-amber-300"></i></span>
+                <span class="font-bold text-xs sm:text-sm text-purple-200">${categoryName}</span>
+            `;
+            grid.appendChild(btn);
+            
+            nameInput.value = "";
+            alert(`Fantastico! La categoria "${categoryName}" è stata salvata.`);
+            selectPreset(key);
+        }
+
+        /* --- SINTESI VOCALE E PRONUNCIA --- */
+        function speakWord(text) {
+            if (!state.audioEnabled || !text) return;
+            
+            if (state.synth.speaking) {
+                state.synth.cancel();
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'it-IT';
+            utterance.rate = 0.85; 
+            utterance.pitch = 1.0;
+            
+            state.synth.speak(utterance);
+            state.lastSpokenWord = text;
+            document.getElementById('last-word-display').textContent = text;
+        }
+
+        function speakCurrentWord() {
+            if (state.lastSpokenWord && state.lastSpokenWord !== '---') {
+                speakWord(state.lastSpokenWord);
+            }
+        }
+
+        function toggleSpeech() {
+            state.audioEnabled = !state.audioEnabled;
+            const icon = document.getElementById('voice-icon');
+            const text = document.getElementById('voice-status-text');
+            if (state.audioEnabled) {
+                icon.className = "fa-solid fa-volume-high text-amber-400";
+                text.textContent = "Voce: ON";
+            } else {
+                icon.className = "fa-solid fa-volume-xmark text-purple-400";
+                text.textContent = "Voce: OFF";
+            }
+        }
+
+        function toggleLabels() {
+            state.showLabels = !state.showLabels;
+            const icon = document.getElementById('labels-icon');
+            const text = document.getElementById('labels-status-text');
+            if (state.showLabels) {
+                icon.className = "fa-solid fa-font text-amber-400";
+                text.textContent = "Testo: ON";
+            } else {
+                icon.className = "fa-solid fa-font text-purple-400 opacity-40";
+                text.textContent = "Testo: OFF";
+            }
+            renderCard('card1', state.deckCards[state.card1Index]);
+            renderCard('card2', state.deckCards[state.card2Index]);
+        }
+
+        /* --- LOGICA DEL GIOCO & RENDERING CARTE --- */
+        function nextPair(animate = true) {
+            if (state.deckCards.length < 2) return;
+
+            let idx1 = Math.floor(Math.random() * state.deckCards.length);
+            let idx2 = Math.floor(Math.random() * state.deckCards.length);
+            while (idx1 === idx2) {
+                idx2 = Math.floor(Math.random() * state.deckCards.length);
+            }
+
+            state.card1Index = idx1;
+            state.card2Index = idx2;
+
+            const card1Vals = state.deckCards[idx1].map(s => s.val);
+            const card2Vals = state.deckCards[idx2].map(s => s.val);
+            state.matchingSymbol = card1Vals.find(val => card2Vals.includes(val));
+
+            const card1El = document.getElementById('card1');
+            const card2El = document.getElementById('card2');
+
+            if (animate) {
+                card1El.classList.remove('animate-card');
+                card2El.classList.remove('animate-card');
+                void card1El.offsetWidth;
+                card1El.classList.add('animate-card');
+                card2El.classList.add('animate-card');
+            }
+
+            renderCard('card1', state.deckCards[idx1]);
+            renderCard('card2', state.deckCards[idx2]);
+
+            if (ruolounico === 'docente') {
+                inviaStatoAGliStudenti();
+            }
+        }
+
+        /* RENDERING CIRCOLARE CON IMMAGINI GIGANTI E PROPORZIONATE */
+        function renderCard(cardId, symbols) {
+            const cardEl = document.getElementById(cardId);
+            cardEl.innerHTML = '';
+
+            const num = symbols.length;
+            let positions = [];
+
+            if (num === 8) {
+                positions.push({ r: 0, angle: 0 }); // Centro
+                for (let i = 0; i < 7; i++) {
+                    let angle = (i * (360 / 7)) + (Math.random() * 10 - 5);
+                    positions.push({ r: 34, angle: angle }); 
+                }
+            } else {
+                positions.push({ r: 0, angle: 0 });
+                for (let i = 0; i < num - 1; i++) {
+                    let angle = (i * (360 / (num - 1)));
+                    positions.push({ r: 32, angle: angle });
+                }
+            }
+
+            let shuffledSymbols = symbols.map((sym, i) => ({ sym, pos: positions[i] }));
+            shuffledSymbols.sort(() => Math.random() - 0.5);
+
+            shuffledSymbols.forEach((item) => {
+                const symbolObj = item.sym;
+                const pos = item.pos;
+
+                const symEl = document.createElement('div');
+                symEl.className = 'symbol-item hover:bg-purple-900/15 hover:shadow-lg rounded-full';
+
+                const rad = (pos.angle * Math.PI) / 180;
+                const left = 50 + pos.r * Math.cos(rad);
+                const top = 50 + pos.r * Math.sin(rad);
+
+                symEl.style.left = `${left}%`;
+                symEl.style.top = `${top}%`;
+                symEl.style.transform = `translate(-50%, -50%)`;
+
+                const scale = (0.70 + Math.random() * 0.70).toFixed(2);
+                const rotation = Math.floor(Math.random() * 360) - 180;
+
+                const graphicStyle = `transform: scale(${scale}) rotate(${rotation}deg); display: block; margin: 0 auto;`;
+                const labelStyle = `transform: rotate(${rotation}deg); font-size: 12px !important; line-height: 1 !important; display: inline-block;`;
+
+                let contentHtml = '';
+                if (symbolObj.type === 'emoji') {
+                    contentHtml = `<span class="text-4xl sm:text-6xl md:text-7xl drop-shadow-md select-none" style="${graphicStyle}">${symbolObj.icon}</span>`;
+                } else {
+                    contentHtml = `
+                        <div style="${graphicStyle}">
+                            <img src="${symbolObj.icon}" class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain drop-shadow-md select-none pointer-events-none">
+                        </div>`;
+                }
+
+                let labelHtml = state.showLabels 
+                    ? `<span class="font-bold text-purple-950 bg-white/95 px-2 py-0.5 rounded-full shadow border border-purple-300 mt-1 whitespace-nowrap select-none z-10" style="${labelStyle}">${symbolObj.val}</span>` 
+                    : '';
+
+                symEl.innerHTML = `<div class="flex flex-col items-center justify-center">${contentHtml}${labelHtml}</div>`;
+
+                symEl.onclick = (e) => {
+                    e.stopPropagation();
+                    handleSymbolClick(symbolObj.val, symEl);
+                };
+
+                cardEl.appendChild(symEl);
+            });
+        }
+
+        /* --- CLIC SUL SIMBOLO & SISTEMA ANTI-SPAM PENALITÀ --- */
+        function handleSymbolClick(val, element) {
+            if (isTransitioning || isPenalized) return;
+
+            if (val === state.matchingSymbol) {
+                isTransitioning = true;
+                element.classList.add('symbol-correct');
+                
+                if (ruolounico === 'studente' && connDocente && connDocente.open) {
+                    state.score += 1;
+                    document.getElementById('score-display').textContent = state.score;
+                    if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
+                    confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
+                    speakWord(val);
+
+                    connDocente.send({
+                        tipo: 'RISPOSTA_CORRETTA',
+                        valore: val,
+                        nome: mioNomeStudente,
+                        score: state.score
+                    });
+
+                    setTimeout(() => {
+                        isTransitioning = false;
+                    }, 1500);
+                    return;
+                }
+
+                registraEsitoPositivo(val, element, "LIM", true);
+
+            } else {
+                element.classList.add('symbol-wrong');
+                if (wrongSound) {
+                    wrongSound.triggerAttackRelease("G2", "8n");
+                }
+                
+                if (ruolounico === 'studente') {
+                    isPenalized = true;
+                    document.getElementById('card1').classList.add('locked-card');
+                    document.getElementById('card2').classList.add('locked-card');
+                    document.getElementById('penalty-banner').classList.remove('hidden');
+
+                    setTimeout(() => {
+                        isPenalized = false;
+                        document.getElementById('card1').classList.remove('locked-card');
+                        document.getElementById('card2').classList.remove('locked-card');
+                        document.getElementById('penalty-banner').classList.add('hidden');
+                        element.classList.remove('symbol-wrong');
+                    }, 3000);
+                } else {
+                    setTimeout(() => {
+                        element.classList.remove('symbol-wrong');
+                    }, 500);
+                }
+            }
+        }
+
+        function registraEsitoPositivo(val, element, nomeVincitore, incrementaPuntiHost = false) {
+            isTransitioning = true;
+            if (synthSound) {
+                synthSound.triggerAttackRelease("C5", "8n");
+            }
+
+            confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
+            speakWord(val);
+
+            if (incrementaPuntiHost || ruolounico === 'standalone') {
+                state.score += 1;
+                document.getElementById('score-display').textContent = state.score;
+            }
+
+            document.getElementById('last-word-display').textContent = `${val} (${nomeVincitore})`;
+
+            setTimeout(() => {
+                nextPair(true);
+                isTransitioning = false;
+            }, 1500);
+        }
+
+        function resetScore() {
+            state.score = 0;
+            punteggiClasse = {};
+            document.getElementById('score-display').textContent = "0";
+            document.getElementById('last-word-display').textContent = "---";
+            state.lastSpokenWord = '';
+        }
+
+        /* --- MULTIPLAYER & REGOLAZIONE RUOLI --- */
+        function mostraModalConnessione() {
+            document.getElementById('connection-modal').classList.remove('hidden');
+        }
+        function chiudiModalConnessione() {
+            document.getElementById('connection-modal').classList.add('hidden');
+        }
+
+        function avviaComeDocente() {
+            ruolounico = 'docente';
+            const pinStanza = Math.floor(1000 + Math.random() * 9000).toString();
+            
+            if (typeof Peer === 'undefined') {
+                alert("Errore caricamento PeerJS online. Verifica la connessione internet e ricarica la pagina.");
+                return;
+            }
+
+            peer = new Peer(PREFISSO_STANZA + pinStanza);
+            
+            peer.on('open', (id) => {
+                document.getElementById('role-selection').classList.add('hidden');
+                document.getElementById('teacher-qr-view').classList.remove('hidden');
+                document.getElementById('teacher-qr-view').classList.add('flex');
+                document.getElementById('display-pin-code').textContent = pinStanza;
+                
+                document.getElementById('connected-players-badge').classList.remove('hidden');
+                document.getElementById('txt-multiplayer').textContent = "LIM (Host)";
+
+                const qrBox = document.getElementById('qrcode-box');
+                qrBox.innerHTML = '';
+                if (typeof QRCode !== 'undefined') {
+                    new QRCode(qrBox, {
+                        text: window.location.href.split('?')[0] + '?pin=' + pinStanza,
+                        width: 180, 
+                        height: 180
+                    });
+                } else {
+                    qrBox.innerHTML = '<p class="text-xs text-purple-950 font-bold p-2">QR Code non disponibile.<br>Usa il PIN qui sotto per connetterti!</p>';
+                }
+            });
+
+            peer.on('connection', (conn) => {
+                connessioniStudenti.push(conn);
+                aggiornaContatoreAlunni();
+
+                conn.on('open', () => {
+                    inviaStatoAGliStudenti();
+                });
+
+                conn.on('data', (dati) => {
+                    if (dati.tipo === 'RISPOSTA_CORRETTA' && dati.valore === state.matchingSymbol) {
+                        punteggiClasse[dati.nome] = dati.score;
+                        const targetEl = document.querySelector('.symbol-correct') || document.getElementById('card1');
+                        registraEsitoPositivo(dati.valore, targetEl, dati.nome, false);
+                    }
+                });
+
+                conn.on('close', () => {
+                    connessioniStudenti = connessioniStudenti.filter(c => c !== conn);
+                    aggiornaContatoreAlunni();
+                });
+            });
+        }
+
+        function connettiComeStudente() {
+            let pin = document.getElementById('room-pin-input').value.trim();
+            mioNomeStudente = document.getElementById('student-name').value.trim() || "Alunno";
+            
+            if (!pin) { alert("Inserisci il PIN della Stanza!"); return; }
+
+            ruolounico = 'studente';
+            
+            document.getElementById('start-timer-btn').classList.add('hidden');
+            document.getElementById('btn-next-pair').classList.add('hidden');
+
+            peer = new Peer();
+
+            peer.on('open', () => {
+                connDocente = peer.connect(PREFISSO_STANZA + pin);
+                
+                connDocente.on('open', () => {
+                    chiudiModalConnessione();
+                    document.getElementById('txt-multiplayer').textContent = mioNomeStudente;
+                    
+                    // Avvia automaticamente il microfono per lo studente se disponibile
+                    if (recognition) {
+                        toggleSpeechRecognition();
+                    }
+
+                    alert("Connesso alla LIM! Guarda il tuo schermo: puoi rispondere dicendo la parola a voce alta al microfono o toccando la figura!");
+                });
+
+                connDocente.on('data', (dati) => {
+                    if (dati.tipo === 'AGGIORNA_CARTE') {
+                        state.card1Index = dati.card1Index;
+                        state.card2Index = dati.card2Index;
+                        state.matchingSymbol = dati.matchingSymbol;
+                        renderCard('card1', state.deckCards[dati.card1Index]);
+                        renderCard('card2', state.deckCards[dati.card2Index]);
+                    } else if (dati.tipo === 'TIMER_TICK') {
+                        document.getElementById('timer-box').classList.remove('hidden');
+                        document.getElementById('timer-display').textContent = dati.timeLeft;
+                    } else if (dati.tipo === 'GAMEOVER') {
+                        showGameOverModal();
+                    }
+                });
+            });
+        }
+
+        function inviaStatoAGliStudenti() {
+            connessioniStudenti.forEach(conn => {
+                if (conn.open) {
+                    conn.send({
+                        tipo: 'AGGIORNA_CARTE',
+                        card1Index: state.card1Index,
+                        card2Index: state.card2Index,
+                        matchingSymbol: state.matchingSymbol
+                    });
+                }
+            });
+        }
+
+        function inviaEventoSistemaStudenti(tipo, payload = {}) {
+            connessioniStudenti.forEach(conn => {
+                if (conn.open) {
+                    conn.send({ tipo: tipo, ...payload });
+                }
+            });
+        }
+
+        function aggiornaContatoreAlunni() {
+            document.getElementById('players-count').textContent = connessioniStudenti.length;
+        }
+
+        /* --- TIMER E CLASSIFICA FINALE --- */
+        function toggleTimeAttack() {
+            if (ruolounico === 'studente') return;
+
+            if (state.isTimeAttack) {
+                stopTimeAttack();
+            } else {
+                startTimeAttack();
+            }
+        }
+
+        function startTimeAttack() {
+            state.isTimeAttack = true;
+            state.timeLeft = 60;
+            resetScore();
+
+            document.getElementById('timer-box').classList.remove('hidden');
+            document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-stop"></i> Ferma Sfida`;
+            document.getElementById('start-timer-btn').className = "px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold transition flex items-center gap-2 shadow-lg text-sm";
+
+            state.timerInterval = setInterval(() => {
+                state.timeLeft--;
+                document.getElementById('timer-display').textContent = state.timeLeft;
+                
+                if (ruolounico === 'docente') {
+                    inviaEventoSistemaStudenti('TIMER_TICK', { timeLeft: state.timeLeft });
+                }
+
+                if (state.timeLeft <= 0) {
+                    stopTimeAttack();
+                    showGameOverModal();
+                }
+            }, 1000);
+        }
+
+        function stopTimeAttack() {
+            state.isTimeAttack = false;
+            clearInterval(state.timerInterval);
+            document.getElementById('timer-box').classList.add('hidden');
+            document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-play"></i> Avvia Sfida 60s`;
+            document.getElementById('start-timer-btn').className = "px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm";
+        }
+
+        /* --- MOSTRA CLASSIFICA O GAMEOVER --- */
+        function showGameOverModal() {
+            if (ruolounico === 'docente') {
+                inviaEventoSistemaStudenti('GAMEOVER');
+                
+                document.getElementById('single-score-view').classList.add('hidden');
+                document.getElementById('leaderboard-view').classList.remove('hidden');
+                
+                const listEl = document.getElementById('leaderboard-list');
+                listEl.innerHTML = '';
+
+                const sorted = Object.entries(punteggiClasse).sort((a, b) => b[1] - a[1]);
+                
+                if (sorted.length === 0) {
+                    listEl.innerHTML = '<p class="text-xs text-purple-300 italic">Nessun punto registrato dagli alunni.</p>';
+                } else {
+                    sorted.forEach(([nome, punti], idx) => {
+                        let badgeColor = "bg-purple-950 text-purple-200 border-purple-700";
+                        let rankIcon = `#${idx + 1}`;
+                        if (idx === 0) { badgeColor = "bg-amber-400 text-purple-950 font-bold border-amber-300"; rankIcon = "🥇 1°"; }
+                        else if (idx === 1) { badgeColor = "bg-slate-300 text-purple-950 font-bold border-white"; rankIcon = "🥈 2°"; }
+                        else if (idx === 2) { badgeColor = "bg-amber-700 text-white font-bold border-amber-600"; rankIcon = "🥉 3°"; }
+
+                        const item = document.createElement('div');
+                        item.className = `flex justify-between items-center p-2.5 rounded-xl border ${badgeColor}`;
+                        item.innerHTML = `
+                            <span class="text-sm font-semibold">${rankIcon} ${nome}</span>
+                            <span class="text-base font-extrabold font-mono">${punti} pt</span>
+                        `;
+                        listEl.appendChild(item);
+                    });
+                }
+            } else {
+                document.getElementById('single-score-view').classList.remove('hidden');
+                document.getElementById('leaderboard-view').classList.add('hidden');
+                document.getElementById('final-score-display').textContent = state.score;
+            }
+
+            document.getElementById('gameover-modal').classList.remove('hidden');
+        }
+
+        function closeGameOverModal() {
+            document.getElementById('gameover-modal').classList.add('hidden');
+            if (ruolounico !== 'studente') {
+                nextPair(true);
+            }
+        }
+
+        /* --- MODALI ED IMPOSTAZIONI --- */
+        function requireSettingsAccess() {
+            document.getElementById('pin-modal').classList.remove('hidden');
+            const pinInput = document.getElementById('teacher-pin');
+            pinInput.value = '';
+            document.getElementById('pin-error').classList.add('hidden');
+            setTimeout(() => pinInput.focus(), 100);
+        }
+
+        function closePinModal() {
+            document.getElementById('pin-modal').classList.add('hidden');
+        }
+
+        function checkPin() {
+            const input = document.getElementById('teacher-pin').value;
+            if (input === TEACHER_PIN) {
+                closePinModal();
+                openSettingsModal();
+            } else {
+                document.getElementById('pin-error').classList.remove('hidden');
+                document.getElementById('teacher-pin').value = '';
+                document.getElementById('teacher-pin').focus();
+            }
+        }
+
+        function openSettingsModal() {
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').classList.add('hidden');
+        }
+
+        function setDeckOrder(orderN) {
+            state.n = orderN;
+            state.symbolsPerCard = orderN + 1;
+
+            const btn5 = document.getElementById('order-5-btn');
+            const btn7 = document.getElementById('order-7-btn');
+
+            if (orderN === 5) {
+                btn5.className = "p-3 rounded-xl border border-amber-400 bg-amber-400/20 text-center font-bold text-sm";
+                btn7.className = "p-3 rounded-xl border border-purple-700 bg-purple-950/60 hover:bg-purple-800 text-center font-bold text-sm";
+            } else {
+                btn7.className = "p-3 rounded-xl border border-amber-400 bg-amber-400/20 text-center font-bold text-sm";
+                btn5.className = "p-3 rounded-xl border border-purple-700 bg-purple-950/60 hover:bg-purple-800 text-center font-bold text-sm";
+            }
+        }
+
+        function applySettings() {
+            buildDeck();
+            closeSettingsModal();
+        }
+    </script>
+</body>
+</html>
