@@ -4,169 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Colpo d'occhio - Giochiamo Insieme</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- Tone.js for Sound Effects -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-    <!-- PeerJS e QR Code -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Lexend', 'Fredoka', sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        .dobble-card {
-            aspect-ratio: 1 / 1;
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 0 30px inset rgba(255, 255, 255, 0.9);
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            overflow: visible !important;
-        }
-
-        .dobble-card:hover {
-            transform: scale(1.02);
-        }
-        
-        .symbol-item {
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: pointer;
-            position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 9999px;
-            padding: 0; 
-        }
-
-        .symbol-item:hover {
-            z-index: 40 !important;
-        }
-
-        .symbol-correct {
-            animation: pulse-green 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 50 !important;
-        }
-
-        .symbol-wrong {
-            animation: shake-red 0.5s ease-in-out;
-        }
-
-        .locked-card {
-            opacity: 0.35 !important;
-            pointer-events: none !important;
-            filter: grayscale(80%);
-        }
-
-        @keyframes pulse-green {
-            0% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.5); }
-            100% { transform: translate(-50%, -50%) scale(1); }
-        }
-
-        @keyframes shake-red {
-            0%, 100% { transform: translate(-50%, -50%) translateX(0); }
-            20%, 60% { transform: translate(-50%, -50%) translateX(-10px); }
-            40%, 80% { transform: translate(-50%, -50%) translateX(10px); }
-        }
-
-        @keyframes card-appear {
-            0% { opacity: 0; transform: scale(0.65) rotate(-12deg); }
-            100% { opacity: 1; transform: scale(1) rotate(0deg); }
-        }
-
-        .animate-card {
-            animation: card-appear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #2e1065;
-            border-radius: 8px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #6b21a8;
-            border-radius: 8px;
-        }
+        body { font-family: 'Lexend', 'Fredoka', sans-serif; user-select: none; -webkit-user-select: none; overflow-x: hidden; }
+        .dobble-card { aspect-ratio: 1 / 1; box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 0 30px inset rgba(255, 255, 255, 0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); overflow: visible !important; }
+        .dobble-card:hover { transform: scale(1.02); }
+        .symbol-item { transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 9999px; padding: 0; }
+        .symbol-item:hover { z-index: 40 !important; transform: scale(1.15); }
+        .symbol-correct { animation: pulse-green 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 50 !important; }
+        .symbol-wrong { animation: shake-red 0.5s ease-in-out; }
+        .locked-card { opacity: 0.35 !important; pointer-events: none !important; filter: grayscale(80%); }
+        @keyframes pulse-green { 0% { transform: scale(1); } 50% { transform: scale(1.5); } 100% { transform: scale(1); } }
+        @keyframes shake-red { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+        @keyframes card-appear { 0% { opacity: 0; transform: scale(0.65) rotate(-12deg); } 100% { opacity: 1; transform: scale(1) rotate(0deg); } }
+        .animate-card { animation: card-appear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #2e1065; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb { background: #6b21a8; border-radius: 8px; }
     </style>
 </head>
-<body class="bg-purple-950 text-slate-100 min-h-screen flex flex-col justify-between bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 overflow-x-hidden">
+<body class="bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 text-slate-100 min-h-screen flex flex-col justify-between">
 
-    <!-- HEADER / BARRA SUPERIORE -->
+    <!-- HEADER -->
     <header class="w-full bg-purple-900/90 backdrop-blur-md border-b border-purple-700/50 px-4 py-3 flex justify-between items-center z-10 shadow-lg">
         <div class="flex items-center gap-3">
             <div class="bg-amber-400 text-purple-950 p-2.5 rounded-2xl shadow-lg flex items-center justify-center font-bold text-xl">
-                <i class="fa-solid fa-comments"></i>
+                <i class="fa-solid fa-eye"></i>
             </div>
             <div>
-                <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide flex items-center gap-2">
-                    Colpo d'occhio
-                </h1>
-                <p class="text-xs text-purple-200 hidden sm:block">Pronuncia la figura in comune al microfono o selezionala toccando lo schermo!</p>
+                <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide flex items-center gap-2">Colpo d'occhio</h1>
+                <p class="text-xs text-purple-200 hidden sm:block">Tocca l'immagine in comune o dilla al microfono!</p>
             </div>
         </div>
 
         <div class="flex items-center gap-2 md:gap-3 flex-wrap justify-end">
             <button id="btn-multiplayer" onclick="mostraModalConnessione()" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
-                <i class="fa-solid fa-users"></i>
-                <span id="txt-multiplayer">Giochiamo insieme</span>
+                <i class="fa-solid fa-users"></i><span id="txt-multiplayer">Giochiamo insieme</span>
             </button>
-            <button id="toggle-touch-btn" onclick="toggleTouch()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva Touch">
-                <i id="touch-icon" class="fa-solid fa-hand-pointer text-amber-400"></i>
-                <span id="touch-status-text" class="hidden md:inline font-medium">Touch: ON</span>
-            </button>
-            <button id="btn-mic-toggle" onclick="toggleSpeechRecognition()" class="px-3.5 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva Microfono per Risposta Vocale">
+            <button id="btn-mic-toggle" onclick="toggleSpeechRecognition()" class="px-3.5 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva Microfono">
+                <!-- PARTE DEFAULT OFF -->
                 <i id="mic-icon" class="fa-solid fa-microphone-slash text-purple-400"></i>
                 <span id="mic-status-text" class="hidden md:inline font-medium">Mic: OFF</span>
-            </button>
-            <button id="toggle-labels-btn" onclick="toggleLabels()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Mostra o nascondi il testo scritto">
-                <i id="labels-icon" class="fa-solid fa-font text-purple-400 opacity-40"></i>
-                <span id="labels-status-text" class="hidden md:inline font-medium">Testo: OFF</span>
-            </button>
-            <button id="toggle-voice-btn" onclick="toggleSpeech()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva pronuncia vocale">
-                <i id="voice-icon" class="fa-solid fa-volume-high text-amber-400"></i>
-                <span id="voice-status-text" class="hidden md:inline font-medium">Voce: ON</span>
-            </button>
-            <button onclick="requireSettingsAccess()" class="px-3.5 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
-                <i class="fa-solid fa-lock"></i>
-                <span class="hidden md:inline">Area Docente</span>
             </button>
         </div>
     </header>
 
-    <!-- AREA DI GIOCO PRINCIPALE -->
+    <!-- AREA DI GIOCO -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-2 flex flex-col justify-center items-center gap-3">
-        <!-- STATUS BAR & FEEDBACK VOCALE -->
+        <!-- STATUS BAR -->
         <div class="w-full flex flex-col sm:flex-row justify-between items-center bg-purple-900/80 backdrop-blur-md rounded-2xl p-3 border border-purple-700/50 text-white shadow-xl gap-3">
             <div class="flex items-center gap-2">
-                <span id="current-preset-badge" class="bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-semibold px-3 py-1 rounded-full flex items-center gap-2">
-                    <i class="fa-solid fa-user"></i> Il Corpo Umano (57 simboli)
-                </span>
-                <span id="symbols-count-badge" class="bg-fuchsia-500/20 border border-fuchsia-400/40 text-fuchsia-300 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full">
-                    8 Figure/Carta
-                </span>
                 <span id="connected-players-badge" class="bg-purple-500/20 border border-purple-400/40 text-purple-200 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full hidden">
                     <i class="fa-solid fa-user-group"></i> Alunni: <b id="players-count">0</b>
                 </span>
             </div>
-
-            <div id="last-word-container" class="flex items-center gap-3 bg-purple-950/80 px-4 py-1.5 rounded-xl border border-purple-800 min-h-[44px]">
-                <span class="text-xs text-purple-300 uppercase tracking-wider font-semibold">Parola:</span>
-                <span id="last-word-display" class="text-lg md:text-xl font-bold text-amber-300">---</span>
-                <button id="repeat-speech-btn" onclick="speakCurrentWord()" class="p-1.5 rounded-lg bg-amber-400/20 hover:bg-amber-400/40 text-amber-300 transition text-sm" title="Riascolta pronuncia">
-                    <i class="fa-solid fa-bullhorn"></i>
-                </button>
-            </div>
-
             <div class="flex items-center gap-6">
                 <div id="timer-box" class="hidden flex items-center gap-2">
                     <i class="fa-solid fa-stopwatch text-amber-300 text-xl"></i>
@@ -180,1076 +76,327 @@
             </div>
         </div>
 
-        <!-- INDICATORE WARNING / PENALITÀ -->
-        <div id="penalty-banner" class="hidden w-full bg-red-600/90 text-white text-center py-1.5 px-4 rounded-xl text-xs font-bold shadow-md transition-all duration-300">
-             Errore! Attendi 3 secondi prima di poter riprovare...
-        </div>
-
-        <!-- BARRA RICONOSCIMENTO VOCALE IN TEMPO REALE -->
+        <!-- BARRA MICROFONO (NASCOSTA DI DEFAULT) -->
         <div id="speech-live-bar" class="hidden w-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 text-center py-1.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 animate-pulse">
             <i class="fa-solid fa-microphone text-emerald-400 text-sm"></i>
-            <span>Microfono attivo — In ascolto... <span class="text-purple-300 font-normal">(Hai detto: <b id="speech-heard-text" class="text-amber-300 font-bold">...</b>)</span></span>
+            <span>In ascolto... <span class="text-purple-300 font-normal">(Hai detto: <b id="speech-heard-text" class="text-amber-300 font-bold">...</b>)</span></span>
         </div>
 
-        <!-- LE DUE CARTE CIRCOLARI -->
+        <!-- CARTE -->
         <div class="w-full flex-1 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 my-1">
-            <div id="card1" class="dobble-card animate-card w-full max-w-[340px] sm:max-w-[420px] md:max-w-[460px] bg-gradient-to-b from-yellow-100 via-amber-200 to-yellow-300 rounded-full border-8 border-purple-900 relative overflow-hidden flex items-center justify-center">
-            </div>
-            <div class="flex md:flex-col items-center justify-center gap-1 my-[-10px] md:my-0">
-                <div class="bg-amber-400 text-purple-950 w-12 h-12 rounded-full flex items-center justify-center font-black text-2xl shadow-xl border-4 border-purple-950 z-10">
-                    <i class="fa-solid fa-equals"></i>
-                </div>
-            </div>
-            <div id="card2" class="dobble-card animate-card w-full max-w-[340px] sm:max-w-[420px] md:max-w-[460px] bg-gradient-to-b from-yellow-100 via-amber-200 to-yellow-300 rounded-full border-8 border-purple-900 relative overflow-hidden flex items-center justify-center">
-            </div>
+            <div id="card1" class="dobble-card animate-card w-full max-w-[340px] md:max-w-[460px] bg-gradient-to-b from-yellow-100 to-yellow-300 rounded-full border-8 border-purple-900 relative"></div>
+            <div class="bg-amber-400 text-purple-950 w-12 h-12 rounded-full flex items-center justify-center font-black text-2xl shadow-xl border-4 border-purple-950 z-10"><i class="fa-solid fa-equals"></i></div>
+            <div id="card2" class="dobble-card animate-card w-full max-w-[340px] md:max-w-[460px] bg-gradient-to-b from-yellow-100 to-yellow-300 rounded-full border-8 border-purple-900 relative"></div>
         </div>
 
-        <!-- CONTROLLI DI GIOCO -->
-        <div class="flex flex-wrap justify-center gap-3 mt-1">
-            <button id="btn-next-pair" onclick="nextPair(true)" class="px-4 py-2 rounded-xl bg-purple-800 hover:bg-purple-700 text-purple-100 font-semibold transition flex items-center gap-2 border border-purple-600/50 text-sm">
-                <i class="fa-solid fa-arrows-rotate"></i> Cambia Carte
-            </button>
-            <button id="start-timer-btn" onclick="toggleTimeAttack()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm">
-                <i class="fa-solid fa-play"></i> Avvia Sfida 60s
-            </button>
-            <button onclick="resetScore()" class="px-3.5 py-2 rounded-xl bg-purple-950 hover:bg-purple-900 text-purple-300 hover:text-white border border-purple-800 font-medium transition text-xs">
-                Azzera Punti
-            </button>
+        <!-- CONTROLLI (SOLO HOST/SINGOLO) -->
+        <div id="host-controls" class="flex flex-wrap justify-center gap-3 mt-1">
+            <button onclick="nextPair(true)" class="px-4 py-2 rounded-xl bg-purple-800 hover:bg-purple-700 text-purple-100 font-semibold border border-purple-600/50 text-sm"><i class="fa-solid fa-arrows-rotate"></i> Cambia Carte</button>
+            <button onclick="avviaTimer()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-purple-950 font-bold shadow-lg text-sm"><i class="fa-solid fa-play"></i> Avvia Sfida 60s</button>
         </div>
     </main>
 
-    <footer class="text-center py-2 text-xs text-purple-300/60">
-        Colpo d'occhio Didattico • Generatore Matematico Proiettivo • Gamification & Multiplayer
-    </footer>
-
-    <!-- MODALE CONNETTIVITÀ MULTIPLAYER (PEERJS) -->
+    <!-- MODALE CONNESSIONE -->
     <div id="connection-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-purple-900 border border-purple-700 w-full max-w-md rounded-3xl p-6 text-white shadow-2xl flex flex-col">
-            <h2 class="text-xl font-bold mb-4 text-amber-300 flex items-center gap-2">
-                <i class="fa-solid fa-users"></i> Giochiamo Insieme (Stanza)
-            </h2>
+            <h2 class="text-xl font-bold mb-4 text-amber-300"><i class="fa-solid fa-users"></i> Giochiamo Insieme</h2>
             
             <div id="role-selection" class="space-y-4">
-                <button onclick="avviaComeDocente()" class="w-full p-4 rounded-2xl bg-fuchsia-600 hover:bg-fuchsia-500 font-bold flex items-center gap-4 transition text-left shadow-md">
+                <button onclick="avviaComeDocente()" class="w-full p-4 rounded-2xl bg-fuchsia-600 font-bold flex items-center gap-4 text-left">
                     <i class="fa-solid fa-desktop text-3xl"></i>
-                    <div>
-                        <div class="text-base">Crea una Stanza (Host)</div>
-                        <div class="text-xs font-normal text-purple-200">Genera il PIN a 4 cifre per invitare gli altri a giocare</div>
-                    </div>
+                    <div>Crea una Stanza (LIM/Host)<div class="text-xs font-normal">Genera PIN per gli alunni</div></div>
                 </button>
-                <div class="relative flex py-1 items-center">
-                    <div class="flex-grow border-t border-purple-700"></div>
-                    <span class="flex-shrink mx-4 text-purple-300 text-xs uppercase font-semibold">oppure</span>
-                    <div class="flex-grow border-t border-purple-700"></div>
-                </div>
+                <div class="border-t border-purple-700 my-2"></div>
                 <div class="space-y-2">
-                    <input type="text" id="student-name" placeholder="Il tuo Nome" class="w-full bg-purple-950 border border-purple-700 p-3 rounded-xl text-center text-white focus:border-amber-400 outline-none">
-                    <input type="text" id="room-pin-input" placeholder="PIN Stanza (es. 1234)" maxlength="4" class="w-full bg-purple-950 border border-purple-700 p-3 rounded-xl text-center text-lg tracking-widest text-white focus:border-amber-400 outline-none">
-                    <button onclick="connettiComeStudente()" class="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition shadow-md">
-                        Entra con PIN
-                    </button>
+                    <input type="text" id="student-name" placeholder="Il tuo Nome" class="w-full bg-purple-950 border p-3 rounded-xl text-center text-white outline-none">
+                    <input type="text" id="room-pin-input" placeholder="PIN (es. 1234)" maxlength="4" class="w-full bg-purple-950 border p-3 rounded-xl text-center text-lg tracking-widest text-white outline-none">
+                    <button onclick="connettiComeStudente()" class="w-full py-3 rounded-xl bg-amber-400 text-purple-950 font-bold">Entra</button>
                 </div>
             </div>
 
-            <div id="teacher-qr-view" class="hidden flex-col items-center text-center space-y-4">
-                <div class="bg-white p-3 rounded-2xl inline-block shadow-lg" id="qrcode-box"></div>
-                <div class="text-lg font-bold text-amber-300">
-                    PIN Stanza: <span id="display-pin-code" class="text-2xl font-mono text-white bg-purple-950 px-3 py-1 rounded-xl shadow-inner">----</span>
-                </div>
-                <p class="text-xs text-purple-200">Inquadra il QR con il telefono/tablet o inserisci il PIN per unirti alla sfida!</p>
+            <div id="teacher-qr-view" class="hidden flex-col items-center text-center space-y-4 mt-4">
+                <div class="bg-white p-3 rounded-2xl" id="qrcode-box"></div>
+                <div class="text-lg font-bold text-amber-300">PIN: <span id="display-pin-code" class="text-2xl font-mono text-white bg-purple-950 px-3 py-1 rounded-xl">----</span></div>
             </div>
-
-            <button onclick="chiudiModalConnessione()" class="mt-6 w-full py-2 rounded-xl bg-purple-950 hover:bg-purple-800 text-purple-300 text-sm font-semibold transition">Chiudi</button>
-        </div>
-    </div>
-
-    <!-- MODALE IMPOSTAZIONI E CARICAMENTO SIMBOLI -->
-    <div id="settings-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-purple-900 border border-purple-700 w-full max-w-2xl rounded-3xl p-6 text-white shadow-2xl flex flex-col max-h-[90vh]">
-            
-            <div class="flex justify-between items-center pb-4 border-b border-purple-800">
-                <h2 class="text-xl font-bold flex items-center gap-2 text-amber-300">
-                    <i class="fa-solid fa-sliders"></i> Pannello di Configurazione Docente
-                </h2>
-                <button onclick="closeSettingsModal()" class="text-purple-300 hover:text-white p-2 rounded-lg text-xl">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <div class="overflow-y-auto flex-1 my-4 space-y-6 pr-2">
-                <!-- SELEZIONE DIFFICOLTÀ -->
-                <div>
-                    <label class="block text-sm font-semibold text-purple-200 mb-2">Numero di Figure per Carta:</label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="setDeckOrder(5)" id="order-5-btn" class="p-3 rounded-xl border border-purple-700 bg-purple-950/60 hover:bg-purple-800 text-center font-bold text-sm">
-                            6 Figure per Carta<br><span class="text-xs font-normal text-purple-300">(Intermedio • 31 carte)</span>
-                        </button>
-                        <button onclick="setDeckOrder(7)" id="order-7-btn" class="p-3 rounded-xl border border-amber-400 bg-amber-400/20 text-center font-bold text-sm">
-                            8 Figure per Carta<br><span class="text-xs font-normal text-purple-300">(Versione Classica • 57 carte)</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- GRIGLIA ANTEPRIMA SIMBOLI ATTIVI -->
-                <div class="bg-purple-950/60 p-4 rounded-2xl border border-purple-800 space-y-4">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-semibold text-purple-300 uppercase tracking-wider">Simboli Mazzo Corrente (<span id="loaded-count">0</span>):</span>
-                    </div>
-                    <div id="symbols-preview-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto p-2 bg-purple-950 rounded-xl border border-purple-800">
-                    </div>
-                </div>
-            </div>
-
-            <div class="pt-4 border-t border-purple-800 flex justify-end gap-3">
-                <button onclick="applySettings()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition shadow-lg">
-                    Chiudi e Rigenera Mazzo
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALE GAMEOVER & CLASSIFICA -->
-    <div id="gameover-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-purple-900 border border-amber-400/40 w-full max-w-md rounded-3xl p-6 text-white text-center shadow-2xl flex flex-col items-center">
-            <div class="w-20 h-20 bg-amber-400/20 text-amber-300 rounded-full flex items-center justify-center text-4xl mb-4">
-                <i class="fa-solid fa-trophy"></i>
-            </div>
-            <h2 class="text-2xl font-bold mb-1">Tempo Scaduto!</h2>
-            <p class="text-sm text-purple-200 mb-4" id="gameover-sub">Ottimo esercizio di lettura e pronuncia!</p>
-            
-            <!-- VISTA CLASSIFICA (HOST/LIM) -->
-            <div id="leaderboard-view" class="w-full mb-6 hidden">
-                <h3 class="text-sm font-bold uppercase tracking-wider text-amber-300 mb-3"><i class="fa-solid fa-award"></i> Classifica Finale</h3>
-                <div id="leaderboard-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
-                </div>
-            </div>
-
-            <!-- VISTA PUNTEGGIO SINGOLO (STUDENTE / STANDALONE) & PERSONAL BEST -->
-            <div id="single-score-view" class="bg-purple-950 border border-purple-800 rounded-2xl p-4 w-full mb-6 relative">
-                <span class="text-xs uppercase tracking-wider text-purple-300 block mb-1">I tuoi punti finali</span>
-                <span id="final-score-display" class="text-5xl font-black text-white">0</span>
-                
-                <div id="new-record-badge" class="hidden mt-3 text-sm font-bold text-emerald-400 animate-pulse bg-emerald-900/40 py-1 px-3 rounded-full inline-block border border-emerald-500/50">
-                    🏆 Nuovo Record Personale!
-                </div>
-                <div class="mt-3 text-xs text-purple-300 border-t border-purple-800 pt-2">
-                    Miglior Punteggio di sempre: <b id="best-score-display" class="text-amber-300 text-sm">0</b>
-                </div>
-            </div>
-
-            <button onclick="closeGameOverModal()" class="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition shadow-lg">
-                Gioca Ancora
-            </button>
-        </div>
-    </div>
-
-    <!-- MODALE PIN DOCENTE -->
-    <div id="pin-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
-        <div class="bg-purple-900 border border-purple-700 w-full max-w-sm rounded-3xl p-6 text-white shadow-2xl flex flex-col">
-            <h2 class="text-xl font-bold mb-2 text-amber-300 flex items-center gap-2">
-                <i class="fa-solid fa-user-shield"></i> Accesso Riservato
-            </h2>
-            <p class="text-sm text-purple-200 mb-6">Inserisci la password per accedere alle impostazioni avanzate.</p>
-            
-            <input type="password" id="teacher-pin" class="bg-purple-950 border border-purple-700 p-3 rounded-xl mb-4 text-center text-2xl tracking-[0.5em] focus:border-amber-400 outline-none transition" placeholder="****" onkeydown="if(event.key === 'Enter') checkPin()">
-            
-            <div class="flex gap-3">
-                <button onclick="closePinModal()" class="flex-1 py-3 rounded-xl bg-purple-950 hover:bg-purple-800 transition font-semibold text-sm">Annulla</button>
-                <button onclick="checkPin()" class="flex-1 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition text-sm">Sblocca</button>
-            </div>
-            <p id="pin-error" class="text-red-400 text-sm font-semibold text-center mt-4 hidden animate-pulse">Password errata!</p>
+            <button onclick="document.getElementById('connection-modal').classList.add('hidden')" class="mt-6 w-full py-2 rounded-xl bg-purple-950 text-purple-300 text-sm font-semibold">Chiudi</button>
         </div>
     </div>
 
     <script>
-        /* --- COSTANTI SICUREZZA --- */
-        const TEACHER_PIN = "1234";
-        const PREFISSO_STANZA = 'colpo-docchio-';
-
-        /* --- IMMAGINI --- */
-        const CARTELLA_IMMAGINI = [
-            { val: 'contagocce', file: 'img_corpoumano/contagocce.png' },
-            { val: 'alluce', file: 'img_corpoumano/alluce.png' },
-            { val: 'ambulanza', file: 'img_corpoumano/ambulanza.png' },
-            { val: 'barella', file: 'img_corpoumano/barella.png' },
-            { val: 'bisturi', file: 'img_corpoumano/bisturi.png' },
-            { val: 'bocca', file: 'img_corpoumano/bocca.png' },
-            { val: 'borsa del ghiaccio', file: 'img_corpoumano/borsa del ghiaccio.png' },
-            { val: 'braccio', file: 'img_corpoumano/braccio.png' },
-            { val: 'capelli', file: 'img_corpoumano/capelli.png' },
-            { val: 'cerotto', file: 'img_corpoumano/cerotto.png' },
-            { val: 'cervello', file: 'img_corpoumano/cervello.png' },
-            { val: 'ciglia', file: 'img_corpoumano/ciglia.png' },
-            { val: 'collo', file: 'img_corpoumano/collo.png' },
-            { val: 'coscia', file: 'img_corpoumano/coscia.png' },
-            { val: 'cuore', file: 'img_corpoumano/cuore.png' },
-            { val: 'dente', file: 'img_corpoumano/dente.png' },
-            { val: 'dito', file: 'img_corpoumano/dito.png' },
-            { val: 'fegato', file: 'img_corpoumano/fegato.png' },
-            { val: 'femore', file: 'img_corpoumano/femore.png' },
-            { val: 'gamba', file: 'img_corpoumano/gamba.png' },
-            { val: 'gesso', file: 'img_corpoumano/gesso.png' },
-            { val: 'ginocchio', file: 'img_corpoumano/ginocchio.png' },
-            { val: 'gomito', file: 'img_corpoumano/gomito.png' },
-            { val: 'intestino', file: 'img_corpoumano/intestino.png' },
-            { val: 'lingua', file: 'img_corpoumano/lingua.png' },
-            { val: 'mano', file: 'img_corpoumano/mano.png' },
-            { val: 'medico', file: 'img_corpoumano/medico.png' },
-            { val: 'mento', file: 'img_corpoumano/mento.png' },
-            { val: 'muscolo', file: 'img_corpoumano/muscolo.png' },
-            { val: 'narici', file: 'img_corpoumano/narici.png' },
-            { val: 'naso', file: 'img_corpoumano/naso.png' },
-            { val: 'occhiali', file: 'img_corpoumano/occhiali.png' },
-            { val: 'occhio', file: 'img_corpoumano/occhio.png' },
-            { val: 'ombelico', file: 'img_corpoumano/ombelico.png' },
-            { val: 'orecchio', file: 'img_corpoumano/orecchio.png' },
-            { val: 'ospedale', file: 'img_corpoumano/ospedale.png' },
-            { val: 'petto', file: 'img_corpoumano/petto.png' },
-            { val: 'piede', file: 'img_corpoumano/piede.png' },
-            { val: 'pillola', file: 'img_corpoumano/pillola.png' },
-            { val: 'polmoni', file: 'img_corpoumano/polmoni.png' },
-            { val: 'pomata', file: 'img_corpoumano/pomata.png' },
-            { val: 'reni', file: 'img_corpoumano/reni.png' },
-            { val: 'sangue', file: 'img_corpoumano/sangue.png' },
-            { val: 'scheletro', file: 'img_corpoumano/scheletro.png' },
-            { val: 'schiena', file: 'img_corpoumano/schiena.png' },
-            { val: 'sedia a rotelle', file: 'img_corpoumano/sedia a rotelle.png' },
-            { val: 'siringa', file: 'img_corpoumano/siringa.png' },
-            { val: 'sopracciglia', file: 'img_corpoumano/sopracciglia.png' },
-            { val: 'spalla', file: 'img_corpoumano/spalla.png' },
-            { val: 'spazzolino', file: 'img_corpoumano/spazzolino.png' },
-            { val: 'stampelle', file: 'img_corpoumano/stampelle.png' },
-            { val: 'stetoscopio', file: 'img_corpoumano/stetoscopio.png' },
-            { val: 'stomaco', file: 'img_corpoumano/stomaco.png' },
-            { val: 'tallone', file: 'img_corpoumano/tallone.png' },
-            { val: 'termometro', file: 'img_corpoumano/termometro.png' },
-            { val: 'teschio', file: 'img_corpoumano/teschio.png' },
-            { val: 'unghia', file: 'img_corpoumano/unghia.png' }
-        ];
-
-        /* --- STATO PEERJS / MULTIPLAYER --- */
-        let peer = null;
-        let ruolounico = 'standalone'; 
-        let connessioniStudenti = [];
-        let connDocente = null;
-        let mioNomeStudente = "Alunno";
-        let stanzaPinCorrente = "";
-        let isTransitioning = false;
-        let isPenalized = false;
-        let punteggiClasse = {}; 
-
-        /* --- SPEECH RECOGNITION (RICONOSCIMENTO VOCALE) --- */
-        let recognition = null;
-        let isSpeechRecognitionActive = false;
-
-        /* --- STATO DEL GIOCO --- */
+        // DATI DI GIOCO DI BASE (Esempio Simboli)
+        const allSymbols = ["❤️ Cuore", "⭐ Stella", "☀️ Sole", "🌙 Luna", "☁️ Nuvola", "⚡ Fulmine", "❄️ Neve", "🔥 Fuoco", "💧 Goccia", "🍎 Mela", "🍌 Banana", "🍇 Uva", "🍓 Fragola", "🍕 Pizza", "🍔 Hamburger", "🍟 Patatine", "🍩 Ciambella", "🍪 Biscotto", "🍦 Gelato", "🍫 Cioccolato", "🏀 Basket", "⚽ Calcio", "🎾 Tennis", "⚾ Baseball", "🎱 Biliardo", "🚗 Auto", "🚕 Taxi", "🚓 Polizia", "🚑 Ambulanza", "🚒 Pompieri", "✈️ Aereo", "🚀 Razzo", "🚁 Elicottero", "⛵ Barca", "🚢 Nave", "🚲 Bici", "🛵 Moto", "🚜 Trattore", "🐶 Cane", "🐱 Gatto", "🐭 Topo", "🐹 Cralo", "🐰 Coniglio", "🦊 Volpe", "🐻 Orso", "🐼 Panda", "🐨 Koala", "🐯 Tigre", "🦁 Leone", "🐮 Mucca", "🐷 Maiale", "🐸 Rana", "🐵 Scimmia", "🐔 Gallina", "🐧 Pinguino", "🐦 Uccello", "🐤 Pulcino"];
+        
+        // STATO DI GIOCO
         let state = {
-            n: 7, 
-            symbolsPerCard: 8,
-            activeSymbols: [], 
-            deckCards: [], 
-            card1Index: -1,
-            card2Index: -1,
-            matchingSymbol: null,
-            score: 0,
-            showLabels: false, 
-            audioEnabled: true,
-            touchEnabled: true,
-            isTimeAttack: false,
-            timeLeft: 60,
-            timerInterval: null,
-            synth: window.speechSynthesis,
-            lastSpokenWord: ''
+            deck: [], card1: [], card2: [], matchingSymbol: "", score: 0,
+            isHost: false, isStudent: false, timer: 60, timerInterval: null
         };
 
-        let synthSound, wrongSound;
+        // VARIABILI PEERJS & MULTIPLAYER
+        let peer = null;
+        let connDocente = null;
+        let connessioniStudenti = [];
+        let mioNomeStudente = "";
 
-        window.onload = function() {
-            initAudio();
-            initSpeechRecognition();
-            caricaMazzoCorpoUmano();
-            
-            document.getElementById('labels-icon').className = "fa-solid fa-font text-purple-400 opacity-40";
-            document.getElementById('labels-status-text').textContent = "Testo: OFF";
+        // VARIABILI MICROFONO (DEFAULT OFF)
+        let recognition = null;
+        let isSpeechRecognitionActive = false; // <-- QUI IL DEFAULT E' IMPOSTATO SU FALSE
 
-            // CONTROLLO PARAMETRO QR CODE DALL'URL (es. ?pin=1234)
-            const urlParams = new URLSearchParams(window.location.search);
-            const pinParam = urlParams.get('pin');
-            if (pinParam) {
-                document.getElementById('room-pin-input').value = pinParam;
-                mostraModalConnessione();
-            }
-        };
-
-        function showWarningBanner(msg, duration = 3000, isError = false) {
-            const banner = document.getElementById('penalty-banner');
-            banner.innerHTML = msg;
-            if (isError) {
-                banner.className = "w-full bg-red-600/90 text-white text-center py-1.5 px-4 rounded-xl text-xs font-bold animate-bounce shadow-md";
-            } else {
-                banner.className = "w-full bg-amber-500/90 text-white text-center py-1.5 px-4 rounded-xl text-xs font-bold animate-pulse shadow-md";
-            }
-            banner.classList.remove('hidden');
-            setTimeout(() => {
-                banner.classList.add('hidden');
-            }, duration);
-        }
-
-        function toggleTouch() {
-            state.touchEnabled = !state.touchEnabled;
-            const icon = document.getElementById('touch-icon');
-            const text = document.getElementById('touch-status-text');
-            if (state.touchEnabled) {
-                icon.className = "fa-solid fa-hand-pointer text-amber-400";
-                text.textContent = "Touch: ON";
-            } else {
-                icon.className = "fa-solid fa-hand-pointer text-purple-400 opacity-40";
-                text.textContent = "Touch: OFF";
-            }
-            
-            if (ruolounico === 'docente') {
-                inviaEventoSistemaStudenti('SET_INPUT_MODE', { touchEnabled: state.touchEnabled });
-            }
-        }
-
-        function caricaMazzoCorpoUmano() {
-            state.activeSymbols = CARTELLA_IMMAGINI.map(item => ({
-                type: 'image',
-                icon: item.file,
-                val: item.val
-            }));
-            updateSymbolsPreviewGrid();
-            buildDeck();
-        }
-
-        function initAudio() {
-            try {
-                synthSound = new Tone.Synth({
-                    oscillator: { type: "triangle" },
-                    envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.1 }
-                }).toDestination();
-
-                wrongSound = new Tone.MembraneSynth({
-                    pitchDecay: 0.05,
-                    octaves: 2,
-                    oscillator: { type: "sine" },
-                    envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.1 }
-                }).toDestination();
-            } catch (e) {
-                console.log("Audio Web API non avviata direttamente");
-            }
-        }
-
-        function initSpeechRecognition() {
+        // Inizializzazione Riconoscimento Vocale (se supportato)
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                console.warn("Riconoscimento vocale non supportato in questo browser.");
-                return;
-            }
-
             recognition = new SpeechRecognition();
             recognition.lang = 'it-IT';
             recognition.continuous = true;
-            recognition.interimResults = true;
+            recognition.interimResults = false;
 
-            recognition.onresult = function(event) {
-                if (isTransitioning || isPenalized || !state.matchingSymbol) return;
-
-                let transcript = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    transcript += event.results[i][0].transcript.toLowerCase() + ' ';
-                }
-
-                document.getElementById('speech-heard-text').textContent = `${transcript.trim()}`;
-
-                const wordTarget = state.matchingSymbol.toLowerCase();
-                const cleanedTranscript = transcript.replace(/\b(il|lo|la|i|gli|le|un|uno|una|del|della|degli)\b/gi, '').trim();
-
-                if (transcript.includes(wordTarget) || cleanedTranscript.includes(wordTarget)) {
-                    const targetEls = document.querySelectorAll(`.symbol-item[data-val="${state.matchingSymbol}"]`);
-                    targetEls.forEach(el => el.classList.add('symbol-correct'));
-                    handleSymbolClick(state.matchingSymbol, targetEls[0]);
-                }
+            recognition.onresult = (event) => {
+                const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+                document.getElementById('speech-heard-text').textContent = transcript;
+                controllaRisposta(transcript, true);
             };
 
-            recognition.onerror = function(event) {
-                console.log("Speech recognition error: ", event.error);
-            };
-
-            recognition.onend = function() {
-                if (isSpeechRecognitionActive) {
-                    try { recognition.start(); } catch(e) {}
-                }
+            recognition.onend = () => {
+                if (isSpeechRecognitionActive) recognition.start(); // Riavvia se è ancora attivo
             };
         }
 
+        // --- LOGICA MICROFONO ---
         function toggleSpeechRecognition() {
             if (!recognition) {
-                alert("Il tuo browser non supporta il riconoscimento vocale. Usa Google Chrome o Microsoft Edge.");
+                alert("Riconoscimento vocale non supportato in questo browser. Usa Chrome o Edge.");
                 return;
             }
-
+            
             isSpeechRecognitionActive = !isSpeechRecognitionActive;
             const icon = document.getElementById('mic-icon');
             const text = document.getElementById('mic-status-text');
             const liveBar = document.getElementById('speech-live-bar');
 
             if (isSpeechRecognitionActive) {
-                try {
-                    recognition.start();
-                    icon.className = "fa-solid fa-microphone text-emerald-400";
-                    text.textContent = "Mic: ON";
-                    liveBar.classList.remove('hidden');
-                } catch(e) {}
+                recognition.start();
+                icon.className = "fa-solid fa-microphone text-emerald-400";
+                text.textContent = "Mic: ON";
+                liveBar.classList.remove('hidden');
             } else {
-                try {
-                    recognition.stop();
-                    icon.className = "fa-solid fa-microphone-slash text-purple-400";
-                    text.textContent = "Mic: OFF";
-                    liveBar.classList.add('hidden');
-                } catch(e) {}
+                recognition.stop();
+                icon.className = "fa-solid fa-microphone-slash text-purple-400";
+                text.textContent = "Mic: OFF";
+                liveBar.classList.add('hidden');
             }
         }
 
-        function generateProjectivePlaneDeck(n, symbols) {
-            const cards = [];
-            const numSymbolsNeeded = n * n + n + 1;
-
-            if (symbols.length < numSymbolsNeeded) {
-                let extended = [...symbols];
-                let counter = 1;
-                while (extended.length < numSymbolsNeeded) {
-                    let base = symbols[(counter - 1) % symbols.length];
-                    extended.push({
-                        ...base,
-                        val: `${base.val} ${counter}`
-                    });
-                    counter++;
-                }
-                symbols = extended;
-            }
-
+        // --- LOGICA GIOCO E CARTE ---
+        function generaMazzoDobble(n = 7) {
+            // Genera mazzo piano proiettivo
+            let cards = [];
             for (let i = 0; i <= n; i++) {
-                let card = [0];
-                for (let j = 0; j < n; j++) {
-                    card.push((j + 1) + (i * n));
-                }
+                let card = [allSymbols[0]];
+                for (let j = 0; j < n; j++) card.push(allSymbols[(i * n) + j + 1]);
                 cards.push(card);
             }
-
             for (let i = 0; i < n; i++) {
                 for (let j = 0; j < n; j++) {
-                    let card = [i + 1];
+                    let card = [allSymbols[i + 1]];
                     for (let k = 0; k < n; k++) {
-                        card.push(n + 1 + k * n + (i * k + j) % n);
+                        let val = (n + 1) + n * k + ((i * k + j) % n);
+                        card.push(allSymbols[val]);
                     }
                     cards.push(card);
                 }
             }
-
-            return cards.map(c => c.map(idx => symbols[idx % symbols.length]));
+            return cards;
         }
 
-        function buildDeck() {
-            state.deckCards = generateProjectivePlaneDeck(state.n, state.activeSymbols);
-            document.getElementById('symbols-count-badge').textContent = state.symbolsPerCard + " Figure/Carta";
-            if (ruolounico !== 'studente') {
-                nextPair(false);
-            }
-        }
-
-        function updateSymbolsPreviewGrid() {
-            const grid = document.getElementById('symbols-preview-grid');
-            document.getElementById('loaded-count').textContent = state.activeSymbols.length;
-            grid.innerHTML = '';
-
-            state.activeSymbols.forEach((sym) => {
-                const item = document.createElement('div');
-                item.className = "flex items-center gap-2 bg-purple-900 p-1.5 rounded-lg border border-purple-700 text-xs";
-                item.innerHTML = `
-                    <img src="${sym.icon}" class="w-6 h-6 object-contain rounded">
-                    <span class="text-purple-200 text-xs truncate">${sym.val}</span>
-                `;
-                grid.appendChild(item);
-            });
-        }
-
-        function speakWord(text) {
-            if (ruolounico === 'studente') return;
-
-            if (!state.audioEnabled || !text) return;
+        function nextPair(broadcast = false) {
+            if(state.deck.length === 0) state.deck = generaMazzoDobble(7);
             
-            if (state.synth.speaking) {
-                state.synth.cancel();
-            }
+            let idx1 = Math.floor(Math.random() * state.deck.length);
+            let idx2 = Math.floor(Math.random() * state.deck.length);
+            while(idx1 === idx2) idx2 = Math.floor(Math.random() * state.deck.length);
 
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'it-IT';
-            utterance.rate = 0.85; 
-            utterance.pitch = 1.0;
+            state.card1 = state.deck[idx1];
+            state.card2 = state.deck[idx2];
             
-            state.synth.speak(utterance);
-            state.lastSpokenWord = text;
-            document.getElementById('last-word-display').textContent = text;
-        }
+            // Trova simbolo comune
+            state.matchingSymbol = state.card1.find(sym => state.card2.includes(sym));
 
-        function speakCurrentWord() {
-            if (state.lastSpokenWord && state.lastSpokenWord !== '---') {
-                speakWord(state.lastSpokenWord);
+            disegnaCarte();
+
+            if (broadcast && state.isHost) {
+                connessioniStudenti.forEach(conn => {
+                    conn.send({ tipo: 'AGGIORNA_CARTE', card1: state.card1, card2: state.card2, matchingSymbol: state.matchingSymbol });
+                });
             }
         }
 
-        function toggleSpeech() {
-            state.audioEnabled = !state.audioEnabled;
-            const icon = document.getElementById('voice-icon');
-            const text = document.getElementById('voice-status-text');
-            if (state.audioEnabled) {
-                icon.className = "fa-solid fa-volume-high text-amber-400";
-                text.textContent = "Voce: ON";
-            } else {
-                icon.className = "fa-solid fa-volume-xmark text-purple-400";
-                text.textContent = "Voce: OFF";
-            }
+        function disegnaCarte() {
+            const renderCard = (cardData, elementId) => {
+                const container = document.getElementById(elementId);
+                container.innerHTML = '';
+                // Rimuove e rimette classe per animazione
+                container.classList.remove('animate-card');
+                void container.offsetWidth; 
+                container.classList.add('animate-card');
+
+                cardData.forEach((sym, i) => {
+                    let el = document.createElement('div');
+                    el.className = 'symbol-item text-xl md:text-3xl font-bold bg-white/80 p-2 rounded-xl shadow-sm border border-purple-200';
+                    // Posizionamento sparso circolare approssimativo
+                    const angle = (i / cardData.length) * Math.PI * 2;
+                    const radius = 35 + Math.random() * 15; // tra 35% e 50%
+                    el.style.left = `calc(50% + ${Math.cos(angle) * radius}% - 20px)`;
+                    el.style.top = `calc(50% + ${Math.sin(angle) * radius}% - 20px)`;
+                    
+                    let [emoji, ...textArr] = sym.split(" ");
+                    el.innerHTML = `<span class="text-4xl drop-shadow-md">${emoji}</span><span class="text-xs mt-1 text-purple-900">${textArr.join(" ")}</span>`;
+                    
+                    el.onclick = () => controllaRisposta(sym, false);
+                    container.appendChild(el);
+                });
+            };
+            renderCard(state.card1, 'card1');
+            renderCard(state.card2, 'card2');
         }
 
-        function toggleLabels() {
-            state.showLabels = !state.showLabels;
-            const icon = document.getElementById('labels-icon');
-            const text = document.getElementById('labels-status-text');
-            if (state.showLabels) {
-                icon.className = "fa-solid fa-font text-amber-400";
-                text.textContent = "Testo: ON";
-            } else {
-                icon.className = "fa-solid fa-font text-purple-400 opacity-40";
-                text.textContent = "Testo: OFF";
-            }
-            renderCard('card1', state.deckCards[state.card1Index]);
-            renderCard('card2', state.deckCards[state.card2Index]);
-        }
-
-        function nextPair(animate = true) {
-            if (state.deckCards.length < 2) return;
-
-            let idx1 = Math.floor(Math.random() * state.deckCards.length);
-            let idx2 = Math.floor(Math.random() * state.deckCards.length);
-            while (idx1 === idx2) {
-                idx2 = Math.floor(Math.random() * state.deckCards.length);
-            }
-
-            state.card1Index = idx1;
-            state.card2Index = idx2;
-
-            const card1Vals = state.deckCards[idx1].map(s => s.val);
-            const card2Vals = state.deckCards[idx2].map(s => s.val);
-            state.matchingSymbol = card1Vals.find(val => card2Vals.includes(val));
-
-            const card1El = document.getElementById('card1');
-            const card2El = document.getElementById('card2');
-
-            if (animate) {
-                card1El.classList.remove('animate-card');
-                card2El.classList.remove('animate-card');
-                void card1El.offsetWidth;
-                card1El.classList.add('animate-card');
-                card2El.classList.add('animate-card');
-            }
-
-            renderCard('card1', state.deckCards[idx1]);
-            renderCard('card2', state.deckCards[idx2]);
-
-            if (ruolounico === 'docente') {
-                inviaStatoAGliStudenti();
-            }
-        }
-
-        function renderCard(cardId, symbols) {
-            const cardEl = document.getElementById(cardId);
-            cardEl.innerHTML = '';
-
-            const num = symbols.length;
-            let positions = [];
-
-            if (num === 8) {
-                positions.push({ r: 0, angle: 0 });
-                for (let i = 0; i < 7; i++) {
-                    let angle = (i * (360 / 7)) + (Math.random() * 10 - 5);
-                    positions.push({ r: 34, angle: angle }); 
-                }
-            } else {
-                positions.push({ r: 0, angle: 0 });
-                for (let i = 0; i < num - 1; i++) {
-                    let angle = (i * (360 / (num - 1)));
-                    positions.push({ r: 32, angle: angle });
-                }
-            }
-
-            let shuffledSymbols = symbols.map((sym, i) => ({ sym, pos: positions[i] }));
-            shuffledSymbols.sort(() => Math.random() - 0.5);
-
-            shuffledSymbols.forEach((item) => {
-                const symbolObj = item.sym;
-                const pos = item.pos;
-
-                const symEl = document.createElement('div');
-                symEl.className = 'symbol-item hover:bg-purple-900/15 hover:shadow-lg rounded-full';
-                symEl.setAttribute('data-val', symbolObj.val);
-
-                const rad = (pos.angle * Math.PI) / 180;
-                const left = 50 + pos.r * Math.cos(rad);
-                const top = 50 + pos.r * Math.sin(rad);
-
-                symEl.style.left = `${left}%`;
-                symEl.style.top = `${top}%`;
-
-                const scale = (0.75 + Math.random() * 0.65).toFixed(2);
-                const rotation = Math.floor(Math.random() * 360) - 180;
-
-                const imgStyle = `transform: scale(${scale}); display: block; margin: 0 auto; transition: transform 0.2s;`;
-
-                let labelHtml = state.showLabels 
-                    ? `<span class="font-bold text-purple-950 bg-white/95 px-2 py-0.5 rounded-full shadow border border-purple-300 mt-1 whitespace-nowrap select-none z-10 block text-center" style="font-size: 12px !important; line-height: 1.2 !important;">${symbolObj.val}</span>` 
-                    : '';
-
-                let contentHtml = `
-                    <div class="flex items-center justify-center">
-                        <img src="${symbolObj.icon}" class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain drop-shadow-md select-none pointer-events-none" style="${imgStyle}">
-                    </div>`;
-
-                symEl.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
-                symEl.innerHTML = `<div class="flex flex-col items-center justify-center w-full">${contentHtml}${labelHtml}</div>`;
-
-                symEl.onclick = (e) => {
-                    e.stopPropagation();
-                    if (!state.touchEnabled) {
-                        showWarningBanner("🎙️ In questa partita vale solo la voce! Pronuncia la figura al microfono.", 3000, false);
-                        return;
-                    }
-                    handleSymbolClick(symbolObj.val, symEl);
-                };
-
-                cardEl.appendChild(symEl);
-            });
-        }
-
-        function handleSymbolClick(val, element) {
-            if (isTransitioning || isPenalized) return;
-
-            if (val === state.matchingSymbol) {
-                isTransitioning = true;
-                
-                const targets = document.querySelectorAll(`.symbol-item[data-val="${val}"]`);
-                targets.forEach(el => el.classList.add('symbol-correct'));
-                
-                // VERIFICA CHE LA CONNESSIONE SIA ATTIVA E APERTA
-                if (ruolounico === 'studente') {
-                    if (connDocente && connDocente.open) {
-                        state.score += 1;
-                        document.getElementById('score-display').textContent = state.score;
-                        if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
-                        confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
-                        
-                        connDocente.send({
-                            tipo: 'RISPOSTA_CORRETTA',
-                            valore: val,
-                            nome: mioNomeStudente,
-                            score: state.score
-                        });
-
-                        setTimeout(() => {
-                            isTransitioning = false;
-                        }, 1500);
-                        return;
-                    } else {
-                        showWarningBanner("⚠️ Connessione alla stanza in corso o persa. Attendi...", 3000, true);
-                        isTransitioning = false;
-                        return;
-                    }
-                }
-
-                registraEsitoPositivo(val, element, "LIM", true);
-
-            } else {
-                if (element) element.classList.add('symbol-wrong');
-                if (wrongSound) wrongSound.triggerAttackRelease("G2", "8n");
-                
-                if (ruolounico === 'studente') {
-                    isPenalized = true;
-                    document.getElementById('card1').classList.add('locked-card');
-                    document.getElementById('card2').classList.add('locked-card');
-                    showWarningBanner("⚠️ Errore! Attendi 3 secondi prima di poter riprovare...", 3000, true);
-
-                    setTimeout(() => {
-                        isPenalized = false;
-                        document.getElementById('card1').classList.remove('locked-card');
-                        document.getElementById('card2').classList.remove('locked-card');
-                        if (element) element.classList.remove('symbol-wrong');
-                    }, 3000);
-                } else {
-                    setTimeout(() => {
-                        if (element) element.classList.remove('symbol-wrong');
-                    }, 500);
-                }
-            }
-        }
-
-        function registraEsitoPositivo(val, element, nomeVincitore, incrementaPuntiHost = false) {
-            isTransitioning = true;
+        function controllaRisposta(risposta, isVocale) {
+            let nomeRisposta = isVocale ? risposta : risposta;
+            let matchText = state.matchingSymbol.toLowerCase();
             
-            const targetEls = document.querySelectorAll(`.symbol-item[data-val="${val}"]`);
-            targetEls.forEach(el => el.classList.add('symbol-correct'));
+            // Controllo tollerante (se vocale) o esatto (se click)
+            let isCorrect = isVocale ? matchText.includes(nomeRisposta) : (risposta === state.matchingSymbol);
 
-            if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
-
-            confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
-            speakWord(val);
-
-            if (incrementaPuntiHost || ruolounico === 'standalone') {
-                state.score += 1;
+            if (isCorrect) {
+                confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
+                state.score += 10;
                 document.getElementById('score-display').textContent = state.score;
+                
+                if (state.isStudent && connDocente) {
+                    connDocente.send({ tipo: 'RISPOSTA_CORRETTA', nome: mioNomeStudente, score: state.score });
+                } else {
+                    setTimeout(() => nextPair(true), 1000); // Docente cambia carta
+                }
+            } else if (!isVocale) {
+                alert("Sbagliato! Riprova."); // Feedback semplice
+            }
+        }
+
+        // --- TIMER LOGIC ---
+        function avviaTimer() {
+            state.timer = 60;
+            document.getElementById('timer-box').classList.remove('hidden');
+            document.getElementById('timer-display').textContent = state.timer;
+            
+            if (state.isHost) {
+                connessioniStudenti.forEach(c => c.send({ tipo: 'START_TIMER' }));
             }
 
-            document.getElementById('last-word-display').textContent = `${val} (${nomeVincitore})`;
-
-            setTimeout(() => {
-                nextPair(true);
-                isTransitioning = false;
-            }, 1500);
+            if(state.timerInterval) clearInterval(state.timerInterval);
+            state.timerInterval = setInterval(() => {
+                state.timer--;
+                document.getElementById('timer-display').textContent = state.timer;
+                if (state.isHost) connessioniStudenti.forEach(c => c.send({ tipo: 'SYNC_TIMER', time: state.timer }));
+                
+                if (state.timer <= 0) {
+                    clearInterval(state.timerInterval);
+                    alert("Tempo scaduto! Punti: " + state.score);
+                }
+            }, 1000);
         }
 
-        function resetScore() {
-            state.score = 0;
-            punteggiClasse = {};
-            document.getElementById('score-display').textContent = "0";
-            document.getElementById('last-word-display').textContent = "---";
-            state.lastSpokenWord = '';
-        }
-
-        function mostraModalConnessione() {
-            document.getElementById('connection-modal').classList.remove('hidden');
-        }
-        function chiudiModalConnessione() {
-            document.getElementById('connection-modal').classList.add('hidden');
-        }
+        // --- MULTIPLAYER E HANDSHAKE ---
+        function mostraModalConnessione() { document.getElementById('connection-modal').classList.remove('hidden'); }
 
         function avviaComeDocente() {
-            ruolounico = 'docente';
-            const pinStanza = Math.floor(1000 + Math.random() * 9000).toString();
-            stanzaPinCorrente = pinStanza;
-
-            if (typeof Peer === 'undefined') {
-                alert("Errore caricamento PeerJS online. Verifica la connessione internet e ricarica la pagina.");
-                return;
-            }
-
-            peer = new Peer(PREFISSO_STANZA + pinStanza);
+            const pin = Math.floor(1000 + Math.random() * 9000).toString();
+            const peerId = `colpo-docente-${pin}`;
+            
+            peer = new Peer(peerId);
             
             peer.on('open', (id) => {
+                state.isHost = true;
                 document.getElementById('role-selection').classList.add('hidden');
                 document.getElementById('teacher-qr-view').classList.remove('hidden');
                 document.getElementById('teacher-qr-view').classList.add('flex');
-                document.getElementById('display-pin-code').textContent = pinStanza;
-                
+                document.getElementById('display-pin-code').textContent = pin;
                 document.getElementById('connected-players-badge').classList.remove('hidden');
-                document.getElementById('txt-multiplayer').textContent = "Host: " + pinStanza;
-
-                const qrBox = document.getElementById('qrcode-box');
-                qrBox.innerHTML = '';
-                if (typeof QRCode !== 'undefined') {
-                    const currentBaseUrl = window.location.href.split('?')[0];
-                    new QRCode(qrBox, {
-                        text: `${currentBaseUrl}?pin=${pinStanza}`,
-                        width: 180, 
-                        height: 180
-                    });
-                } else {
-                    qrBox.innerHTML = '<p class="text-xs text-purple-950 font-bold p-2">QR Code non disponibile.<br>Usa il PIN qui sotto per connetterti!</p>';
-                }
+                
+                new QRCode(document.getElementById("qrcode-box"), {
+                    text: pin, width: 150, height: 150
+                });
             });
 
+            // MODIFICA 1: LA LIM ASPETTA CHE LO STUDENTE SIA PRONTO
             peer.on('connection', (conn) => {
                 connessioniStudenti.push(conn);
-                aggiornaContatoreAlunni();
-
-                conn.on('open', () => {
-                    inviaStatoAGliStudenti();
-                });
+                document.getElementById('players-count').textContent = connessioniStudenti.length;
 
                 conn.on('data', (dati) => {
-                    if (dati.tipo === 'RISPOSTA_CORRETTA' && dati.valore === state.matchingSymbol) {
-                        punteggiClasse[dati.nome] = dati.score;
-                        const targetEls = document.querySelectorAll(`.symbol-item[data-val="${state.matchingSymbol}"]`);
-                        targetEls.forEach(el => el.classList.add('symbol-correct'));
-                        registraEsitoPositivo(dati.valore, targetEls[0], dati.nome, false);
+                    // HANDSHAKE: Inviamo i dati solo quando il telefono dice di essere pronto
+                    if (dati.tipo === 'STUDENTE_PRONTO') {
+                        conn.send({
+                            tipo: 'AGGIORNA_CARTE',
+                            card1: state.card1,
+                            card2: state.card2,
+                            matchingSymbol: state.matchingSymbol
+                        });
+                        if (state.timer < 60 && state.timer > 0) {
+                            conn.send({ tipo: 'START_TIMER' });
+                            conn.send({ tipo: 'SYNC_TIMER', time: state.timer });
+                        }
+                    }
+                    else if (dati.tipo === 'RISPOSTA_CORRETTA') {
+                        // Lo studente ha indovinato, cambia carte per tutti
+                        nextPair(true);
                     }
                 });
 
                 conn.on('close', () => {
                     connessioniStudenti = connessioniStudenti.filter(c => c !== conn);
-                    aggiornaContatoreAlunni();
+                    document.getElementById('players-count').textContent = connessioniStudenti.length;
                 });
             });
         }
 
         function connettiComeStudente() {
-            let pin = document.getElementById('room-pin-input').value.trim();
-            mioNomeStudente = document.getElementById('student-name').value.trim() || "Alunno";
+            const pin = document.getElementById('room-pin-input').value.trim();
+            mioNomeStudente = document.getElementById('student-name').value.trim() || "Studente";
             
-            if (!pin) { 
-                alert("Inserisci il PIN della Stanza!"); 
-                return; 
-            }
-
-            stanzaPinCorrente = pin;
-            ruolounico = 'studente';
+            if (pin.length !== 4) return alert("Inserisci un PIN di 4 cifre.");
             
-            document.getElementById('start-timer-btn').classList.add('hidden');
-            document.getElementById('btn-next-pair').classList.add('hidden');
-
-            peer = new Peer();
-
+            if (!peer) peer = new Peer(); // Inizializza peer se non esiste
+            
             peer.on('open', () => {
-                connDocente = peer.connect(PREFISSO_STANZA + pin);
+                connDocente = peer.connect(`colpo-docente-${pin}`);
                 
                 connDocente.on('open', () => {
-                    chiudiModalConnessione();
-                    
-                    document.getElementById('txt-multiplayer').textContent = `In Stanza: ${pin} • ${mioNomeStudente}`;
-                    
-                    document.getElementById('repeat-speech-btn').classList.add('hidden');
-                    document.getElementById('toggle-touch-btn').classList.add('hidden');
+                    document.getElementById('connection-modal').classList.add('hidden');
+                    document.getElementById('txt-multiplayer').textContent = `Connesso: ${mioNomeStudente}`;
+                    document.getElementById('host-controls').classList.add('hidden'); // Nasconde controlli host
+                    state.isStudent = true;
 
-                    if (recognition) {
-                        toggleSpeechRecognition();
-                    }
-
-                    showWarningBanner(`✅ Connesso alla stanza ${pin}!`, 3000, false);
-                });
-
-                connDocente.on('error', (err) => {
-                    alert("Impossibile connettersi alla stanza. Verifica che il PIN sia corretto!");
+                    // MODIFICA 2: IL TELEFONO E' PRONTO, BUSSA ALLA LIM
+                    connDocente.send({ tipo: 'STUDENTE_PRONTO' });
                 });
 
                 connDocente.on('data', (dati) => {
                     if (dati.tipo === 'AGGIORNA_CARTE') {
-                        if (dati.n && (state.n !== dati.n || state.symbolsPerCard !== dati.symbolsPerCard)) {
-                            state.n = dati.n;
-                            state.symbolsPerCard = dati.symbolsPerCard;
-                            buildDeck();
-                        }
-                        if (dati.touchEnabled !== undefined) {
-                            state.touchEnabled = dati.touchEnabled;
-                        }
-
-                        state.card1Index = dati.card1Index;
-                        state.card2Index = dati.card2Index;
+                        state.card1 = dati.card1;
+                        state.card2 = dati.card2;
                         state.matchingSymbol = dati.matchingSymbol;
-                        renderCard('card1', state.deckCards[dati.card1Index]);
-                        renderCard('card2', state.deckCards[dati.card2Index]);
-                    } 
-                    else if (dati.tipo === 'SET_INPUT_MODE') {
-                        state.touchEnabled = dati.touchEnabled;
-                        if (!state.touchEnabled) {
-                            showWarningBanner("🎙️ L'Host ha attivato la modalità Solo Voce! Il tocco è disabilitato.", 4500, false);
-                        } else {
-                            showWarningBanner("👆 Modalità Touch riattivata dall'Host!", 3000, false);
-                        }
-                    }
-                    else if (dati.tipo === 'TIMER_TICK') {
+                        disegnaCarte();
+                    } else if (dati.tipo === 'START_TIMER') {
                         document.getElementById('timer-box').classList.remove('hidden');
-                        document.getElementById('timer-display').textContent = dati.timeLeft;
-                    } 
-                    else if (dati.tipo === 'GAMEOVER') {
-                        showGameOverModal();
+                    } else if (dati.tipo === 'SYNC_TIMER') {
+                        document.getElementById('timer-display').textContent = dati.time;
                     }
                 });
             });
-
-            peer.on('error', (err) => {
-                alert("Errore di rete durante la connessione. Riprova tra qualche istante.");
-            });
         }
 
-        function inviaStatoAGliStudenti() {
-            connessioniStudenti.forEach(conn => {
-                if (conn.open) {
-                    conn.send({
-                        tipo: 'AGGIORNA_CARTE',
-                        card1Index: state.card1Index,
-                        card2Index: state.card2Index,
-                        matchingSymbol: state.matchingSymbol,
-                        n: state.n,
-                        symbolsPerCard: state.symbolsPerCard,
-                        touchEnabled: state.touchEnabled
-                    });
-                }
-            });
-        }
+        // Inizializza primo mazzo all'avvio
+        nextPair();
 
-        function inviaEventoSistemaStudenti(tipo, payload = {}) {
-            connessioniStudenti.forEach(conn => {
-                if (conn.open) {
-                    conn.send({ tipo: tipo, ...payload });
-                }
-            });
-        }
-
-        function aggiornaContatoreAlunni() {
-            document.getElementById('players-count').textContent = connessioniStudenti.length;
-        }
-
-        function toggleTimeAttack() {
-            if (ruolounico === 'studente') return;
-
-            if (state.isTimeAttack) {
-                stopTimeAttack();
-            } else {
-                startTimeAttack();
-            }
-        }
-
-        function startTimeAttack() {
-            state.isTimeAttack = true;
-            state.timeLeft = 60;
-            resetScore();
-
-            document.getElementById('timer-box').classList.remove('hidden');
-            document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-stop"></i> Ferma Sfida`;
-            document.getElementById('start-timer-btn').className = "px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold transition flex items-center gap-2 shadow-lg text-sm";
-
-            state.timerInterval = setInterval(() => {
-                state.timeLeft--;
-                document.getElementById('timer-display').textContent = state.timeLeft;
-                
-                if (ruolounico === 'docente') {
-                    inviaEventoSistemaStudenti('TIMER_TICK', { timeLeft: state.timeLeft });
-                }
-
-                if (state.timeLeft <= 0) {
-                    stopTimeAttack();
-                    showGameOverModal();
-                }
-            }, 1000);
-        }
-
-        function stopTimeAttack() {
-            state.isTimeAttack = false;
-            clearInterval(state.timerInterval);
-            document.getElementById('timer-box').classList.add('hidden');
-            document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-play"></i> Avvia Sfida 60s`;
-            document.getElementById('start-timer-btn').className = "px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm";
-        }
-
-        function showGameOverModal() {
-            if (ruolounico === 'docente') {
-                inviaEventoSistemaStudenti('GAMEOVER');
-                document.getElementById('single-score-view').classList.add('hidden');
-                document.getElementById('leaderboard-view').classList.remove('hidden');
-                
-                const listEl = document.getElementById('leaderboard-list');
-                listEl.innerHTML = '';
-
-                const sorted = Object.entries(punteggiClasse).sort((a, b) => b[1] - a[1]);
-                
-                if (sorted.length === 0) {
-                    listEl.innerHTML = '<p class="text-xs text-purple-300 italic">Nessun punto registrato dagli alunni.</p>';
-                } else {
-                    sorted.forEach(([nome, punti], idx) => {
-                        let badgeColor = "bg-purple-950 text-purple-200 border-purple-700";
-                        let rankIcon = `#${idx + 1}`;
-                        if (idx === 0) { badgeColor = "bg-amber-400 text-purple-950 font-bold border-amber-300"; rankIcon = "🥇 1°"; }
-                        else if (idx === 1) { badgeColor = "bg-slate-300 text-purple-950 font-bold border-white"; rankIcon = "🥈 2°"; }
-                        else if (idx === 2) { badgeColor = "bg-amber-700 text-white font-bold border-amber-600"; rankIcon = "🥉 3°"; }
-
-                        const item = document.createElement('div');
-                        item.className = `flex justify-between items-center p-2.5 rounded-xl border ${badgeColor}`;
-                        item.innerHTML = `
-                            <span class="text-sm font-semibold">${rankIcon} ${nome}</span>
-                            <span class="text-base font-extrabold font-mono">${punti} pt</span>
-                        `;
-                        listEl.appendChild(item);
-                    });
-                }
-            } else {
-                document.getElementById('single-score-view').classList.remove('hidden');
-                document.getElementById('leaderboard-view').classList.add('hidden');
-                document.getElementById('final-score-display').textContent = state.score;
-                
-                let bestScore = parseInt(localStorage.getItem('colpodocchio_best_score')) || 0;
-                
-                if (state.score > bestScore) {
-                    bestScore = state.score;
-                    localStorage.setItem('colpodocchio_best_score', bestScore);
-                    document.getElementById('new-record-badge').classList.remove('hidden');
-                    confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
-                } else {
-                    document.getElementById('new-record-badge').classList.add('hidden');
-                }
-                
-                document.getElementById('best-score-display').textContent = bestScore;
-            }
-
-            document.getElementById('gameover-modal').classList.remove('hidden');
-        }
-
-        function closeGameOverModal() {
-            document.getElementById('gameover-modal').classList.add('hidden');
-            if (ruolounico !== 'studente') {
-                nextPair(true);
-            }
-        }
-
-        function requireSettingsAccess() {
-            document.getElementById('pin-modal').classList.remove('hidden');
-            const pinInput = document.getElementById('teacher-pin');
-            pinInput.value = '';
-            document.getElementById('pin-error').classList.add('hidden');
-            setTimeout(() => pinInput.focus(), 100);
-        }
-
-        function closePinModal() {
-            document.getElementById('pin-modal').classList.add('hidden');
-        }
-
-        function checkPin() {
-            const input = document.getElementById('teacher-pin').value;
-            if (input === TEACHER_PIN) {
-                closePinModal();
-                openSettingsModal();
-            } else {
-                document.getElementById('pin-error').classList.remove('hidden');
-                document.getElementById('teacher-pin').value = '';
-                document.getElementById('teacher-pin').focus();
-            }
-        }
-
-        function openSettingsModal() {
-            document.getElementById('settings-modal').classList.remove('hidden');
-        }
-
-        function closeSettingsModal() {
-            document.getElementById('settings-modal').classList.add('hidden');
-        }
-
-        function setDeckOrder(orderN) {
-            state.n = orderN;
-            state.symbolsPerCard = orderN + 1;
-
-            const btn5 = document.getElementById('order-5-btn');
-            const btn7 = document.getElementById('order-7-btn');
-
-            if (orderN === 5) {
-                btn5.className = "p-3 rounded-xl border border-amber-400 bg-amber-400/20 text-center font-bold text-sm";
-                btn7.className = "p-3 rounded-xl border border-purple-700 bg-purple-950/60 hover:bg-purple-800 text-center font-bold text-sm";
-            } else {
-                btn7.className = "p-3 rounded-xl border border-amber-400 bg-amber-400/20 text-center font-bold text-sm";
-                btn5.className = "p-3 rounded-xl border border-purple-700 bg-purple-950/60 hover:bg-purple-800 text-center font-bold text-sm";
-            }
-        }
-
-        function applySettings() {
-            buildDeck();
-            closeSettingsModal();
-        }
     </script>
 </body>
 </html>
