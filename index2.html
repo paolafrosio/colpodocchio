@@ -797,7 +797,9 @@
                     document.getElementById('score-display').textContent = state.score;
                     if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
                     confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
-                    speakWord(val);
+                    
+                    // Nota: speakWord(val) disattivato sul tablet per evitare l'eco.
+                    // Sarà la LIM a riprodurre l'audio per tutta la classe!
 
                     connDocente.send({
                         tipo: 'RISPOSTA_CORRETTA',
