@@ -514,11 +514,12 @@
                 const wordTarget = state.matchingSymbol.toLowerCase();
                 const cleanedTranscript = transcript.replace(/\b(il|lo|la|i|gli|le|un|uno|una|del|della|degli)\b/gi, '').trim();
 
-                if (transcript.includes(wordTarget) || cleanedTranscript.includes(wordTarget)) {
-                    // Trova l'elemento esatto che contiene il simbolo vincente
-                    const targetEl = document.querySelector(`.symbol-item[data-val="${state.matchingSymbol}"]`);
-                    handleSymbolClick(state.matchingSymbol, targetEl);
-                }
+if (transcript.includes(wordTarget) || cleanedTranscript.includes(wordTarget)) {
+        // Seleziona TUTTI gli elementi corrispondenti (sia su card1 che su card2)
+        const targetEls = document.querySelectorAll(`.symbol-item[data-val="${state.matchingSymbol}"]`);
+        targetEls.forEach(el => el.classList.add('symbol-correct'));
+        handleSymbolClick(state.matchingSymbol, targetEls[0]);
+    }
             };
 
             recognition.onerror = function(event) {
@@ -782,12 +783,15 @@
             });
         }
 
-        function handleSymbolClick(val, element) {
+function handleSymbolClick(val, element) {
             if (isTransitioning || isPenalized) return;
 
             if (val === state.matchingSymbol) {
                 isTransitioning = true;
-                if (element) element.classList.add('symbol-correct');
+                
+                // Anima lo zoom verde su ENTRAMBE le carte contemporaneamente!
+                const targets = document.querySelectorAll(`.symbol-item[data-val="${val}"]`);
+                targets.forEach(el => el.classList.add('symbol-correct'));
                 
                 if (ruolounico === 'studente' && connDocente && connDocente.open) {
                     state.score += 1;
@@ -912,11 +916,11 @@
                 });
 
                 conn.on('data', (dati) => {
-                    if (dati.tipo === 'RISPOSTA_CORRETTA' && dati.valore === state.matchingSymbol) {
-                        punteggiClasse[dati.nome] = dati.score;
-                        const targetEl = document.querySelector(`.symbol-item[data-val="${state.matchingSymbol}"]`);
-                        registraEsitoPositivo(dati.valore, targetEl, dati.nome, false);
-                    }
+if (dati.tipo === 'RISPOSTA_CORRETTA' && dati.valore === state.matchingSymbol) {
+        punteggiClasse[dati.nome] = dati.score;
+        const targetEl = document.querySelector(`.symbol-item[data-val="${state.matchingSymbol}"]`);
+        registraEsitoPositivo(dati.valore, targetEl, dati.nome, false);
+    }
                 });
 
                 conn.on('close', () => {
