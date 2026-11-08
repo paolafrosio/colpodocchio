@@ -182,7 +182,7 @@
             </div>
         </div>
 
-        <!-- NUOVA BARRA GIOCATORI CONNESSI SULLA LIM -->
+        <!-- BARRA GIOCATORI CONNESSI SULLA LIM -->
         <div id="live-players-bar" class="hidden w-full bg-purple-950/60 border border-purple-800/80 rounded-xl p-2 flex items-center gap-2 overflow-x-auto min-h-[46px]">
             <span class="text-xs text-purple-300 uppercase font-bold tracking-wider px-2 flex items-center gap-1">
                 <i class="fa-solid fa-users text-amber-400"></i> In gioco:
@@ -821,11 +821,13 @@
                         if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
                         confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
                         
+                        let uniqueDeviceStudentId = sessionStorage.getItem('colpodocchio_device_id');
                         connDocente.send({
                             tipo: 'RISPOSTA_CORRETTA',
                             valore: val,
                             nome: mioNomeStudente,
-                            score: state.score
+                            score: state.score,
+                            studentId: uniqueDeviceStudentId
                         });
 
                         setTimeout(() => { isTransitioning = false; }, 1500);
@@ -880,7 +882,6 @@
 
             document.getElementById('last-word-display').textContent = `${val} (${nomeVincitore})`;
 
-            // Animazione Badge Giocatore sulla LIM
             if (ruolounico === 'docente') {
                 const playerBadges = document.querySelectorAll(`.player-badge-item`);
                 playerBadges.forEach(badge => {
@@ -900,20 +901,29 @@
         function resetScore() {
             state.score = 0;
             punteggiClasse = {};
+            mappaConnessioniStudenti.forEach(st => st.score = 0);
             document.getElementById('score-display').textContent = "0";
             document.getElementById('last-word-display').textContent = "---";
             state.lastSpokenWord = '';
             aggiornaBarraGiocatoriLIM();
+            
+            // Invia il comando di azzeramento globale agli studenti se siamo l'Host
+            if (ruolounico === 'docente') {
+                inviaEventoSistemaStudenti('RESET_SCORES');
+            }
         }
 
         function mostraModalConnessione() { document.getElementById('connection-modal').classList.remove('hidden'); }
         function chiudiModalConnessione() { document.getElementById('connection-modal').classList.add('hidden'); }
 
-        /* --- INVIO PACCHETTI ULTRALEGGERI DALLA LIM --- */
+        /* --- SINCRO CORRETTA DEI PUNTEGGI SU MAPPA HOST & RESET ALLA CREAZIONE STANZA --- */
         function avviaComeDocente() {
             ruolounico = 'docente';
             const pinStanza = Math.floor(1000 + Math.random() * 9000).toString();
             stanzaPinCorrente = pinStanza;
+
+            // Azzera subito tutti i punti locali prima di creare la nuova stanza
+            resetScore();
 
             peer = new Peer(PREFISSO_STANZA + pinStanza);
             
@@ -937,16 +947,17 @@
                     if (dati.tipo === 'STUDENTE_PRONTO') {
                         const idStudente = dati.studentId || conn.peer;
                         
+                        // Il nuovo studente entra partendo sempre da 0 punti
+                        let currentScore = 0;
                         if (mappaConnessioniStudenti.has(idStudente)) {
                             try { mappaConnessioniStudenti.get(idStudente).conn.close(); } catch(e){}
                         }
                         
-                        mappaConnessioniStudenti.set(idStudente, { conn: conn, nome: dati.nome, score: 0 });
-                        punteggiClasse[dati.nome] = 0;
+                        mappaConnessioniStudenti.set(idStudente, { conn: conn, nome: dati.nome, score: currentScore });
+                        punteggiClasse[dati.nome] = currentScore;
                         aggiornaContatoreAlunni();
                         aggiornaBarraGiocatoriLIM();
 
-                        // PACCHETTO ULTRALEGGERO: invia solo indici carte
                         conn.send({
                             tipo: 'AGGIORNA_CARTE',
                             c1: state.card1Index,
@@ -961,10 +972,17 @@
                     }
                     else if (dati.tipo === 'RISPOSTA_CORRETTA' && dati.valore === state.matchingSymbol) {
                         punteggiClasse[dati.nome] = dati.score;
-                        if (mappaConnessioniStudenti.has(dati.studentId)) {
+                        
+                        if (dati.studentId && mappaConnessioniStudenti.has(dati.studentId)) {
                             mappaConnessioniStudenti.get(dati.studentId).score = dati.score;
+                        } else {
+                            mappaConnessioniStudenti.forEach(st => {
+                                if (st.nome === dati.nome) st.score = dati.score;
+                            });
                         }
+                        
                         aggiornaBarraGiocatoriLIM();
+
                         const targetEls = document.querySelectorAll(`.symbol-item[data-val="${state.matchingSymbol}"]`);
                         targetEls.forEach(el => el.classList.add('symbol-correct'));
                         registraEsitoPositivo(dati.valore, targetEls[0], dati.nome, false);
@@ -1001,7 +1019,7 @@
             });
         }
 
-        /* --- CONNETTIVITÀ STUDENTE CON STOP HANDSHAKE IMMEDIATO --- */
+        /* --- CONNETTIVITÀ STUDENTE CON AZZERAMENTO LOCALE ALL'INGRESSO --- */
         function connettiComeStudente() {
             let pin = document.getElementById('room-pin-input').value.trim();
             mioNomeStudente = document.getElementById('student-name').value.trim() || "Alunno";
@@ -1011,6 +1029,10 @@
             const enterBtn = document.getElementById('btn-enter-room');
             enterBtn.disabled = true;
             enterBtn.textContent = "Connessione in corso...";
+
+            // Resetta i punti dello studente quando entra in una nuova stanza
+            state.score = 0;
+            document.getElementById('score-display').textContent = "0";
 
             stanzaPinCorrente = pin;
             ruolounico = 'studente';
@@ -1075,7 +1097,6 @@
             });
 
             connDocente.on('data', (dati) => {
-                // RICEZIONE CONFERMA: STOP HANDSHAKE PER LIBERARE LA RETE
                 if (studentHandshakeInterval) {
                     clearInterval(studentHandshakeInterval);
                     studentHandshakeInterval = null;
@@ -1099,6 +1120,12 @@
                     renderCard('card1', state.deckCards[dati.c1]);
                     renderCard('card2', state.deckCards[dati.c2]);
                 } 
+                else if (dati.tipo === 'RESET_SCORES') {
+                    // Resetta il punteggio locale quando richiesto dall'Host
+                    state.score = 0;
+                    document.getElementById('score-display').textContent = "0";
+                    showWarningBanner("🔄 Nuova partita avviata! Punti azzerati.", 2500, false);
+                }
                 else if (dati.tipo === 'SET_INPUT_MODE') {
                     state.touchEnabled = dati.touchEnabled;
                     if (!state.touchEnabled) {
@@ -1152,6 +1179,8 @@
         function startTimeAttack() {
             state.isTimeAttack = true;
             state.timeLeft = 60;
+            
+            // AZZERA AUTOMATICAMENTE TUTTI I PUNTEGGI ALL'AVVIO DELLA SFIDA
             resetScore();
 
             document.getElementById('timer-box').classList.remove('hidden');
