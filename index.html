@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Colpo d'Occhio CPIA - Italiano L2</title>
+    <title>Colpo d'Occhio CPIA - Live Class</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -12,6 +12,9 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <!-- Tone.js for Sound Effects -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- PeerJS e QR Code da CDN ufficiali per funzionamento online garantito -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -121,6 +124,10 @@
         </div>
 
         <div class="flex items-center gap-2 md:gap-3">
+            <button id="btn-multiplayer" onclick="mostraModalConnessione()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
+                <i class="fa-solid fa-users"></i>
+                <span id="txt-multiplayer">Modalità Classe</span>
+            </button>
             <button id="toggle-labels-btn" onclick="toggleLabels()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition flex items-center gap-2 text-xs md:text-sm border border-slate-700 shadow-sm" title="Mostra o nascondi il testo scritto">
                 <i id="labels-icon" class="fa-solid fa-font text-emerald-400"></i>
                 <span id="labels-status-text" class="hidden md:inline font-medium">Testo: ON</span>
@@ -146,6 +153,9 @@
                 </span>
                 <span id="symbols-count-badge" class="bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full">
                     8 Figure/Carta
+                </span>
+                <span id="connected-players-badge" class="bg-blue-500/20 border border-blue-500/40 text-blue-300 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full hidden">
+                    <i class="fa-solid fa-user-group"></i> Alunni: <b id="players-count">0</b>
                 </span>
             </div>
 
@@ -201,6 +211,47 @@
         Colpo d'Occhio Didattico • Generatore Matematico Proiettivo • Per LIM e Tablet
     </footer>
 
+    <!-- MODALE CONNETTIVITÀ MULTIPLAYER (PEERJS) -->
+    <div id="connection-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-3xl p-6 text-white shadow-2xl flex flex-col">
+            <h2 class="text-xl font-bold mb-4 text-indigo-400 flex items-center gap-2">
+                <i class="fa-solid fa-network-wired"></i> Modalità Classe in Tempo Reale
+            </h2>
+            
+            <div id="role-selection" class="space-y-4">
+                <button onclick="avviaComeDocente()" class="w-full p-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 font-bold flex items-center gap-4 transition text-left">
+                    <i class="fa-solid fa-desktop text-3xl"></i>
+                    <div>
+                        <div class="text-base">Sono sulla LIM (Crea Stanza)</div>
+                        <div class="text-xs font-normal text-indigo-200">Genera il PIN per far collegare gli alunni</div>
+                    </div>
+                </button>
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t border-slate-700"></div>
+                    <span class="flex-shrink mx-4 text-slate-500 text-xs uppercase font-semibold">oppure</span>
+                    <div class="flex-grow border-t border-slate-700"></div>
+                </div>
+                <div class="space-y-2">
+                    <input type="text" id="student-name" placeholder="Il tuo Nome" class="w-full bg-slate-950 border border-slate-700 p-3 rounded-xl text-center text-white focus:border-emerald-400 outline-none">
+                    <input type="text" id="room-pin-input" placeholder="PIN Stanza (es. 123456)" class="w-full bg-slate-950 border border-slate-700 p-3 rounded-xl text-center text-lg tracking-widest text-white focus:border-emerald-400 outline-none">
+                    <button onclick="connettiComeStudente()" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition">
+                        Entra nel Gioco (Studente)
+                    </button>
+                </div>
+            </div>
+
+            <div id="teacher-qr-view" class="hidden flex-col items-center text-center space-y-4">
+                <div class="bg-white p-3 rounded-2xl inline-block shadow-lg" id="qrcode-box"></div>
+                <div class="text-lg font-bold text-emerald-400">
+                    PIN Stanza: <span id="display-pin-code" class="text-2xl font-mono text-white bg-slate-800 px-3 py-1 rounded-xl">------</span>
+                </div>
+                <p class="text-xs text-slate-400">Inquadra il QR con il tablet o inserisci il PIN per giocare!</p>
+            </div>
+
+            <button onclick="chiudiModalConnessione()" class="mt-6 w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 text-sm font-semibold">Chiudi</button>
+        </div>
+    </div>
+
     <!-- MODALE IMPOSTAZIONI E CARICAMENTO SIMBOLI -->
     <div id="settings-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-3xl p-6 text-white shadow-2xl flex flex-col max-h-[90vh]">
@@ -233,7 +284,7 @@
                     <label class="block text-sm font-semibold text-slate-300 mb-3">Scegli la Categoria / Vocabolario:</label>
                     <div id="presets-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         <button onclick="selectPreset('corpo')" class="preset-btn p-3 rounded-2xl border-2 border-emerald-500/40 bg-emerald-950/40 hover:bg-emerald-900/50 flex flex-col items-center gap-2 text-center transition">
-                            <span class="text-2xl">👁️</span>
+                            <span class="text-2xl">👄</span>
                             <span class="font-bold text-xs sm:text-sm text-emerald-200">Il Corpo Umano</span>
                         </button>
                         <button onclick="selectPreset('casa')" class="preset-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 hover:bg-slate-800 flex flex-col items-center gap-2 text-center transition">
@@ -282,11 +333,9 @@
                             <button onclick="clearCustomSymbols()" class="text-xs text-red-400 hover:text-red-300 transition">Svuota Elenco</button>
                         </div>
                         <div id="symbols-preview-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto p-2 bg-slate-900 rounded-xl border border-slate-800">
-                            <!-- Renderizzato da JS -->
                         </div>
                     </div>
 
-                    <!-- NUOVO BLOCCO: SALVATAGGIO CATEGORIA PERSONALIZZATA -->
                     <div class="mt-4 pt-4 border-t border-slate-800">
                         <label class="block text-sm font-semibold text-emerald-400 mb-2">
                             <i class="fa-solid fa-floppy-disk"></i> Salva come Nuova Categoria:
@@ -350,49 +399,57 @@
     <script>
         /* --- COSTANTI SICUREZZA --- */
         const TEACHER_PIN = "1234";
+        const PREFISSO_STANZA = 'colpo-docchio-';
 
-        /* --- SET PREDEFINITI VOCABOLARIO CPIA L2 COMPLETI --- */
+        /* --- STATO PEERJS / MULTIPLAYER --- */
+        let peer = null;
+        let ruolounico = 'standalone'; // 'docente', 'studente', 'standalone'
+        let connessioniStudenti = [];
+        let connDocente = null;
+        let mioNomeStudente = "Alunno";
+
+        /* --- SET PREDEFINITI VOCABOLARIO CPIA L2 COMPLETI CON EMOJI RIPRISTINATE --- */
         const PRESETS = {
             corpo: {
                 name: "Il Corpo Umano (30+ Parti)",
                 badge: '<i class="fa-solid fa-user"></i> Corpo Umano',
                 items: [
-                    { type: 'emoji', icon: '👄', val: 'bocca' }, { type: 'emoji', icon: '👃', val: 'naso' }, { type: 'emoji', icon: '👁️', val: 'occhio' }, { type: 'emoji', icon: '👂', val: 'orecchio' }, { type: 'emoji', icon: '✋', val: 'mano' }, { type: 'emoji', icon: '🦶', val: 'piede' }, { type: 'emoji', icon: '🗣️', val: 'testa' }, { type: 'emoji', icon: '💪', val: 'braccio' }, { type: 'emoji', icon: '🦵', val: 'gamba' }, { type: 'emoji', icon: '🫃', val: 'pancia' }, { type: 'emoji', icon: '🦷', val: 'dente' }, { type: 'emoji', icon: '👅', val: 'lingua' }, { type: 'emoji', icon: '🫀', val: 'cuore' }, { type: 'emoji', icon: '🧠', val: 'cervello' }, { type: 'emoji', icon: '🦴', val: 'osso' }, { type: 'emoji', icon: '💇', val: 'capelli' }, { type: 'emoji', icon: '👈', val: 'dito' }, { type: 'emoji', icon: '🫁', val: 'polmoni' }, { type: 'emoji', icon: '🦵', val: 'ginocchio' }, { type: 'emoji', icon: '🤳', val: 'spalla' }, { type: 'emoji', icon: '👔', val: 'collo' }, { type: 'emoji', icon: '🧍', val: 'schiena' }, { type: 'emoji', icon: '🫱', val: 'gomito' }, { type: 'emoji', icon: '👕', val: 'petto' }, { type: 'emoji', icon: '👣', val: 'impronta' }, { type: 'emoji', icon: '👀', val: 'occhi' }, { type: 'emoji', icon: '💅', val: 'unghia' }, { type: 'emoji', icon: '🧔', val: 'barba' }, { type: 'emoji', icon: '👨‍🦰', val: 'baffi' }, { type: 'emoji', icon: '🩸', val: 'sangue' }, { type: 'emoji', icon: '🩺', val: 'salute' }, { type: 'emoji', icon: '🩹', val: 'cerotto' }, { type: 'emoji', icon: '🧬', val: 'corpo' }, { type: 'emoji', icon: '😊', val: 'faccia' }, { type: 'emoji', icon: '🤝', val: 'pugno' }, { type: 'emoji', icon: '🦿', val: 'gamba artificiale' }, { type: 'emoji', icon: '🦾', val: 'braccio robotico' }, { type: 'emoji', icon: '🩻', val: 'radiografia' }, { type: 'emoji', icon: '🤒', val: 'febbre' }, { type: 'emoji', icon: '😷', val: 'mascherina' }, { type: 'emoji', icon: '💉', val: 'siringa' }
+                    { type: 'emoji', icon: '👄', val: 'bocca' }, { type: 'emoji', icon: '👃', val: 'naso' }, { type: 'emoji', icon: '👁️', val: 'occhio' }, { type: 'emoji', icon: '👂', val: 'orecchio' }, { type: 'emoji', icon: '✋', val: 'mano' }, { type: 'emoji', icon: '🦶', val: 'piede' }, { type: 'emoji', icon: '🗣️', val: 'testa' }, { type: 'emoji', icon: '💪', val: 'braccio' }, { type: 'emoji', icon: '🦵', val: 'gamba' }, { type: 'emoji', icon: '🤰', val: 'pancia' }, { type: 'emoji', icon: '🦷', val: 'dente' }, { type: 'emoji', icon: '👅', val: 'lingua' }, { type: 'emoji', icon: '❤️', val: 'cuore' }, { type: 'emoji', icon: '🧠', val: 'cervello' }, { type: 'emoji', icon: '🦴', val: 'osso' }, { type: 'emoji', icon: '💇', val: 'capelli' }, { type: 'emoji', icon: '👆', val: 'dito' }, { type: 'emoji', icon: '🫁', val: 'polmoni' }, { type: 'emoji', icon: '🦵', val: 'ginocchio' }, { type: 'emoji', icon: '🤷', val: 'spalla' }, { type: 'emoji', icon: '🦒', val: 'collo' }, { type: 'emoji', icon: '🚶', val: 'schiena' }, { type: 'emoji', icon: '💪', val: 'gomito' }, { type: 'emoji', icon: '👕', val: 'petto' }, { type: 'emoji', icon: '👣', val: 'impronta' }, { type: 'emoji', icon: '👀', val: 'occhi' }, { type: 'emoji', icon: '💅', val: 'unghia' }, { type: 'emoji', icon: '🧔', val: 'barba' }, { type: 'emoji', icon: '👨', val: 'baffi' }, { type: 'emoji', icon: '🩸', val: 'sangue' }, { type: 'emoji', icon: '🏥', val: 'salute' }, { type: 'emoji', icon: '🩹', val: 'cerotto' }, { type: 'emoji', icon: '🧍', val: 'corpo' }, { type: 'emoji', icon: '😀', val: 'faccia' }, { type: 'emoji', icon: '👊', val: 'pugno' }, { type: 'emoji', icon: '🦿', val: 'gamba artificiale' }, { type: 'emoji', icon: '🦾', val: 'braccio robotico' }, { type: 'emoji', icon: '🩻', val: 'radiografia' }, { type: 'emoji', icon: '🤒', val: 'febbre' }, { type: 'emoji', icon: '😷', val: 'mascherina' }, { type: 'emoji', icon: '💉', val: 'siringa' }
                 ]
             },
             casa: {
                 name: "La Casa & Oggetti",
                 badge: '<i class="fa-solid fa-house"></i> La Casa',
                 items: [
-                    { type: 'emoji', icon: '🏠', val: 'casa' }, { type: 'emoji', icon: '🪑', val: 'sedia' }, { type: 'emoji', icon: '🛋️', val: 'divano' }, { type: 'emoji', icon: '🛏️', val: 'letto' }, { type: 'emoji', icon: '🚪', val: 'porta' }, { type: 'emoji', icon: '🪟', val: 'finestra' }, { type: 'emoji', icon: '🔑', val: 'chiave' }, { type: 'emoji', icon: '📱', val: 'telefono' }, { type: 'emoji', icon: '📺', val: 'televisione' }, { type: 'emoji', icon: '💡', val: 'lampada' }, { type: 'emoji', icon: '⏰', val: 'orologio' }, { type: 'emoji', icon: '🍽️', val: 'piatto' }, { type: 'emoji', icon: '🥄', val: 'cucchiaio' }, { type: 'emoji', icon: '🍴', val: 'forchetta' }, { type: 'emoji', icon: '🔪', val: 'coltello' }, { type: 'emoji', icon: '🥛', val: 'bicchiere' }, { type: 'emoji', icon: '🧹', val: 'scopa' }, { type: 'emoji', icon: '🧼', val: 'sapone' }, { type: 'emoji', icon: '🪞', val: 'specchio' }, { type: 'emoji', icon: '🖼️', val: 'quadro' }, { type: 'emoji', icon: '🚿', val: 'doccia' }, { type: 'emoji', icon: '🚽', val: 'bagno' }, { type: 'emoji', icon: '🗝️', val: 'chiavi' }, { type: 'emoji', icon: '📦', val: 'scatola' }, { type: 'emoji', icon: '📻', val: 'radio' }, { type: 'emoji', icon: '🕯️', val: 'candela' }, { type: 'emoji', icon: '💻', val: 'computer' }, { type: 'emoji', icon: '📚', val: 'libri' }, { type: 'emoji', icon: '🗑️', val: 'cestino' }, { type: 'emoji', icon: '🪴', val: 'pianta' }, { type: 'emoji', icon: '🧥', val: 'cappotto' }
+                    { type: 'emoji', icon: '🏠', val: 'casa' }, { type: 'emoji', icon: '🪑', val: 'sedia' }, { type: 'emoji', icon: '🛋️', val: 'divano' }, { type: 'emoji', icon: '🛏️', val: 'letto' }, { type: 'emoji', icon: '🚪', val: 'porta' }, { type: 'emoji', icon: '🪟', val: 'finestra' }, { type: 'emoji', icon: '🔑', val: 'chiave' }, { type: 'emoji', icon: '📞', val: 'telefono' }, { type: 'emoji', icon: '📺', val: 'televisione' }, { type: 'emoji', icon: '💡', val: 'lampada' }, { type: 'emoji', icon: '⏰', val: 'orologio' }, { type: 'emoji', icon: '🍽️', val: 'piatto' }, { type: 'emoji', icon: '🥄', val: 'cucchiaio' }, { type: 'emoji', icon: '🍴', val: 'forchetta' }, { type: 'emoji', icon: '🔪', val: 'coltello' }, { type: 'emoji', icon: '🥛', val: 'bicchiere' }, { type: 'emoji', icon: '🧹', val: 'scopa' }, { type: 'emoji', icon: '🧼', val: 'sapone' }, { type: 'emoji', icon: '🪞', val: 'specchio' }, { type: 'emoji', icon: '🖼️', val: 'quadro' }, { type: 'emoji', icon: '🚿', val: 'doccia' }, { type: 'emoji', icon: '🛁', val: 'bagno' }, { type: 'emoji', icon: '🗝️', val: 'chiavi' }, { type: 'emoji', icon: '📦', val: 'scatola' }, { type: 'emoji', icon: '📻', val: 'radio' }, { type: 'emoji', icon: '🕯️', val: 'candela' }, { type: 'emoji', icon: '💻', val: 'computer' }, { type: 'emoji', icon: '📚', val: 'libri' }, { type: 'emoji', icon: '🗑️', val: 'cestino' }, { type: 'emoji', icon: '🪴', val: 'pianta' }, { type: 'emoji', icon: '🧥', val: 'cappotto' }
                 ]
             },
             citta: {
                 name: "La Città & Servizi",
                 badge: '<i class="fa-solid fa-city"></i> La Città',
                 items: [
-                    { type: 'emoji', icon: '🚌', val: 'autobus' }, { type: 'emoji', icon: '🚆', val: 'treno' }, { type: 'emoji', icon: '🏥', val: 'ospedale' }, { type: 'emoji', icon: '🏫', val: 'scuola' }, { type: 'emoji', icon: '🛒', val: 'supermercato' }, { type: 'emoji', icon: '✉️', val: 'posta' }, { type: 'emoji', icon: '🏦', val: 'banca' }, { type: 'emoji', icon: '💊', val: 'farmacia' }, { type: 'emoji', icon: '🚓', val: 'polizia' }, { type: 'emoji', icon: '🚒', val: 'pompieri' }, { type: 'emoji', icon: '🚏', val: 'fermata' }, { type: 'emoji', icon: '🚕', val: 'taxi' }, { type: 'emoji', icon: '🚲', val: 'bicicletta' }, { type: 'emoji', icon: '🚗', val: 'macchina' }, { type: 'emoji', icon: '🚥', val: 'semaforo' }, { type: 'emoji', icon: '🏢', val: 'palazzo' }, { type: 'emoji', icon: '🏪', val: 'negozio' }, { type: 'emoji', icon: '☕', val: 'bar' }, { type: 'emoji', icon: '🍕', val: 'pizzeria' }, { type: 'emoji', icon: '🌳', val: 'parco' }, { type: 'emoji', icon: '✈️', val: 'aeroporto' }, { type: 'emoji', icon: '⛽', val: 'benzinaio' }, { type: 'emoji', icon: '🌉', val: 'ponte' }, { type: 'emoji', icon: '🎟️', val: 'biglietto' }, { type: 'emoji', icon: '🗺️', val: 'mappa' }, { type: 'emoji', icon: '🚶', val: 'pedone' }, { type: 'emoji', icon: '⚓', val: 'porto' }, { type: 'emoji', icon: '🏨', val: 'albergo' }, { type: 'emoji', icon: '⛲', val: 'fontana' }, { type: 'emoji', icon: '🏛️', val: 'museo' }, { type: 'emoji', icon: '🏟️', val: 'stadio' }
+                    { type: 'emoji', icon: '🚌', val: 'autobus' }, { type: 'emoji', icon: '🚆', val: 'treno' }, { type: 'emoji', icon: '🏥', val: 'ospedale' }, { type: 'emoji', icon: '🏫', val: 'scuola' }, { type: 'emoji', icon: '🛒', val: 'supermercato' }, { type: 'emoji', icon: '🏣', val: 'posta' }, { type: 'emoji', icon: '🏦', val: 'banca' }, { type: 'emoji', icon: '💊', val: 'farmacia' }, { type: 'emoji', icon: '🚓', val: 'polizia' }, { type: 'emoji', icon: '🚒', val: 'pompieri' }, { type: 'emoji', icon: '🚏', val: 'fermata' }, { type: 'emoji', icon: '🚕', val: 'taxi' }, { type: 'emoji', icon: '🚲', val: 'bicicletta' }, { type: 'emoji', icon: '🚗', val: 'macchina' }, { type: 'emoji', icon: '🚦', val: 'semaforo' }, { type: 'emoji', icon: '🏢', val: 'palazzo' }, { type: 'emoji', icon: '🏪', val: 'negozio' }, { type: 'emoji', icon: '☕', val: 'bar' }, { type: 'emoji', icon: '🍕', val: 'pizzeria' }, { type: 'emoji', icon: '🛝', val: 'parco' }, { type: 'emoji', icon: '✈️', val: 'aeroporto' }, { type: 'emoji', icon: '⛽', val: 'benzinaio' }, { type: 'emoji', icon: '🌉', val: 'ponte' }, { type: 'emoji', icon: '🎟️', val: 'biglietto' }, { type: 'emoji', icon: '🗺️', val: 'mappa' }, { type: 'emoji', icon: '🚶', val: 'pedone' }, { type: 'emoji', icon: '⚓', val: 'porto' }, { type: 'emoji', icon: '🏨', val: 'albergo' }, { type: 'emoji', icon: '⛲', val: 'fontana' }, { type: 'emoji', icon: '🏛️', val: 'museo' }, { type: 'emoji', icon: '🏟️', val: 'stadio' }
                 ]
             },
             cibo: {
                 name: "Cibo & Bevande",
                 badge: '<i class="fa-solid fa-utensils"></i> Cibo',
                 items: [
-                    { type: 'emoji', icon: '🍎', val: 'mela' }, { type: 'emoji', icon: '🍌', val: 'banana' }, { type: 'emoji', icon: '🍞', val: 'pane' }, { type: 'emoji', icon: '🧀', val: 'formaggio' }, { type: 'emoji', icon: '🥛', val: 'latte' }, { type: 'emoji', icon: '🥩', val: 'carne' }, { type: 'emoji', icon: '🐟', val: 'pesce' }, { type: 'emoji', icon: '🥚', val: 'uovo' }, { type: 'emoji', icon: '🍕', val: 'pizza' }, { type: 'emoji', icon: '🍝', val: 'pasta' }, { type: 'emoji', icon: '🥗', val: 'insalata' }, { type: 'emoji', icon: '🍅', val: 'pomodoro' }, { type: 'emoji', icon: '🥔', val: 'patata' }, { type: 'emoji', icon: '🥕', val: 'carota' }, { type: 'emoji', icon: '🍊', val: 'arancia' }, { type: 'emoji', icon: '🍇', val: 'uva' }, { type: 'emoji', icon: '☕', val: 'caffè' }, { type: 'emoji', icon: '🍵', val: 'tè' }, { type: 'emoji', icon: '💧', val: 'acqua' }, { type: 'emoji', icon: '🍦', val: 'gelato' }, { type: 'emoji', icon: '🍰', val: 'torta' }, { type: 'emoji', icon: '🍫', val: 'cioccolato' }, { type: 'emoji', icon: '🍚', val: 'riso' }, { type: 'emoji', icon: '🍋', val: 'limone' }, { type: 'emoji', icon: '🍓', val: 'fragola' }, { type: 'emoji', icon: '🥒', val: 'cetriolo' }, { type: 'emoji', icon: '🧅', val: 'cipolla' }, { type: 'emoji', icon: '🥖', val: 'baguette' }, { type: 'emoji', icon: '🥐', val: 'cornetto' }, { type: 'emoji', icon: '🧃', val: 'succo' }, { type: 'emoji', icon: '🧂', val: 'sale' }
+                    { type: 'emoji', icon: '🍎', val: 'mela' }, { type: 'emoji', icon: '🍌', val: 'banana' }, { type: 'emoji', icon: '🍞', val: 'pane' }, { type: 'emoji', icon: '🧀', val: 'formaggio' }, { type: 'emoji', icon: '🥛', val: 'latte' }, { type: 'emoji', icon: '🥩', val: 'carne' }, { type: 'emoji', icon: '🐟', val: 'pesce' }, { type: 'emoji', icon: '🥚', val: 'uovo' }, { type: 'emoji', icon: '🍕', val: 'pizza' }, { type: 'emoji', icon: '🍝', val: 'pasta' }, { type: 'emoji', icon: '🥗', val: 'insalata' }, { type: 'emoji', icon: '🍅', val: 'pomodoro' }, { type: 'emoji', icon: '🥔', val: 'patata' }, { type: 'emoji', icon: '🥕', val: 'carota' }, { type: 'emoji', icon: '🍊', val: 'arancia' }, { type: 'emoji', icon: '🍇', val: 'uva' }, { type: 'emoji', icon: '☕', val: 'caffè' }, { type: 'emoji', icon: '🍵', val: 'tè' }, { type: 'emoji', icon: '💧', val: 'acqua' }, { type: 'emoji', icon: '🍨', val: 'gelato' }, { type: 'emoji', icon: '🍰', val: 'torta' }, { type: 'emoji', icon: '🍫', val: 'cioccolato' }, { type: 'emoji', icon: '🍚', val: 'riso' }, { type: 'emoji', icon: '🍋', val: 'limone' }, { type: 'emoji', icon: '🍓', val: 'fragola' }, { type: 'emoji', icon: '🥒', val: 'cetriolo' }, { type: 'emoji', icon: '🧅', val: 'cipolla' }, { type: 'emoji', icon: '🥖', val: 'baguette' }, { type: 'emoji', icon: '🥐', val: 'cornetto' }, { type: 'emoji', icon: '🧃', val: 'succo' }, { type: 'emoji', icon: '🧂', val: 'sale' }
                 ]
             },
             azioni: {
                 name: "Verbi d'Azione",
                 badge: '<i class="fa-solid fa-person-running"></i> Azioni',
                 items: [
-                    { type: 'emoji', icon: '🏃', val: 'correre' }, { type: 'emoji', icon: '🚶', val: 'camminare' }, { type: 'emoji', icon: '🍽️', val: 'mangiare' }, { type: 'emoji', icon: '🥤', val: 'bere' }, { type: 'emoji', icon: '😴', val: 'dormire' }, { type: 'emoji', icon: '📖', val: 'leggere' }, { type: 'emoji', icon: '✍️', val: 'scrivere' }, { type: 'emoji', icon: '🗣️', val: 'parlare' }, { type: 'emoji', icon: '👂', val: 'ascoltare' }, { type: 'emoji', icon: '👁️', val: 'guardare' }, { type: 'emoji', icon: '🎵', val: 'cantare' }, { type: 'emoji', icon: '💃', val: 'ballare' }, { type: 'emoji', icon: '🧼', val: 'lavare' }, { type: 'emoji', icon: '🍳', val: 'cucinare' }, { type: 'emoji', icon: '🧹', val: 'pulire' }, { type: 'emoji', icon: '🛒', val: 'comprare' }, { type: 'emoji', icon: '💼', val: 'lavorare' }, { type: 'emoji', icon: '📚', val: 'studiare' }, { type: 'emoji', icon: '🚗', val: 'guidare' }, { type: 'emoji', icon: '🏊', val: 'nuotare' }, { type: 'emoji', icon: '👋', val: 'salutare' }, { type: 'emoji', icon: '🤔', val: 'pensare' }, { type: 'emoji', icon: '📞', val: 'chiamare' }, { type: 'emoji', icon: '🚴', val: 'pedalare' }, { type: 'emoji', icon: '✂️', val: 'tagliare' }, { type: 'emoji', icon: '🧹', val: 'spazzare' }, { type: 'emoji', icon: '🛋️', val: 'riposare' }, { type: 'emoji', icon: '🎁', val: 'regalare' }, { type: 'emoji', icon: '🎮', val: 'giocare' }, { type: 'emoji', icon: '✈️', val: 'volare' }, { type: 'emoji', icon: '🔓', val: 'aprire' }
+                    { type: 'emoji', icon: '🏃', val: 'correre' }, { type: 'emoji', icon: '🚶', val: 'camminare' }, { type: 'emoji', icon: '🍽️', val: 'mangiare' }, { type: 'emoji', icon: '🥤', val: 'bere' }, { type: 'emoji', icon: '😴', val: 'dormire' }, { type: 'emoji', icon: '📖', val: 'leggere' }, { type: 'emoji', icon: '✍️', val: 'scrivere' }, { type: 'emoji', icon: '🗣️', val: 'parlare' }, { type: 'emoji', icon: '👂', val: 'ascoltare' }, { type: 'emoji', icon: '👀', val: 'guardare' }, { type: 'emoji', icon: '🎤', val: 'cantare' }, { type: 'emoji', icon: '💃', val: 'ballare' }, { type: 'emoji', icon: '🧼', val: 'lavare' }, { type: 'emoji', icon: '🍳', val: 'cucinare' }, { type: 'emoji', icon: '🧹', val: 'pulire' }, { type: 'emoji', icon: '🛍️', val: 'comprare' }, { type: 'emoji', icon: '💼', val: 'lavorare' }, { type: 'emoji', icon: '📝', val: 'studiare' }, { type: 'emoji', icon: '🚗', val: 'guidare' }, { type: 'emoji', icon: '🏊', val: 'nuotare' }, { type: 'emoji', icon: '👋', val: 'salutare' }, { type: 'emoji', icon: '🤔', val: 'pensare' }, { type: 'emoji', icon: '📞', val: 'chiamare' }, { type: 'emoji', icon: '🚴', val: 'pedalare' }, { type: 'emoji', icon: '✂️', val: 'tagliare' }, { type: 'emoji', icon: '🧹', val: 'spazzare' }, { type: 'emoji', icon: '🛋️', val: 'riposare' }, { type: 'emoji', icon: '🎁', val: 'regalare' }, { type: 'emoji', icon: '🎮', val: 'giocare' }, { type: 'emoji', icon: '✈️', val: 'volare' }, { type: 'emoji', icon: '🔓', val: 'aprire' }
                 ]
             },
             abbigliamento: {
                 name: "Abbigliamento",
                 badge: '<i class="fa-solid fa-shirt"></i> Vestiti',
                 items: [
-                    { type: 'emoji', icon: '👕', val: 'maglietta' }, { type: 'emoji', icon: '👖', val: 'pantaloni' }, { type: 'emoji', icon: '👗', val: 'vestito' }, { type: 'emoji', icon: '🧥', val: 'cappotto' }, { type: 'emoji', icon: '👟', val: 'scarpe' }, { type: 'emoji', icon: '🧦', val: 'calzini' }, { type: 'emoji', icon: '🧢', val: 'cappellino' }, { type: 'emoji', icon: '🎩', val: 'cappello' }, { type: 'emoji', icon: '🧣', val: 'sciarpa' }, { type: 'emoji', icon: '🧤', val: 'guanti' }, { type: 'emoji', icon: '👔', val: 'cravatta' }, { type: 'emoji', icon: '🩳', val: 'pantaloncini' }, { type: 'emoji', icon: '🩱', val: 'costume' }, { type: 'emoji', icon: '🥾', val: 'scarponi' }, { type: 'emoji', icon: '👠', val: 'tacchi' }, { type: 'emoji', icon: '🕶️', val: 'occhiali da sole' }, { type: 'emoji', icon: '👓', val: 'occhiali' }, { type: 'emoji', icon: '👜', val: 'borsa' }, { type: 'emoji', icon: '🎒', val: 'zaino' }, { type: 'emoji', icon: '☂️', val: 'ombrello' }, { type: 'emoji', icon: '💍', val: 'anello' }, { type: 'emoji', icon: '⌚', val: 'orologio da polso' }, { type: 'emoji', icon: '🥋', val: 'pigiama' }, { type: 'emoji', icon: '🥼', val: 'camice' }, { type: 'emoji', icon: '🪡', val: 'gilet' }, { type: 'emoji', icon: '👑', val: 'corona' }, { type: 'emoji', icon: '👛', val: 'pochette' }, { type: 'emoji', icon: '👛', val: 'portafoglio' }, { type: 'emoji', icon: '🎽', val: 'canottiera' }, { type: 'emoji', icon: '🥿', val: 'scarpette' }, { type: 'emoji', icon: '🩴', val: 'infradito' }
+                    { type: 'emoji', icon: '👕', val: 'maglietta' }, { type: 'emoji', icon: '👖', val: 'pantaloni' }, { type: 'emoji', icon: '👗', val: 'vestito' }, { type: 'emoji', icon: '🧥', val: 'cappotto' }, { type: 'emoji', icon: '👟', val: 'scarpe' }, { type: 'emoji', icon: '🧦', val: 'calzini' }, { type: 'emoji', icon: '🧢', val: 'cappellino' }, { type: 'emoji', icon: '👒', val: 'cappello' }, { type: 'emoji', icon: '🧣', val: 'sciarpa' }, { type: 'emoji', icon: '🧤', val: 'guanti' }, { type: 'emoji', icon: '👔', val: 'cravatta' }, { type: 'emoji', icon: '🩳', val: 'pantaloncini' }, { type: 'emoji', icon: '🩱', val: 'costume' }, { type: 'emoji', icon: '🥾', val: 'scarponi' }, { type: 'emoji', icon: '👠', val: 'tacchi' }, { type: 'emoji', icon: '🕶️', val: 'occhiali da sole' }, { type: 'emoji', icon: '👓', val: 'occhiali' }, { type: 'emoji', icon: '👜', val: 'borsa' }, { type: 'emoji', icon: '🎒', val: 'zaino' }, { type: 'emoji', icon: '☂️', val: 'ombrello' }, { type: 'emoji', icon: '💍', val: 'anello' }, { type: 'emoji', icon: '⌚', val: 'orologio da polso' }, { type: 'emoji', icon: '🥋', val: 'pigiama' }, { type: 'emoji', icon: '🥼', val: 'camice' }, { type: 'emoji', icon: '🤹', val: 'gilet' }, { type: 'emoji', icon: '👑', val: 'corona' }, { type: 'emoji', icon: '👛', val: 'pochette' }, { type: 'emoji', icon: '👛', val: 'portafoglio' }, { type: 'emoji', icon: '🎽', val: 'canottiera' }, { type: 'emoji', icon: '🩰', val: 'scarpette' }, { type: 'emoji', icon: '🩴', val: 'infradito' }
                 ]
             }
         };
@@ -507,7 +564,9 @@
         function buildDeck() {
             state.deckCards = generateProjectivePlaneDeck(state.n, state.activeSymbols);
             document.getElementById('symbols-count-badge').textContent = state.symbolsPerCard + " Figure/Carta";
-            nextPair(false);
+            if (ruolounico !== 'studente') {
+                nextPair(false);
+            }
         }
 
         /* --- CARICAMENTO E SALVATAGGIO SIMBOLI PERSONALIZZATI --- */
@@ -686,9 +745,14 @@
 
             renderCard('card1', state.deckCards[idx1]);
             renderCard('card2', state.deckCards[idx2]);
+
+            // TRASMETTI CARTE AGLI STUDENTI SE DOCENTE
+            if (ruolounico === 'docente') {
+                inviaStatoAGliStudenti();
+            }
         }
 
-       /* RENDERING CIRCOLARE CON IMMAGINI GIGANTI E PROPORZIONATE */
+        /* RENDERING CIRCOLARE CON IMMAGINI GIGANTI E PROPORZIONATE */
         function renderCard(cardId, symbols) {
             const cardEl = document.getElementById(cardId);
             cardEl.innerHTML = '';
@@ -738,16 +802,15 @@
                 // 2. SCRITTA: RUOTA MA MANTIENE DIMENSIONE FISSA DI 12px
                 const labelStyle = `transform: rotate(${rotation}deg); font-size: 12px !important; line-height: 1 !important; display: inline-block;`;
 
-let contentHtml = '';
-if (symbolObj.type === 'emoji') {
-    contentHtml = `<span class="text-4xl sm:text-6xl md:text-7xl drop-shadow-md select-none" style="${graphicStyle}">${symbolObj.icon}</span>`;
-} else {
-    // Racchiudiamo l'immagine in un div wrapper a cui applichiamo direttamente la scala e la rotazione
-    contentHtml = `
-        <div style="${graphicStyle}">
-            <img src="${symbolObj.icon}" class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain drop-shadow-md select-none pointer-events-none">
-        </div>`;
-}
+                let contentHtml = '';
+                if (symbolObj.type === 'emoji') {
+                    contentHtml = `<span class="text-4xl sm:text-6xl md:text-7xl drop-shadow-md select-none" style="${graphicStyle}">${symbolObj.icon}</span>`;
+                } else {
+                    contentHtml = `
+                        <div style="${graphicStyle}">
+                            <img src="${symbolObj.icon}" class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain drop-shadow-md select-none pointer-events-none">
+                        </div>`;
+                }
 
                 let labelHtml = state.showLabels 
                     ? `<span class="font-bold text-slate-800 bg-white/95 px-2 py-0.5 rounded-full shadow border border-slate-300 mt-1 whitespace-nowrap select-none z-10" style="${labelStyle}">${symbolObj.val}</span>` 
@@ -769,19 +832,16 @@ if (symbolObj.type === 'emoji') {
             if (val === state.matchingSymbol) {
                 element.classList.add('symbol-correct');
                 
-                if (synthSound) {
-                    synthSound.triggerAttackRelease("C5", "8n");
+                if (ruolounico === 'studente' && connDocente && connDocente.open) {
+                    connDocente.send({
+                        tipo: 'RISPOSTA_CORRETTA',
+                        valore: val,
+                        nome: mioNomeStudente
+                    });
+                    return;
                 }
 
-                confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
-                speakWord(val);
-
-                state.score += 1;
-                document.getElementById('score-display').textContent = state.score;
-
-                setTimeout(() => {
-                    nextPair(true);
-                }, 450);
+                registraEsitoPositivo(val, element, "LIM");
 
             } else {
                 element.classList.add('symbol-wrong');
@@ -794,11 +854,139 @@ if (symbolObj.type === 'emoji') {
             }
         }
 
+        function registraEsitoPositivo(val, element, nomeVincitore) {
+            if (synthSound) {
+                synthSound.triggerAttackRelease("C5", "8n");
+            }
+
+            confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
+            speakWord(val);
+
+            state.score += 1;
+            document.getElementById('score-display').textContent = state.score;
+            document.getElementById('last-word-display').textContent = `${val} (${nomeVincitore})`;
+
+            setTimeout(() => {
+                nextPair(true);
+            }, 450);
+        }
+
         function resetScore() {
             state.score = 0;
             document.getElementById('score-display').textContent = "0";
             document.getElementById('last-word-display').textContent = "---";
             state.lastSpokenWord = '';
+        }
+
+        /* --- LOGICA MULTIPLAYER (PEERJS E QR CODE RESILIENTE) --- */
+        function mostraModalConnessione() {
+            document.getElementById('connection-modal').classList.remove('hidden');
+        }
+        function chiudiModalConnessione() {
+            document.getElementById('connection-modal').classList.add('hidden');
+        }
+
+        function avviaComeDocente() {
+            ruolounico = 'docente';
+            const pinStanza = Math.floor(100000 + Math.random() * 900000).toString();
+            
+            if (typeof Peer === 'undefined') {
+                alert("Errore caricamento PeerJS online. Verifica la connessione internet e ricarica la pagina.");
+                return;
+            }
+
+            peer = new Peer(PREFISSO_STANZA + pinStanza);
+            
+            peer.on('open', (id) => {
+                document.getElementById('role-selection').classList.add('hidden');
+                document.getElementById('teacher-qr-view').classList.remove('hidden');
+                document.getElementById('teacher-qr-view').classList.add('flex');
+                document.getElementById('display-pin-code').textContent = pinStanza;
+                
+                document.getElementById('connected-players-badge').classList.remove('hidden');
+                document.getElementById('txt-multiplayer').textContent = "LIM (Host)";
+
+                // Genera QR Code con controllo di fallback per evitare che non funzioni
+                const qrBox = document.getElementById('qrcode-box');
+                qrBox.innerHTML = '';
+                if (typeof QRCode !== 'undefined') {
+                    new QRCode(qrBox, {
+                        text: window.location.href.split('?')[0] + '?pin=' + pinStanza,
+                        width: 180, 
+                        height: 180
+                    });
+                } else {
+                    qrBox.innerHTML = '<p class="text-xs text-slate-800 font-bold p-2">QR Code non disponibile.<br>Usa il PIN qui sotto per connetterti!</p>';
+                }
+            });
+
+            peer.on('connection', (conn) => {
+                connessioniStudenti.push(conn);
+                aggiornaContatoreAlunni();
+
+                conn.on('open', () => {
+                    inviaStatoAGliStudenti();
+                });
+
+                conn.on('data', (dati) => {
+                    if (dati.tipo === 'RISPOSTA_CORRETTA' && dati.valore === state.matchingSymbol) {
+                        const targetEl = document.querySelector('.symbol-correct') || document.getElementById('card1');
+                        registraEsitoPositivo(dati.valore, targetEl, dati.nome);
+                    }
+                });
+
+                conn.on('close', () => {
+                    connessioniStudenti = connessioniStudenti.filter(c => c !== conn);
+                    aggiornaContatoreAlunni();
+                });
+            });
+        }
+
+        function connettiComeStudente() {
+            let pin = document.getElementById('room-pin-input').value.trim();
+            mioNomeStudente = document.getElementById('student-name').value.trim() || "Alunno";
+            
+            if (!pin) { alert("Inserisci il PIN della Stanza!"); return; }
+
+            ruolounico = 'studente';
+            peer = new Peer();
+
+            peer.on('open', () => {
+                connDocente = peer.connect(PREFISSO_STANZA + pin);
+                
+                connDocente.on('open', () => {
+                    chiudiModalConnessione();
+                    document.getElementById('txt-multiplayer').textContent = mioNomeStudente;
+                    alert("Connesso alla LIM! Guarda il tuo schermo e individua la figura prima degli altri.");
+                });
+
+                connDocente.on('data', (dati) => {
+                    if (dati.tipo === 'AGGIORNA_CARTE') {
+                        state.card1Index = dati.card1Index;
+                        state.card2Index = dati.card2Index;
+                        state.matchingSymbol = dati.matchingSymbol;
+                        renderCard('card1', state.deckCards[dati.card1Index]);
+                        renderCard('card2', state.deckCards[dati.card2Index]);
+                    }
+                });
+            });
+        }
+
+        function inviaStatoAGliStudenti() {
+            connessioniStudenti.forEach(conn => {
+                if (conn.open) {
+                    conn.send({
+                        tipo: 'AGGIORNA_CARTE',
+                        card1Index: state.card1Index,
+                        card2Index: state.card2Index,
+                        matchingSymbol: state.matchingSymbol
+                    });
+                }
+            });
+        }
+
+        function aggiornaContatoreAlunni() {
+            document.getElementById('players-count').textContent = connessioniStudenti.length;
         }
 
         /* --- TIMER --- */
