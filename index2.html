@@ -757,24 +757,27 @@
 
                 symEl.style.left = `${left}%`;
                 symEl.style.top = `${top}%`;
-                symEl.style.transform = `translate(-50%, -50%)`;
 
-                const scale = (0.70 + Math.random() * 0.70).toFixed(2);
+                // Valori casuali di rotazione e scala
+                const scale = (0.75 + Math.random() * 0.65).toFixed(2);
                 const rotation = Math.floor(Math.random() * 360) - 180;
 
-                const graphicStyle = `transform: scale(${scale}) rotate(${rotation}deg); display: block; margin: 0 auto;`;
-                const labelStyle = `transform: rotate(${rotation}deg); font-size: 12px !important; line-height: 1 !important; display: inline-block;`;
+                // 1. L'immagine viene ingrandita/rimpicciolita, SENZA ruotare da sola
+                const imgStyle = `transform: scale(${scale}); display: block; margin: 0 auto; transition: transform 0.2s;`;
 
-                let contentHtml = `
-                    <div style="${graphicStyle}">
-                        <img src="${symbolObj.icon}" class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain drop-shadow-md select-none pointer-events-none">
-                    </div>`;
-
+                // 2. L'etichetta testo rimane fissa a 12px, SENZA ereditare lo scale dell'immagine
                 let labelHtml = state.showLabels 
-                    ? `<span class="font-bold text-purple-950 bg-white/95 px-2 py-0.5 rounded-full shadow border border-purple-300 mt-1 whitespace-nowrap select-none z-10" style="${labelStyle}">${symbolObj.val}</span>` 
+                    ? `<span class="font-bold text-purple-950 bg-white/95 px-2 py-0.5 rounded-full shadow border border-purple-300 mt-1 whitespace-nowrap select-none z-10 block text-center" style="font-size: 12px !important; line-height: 1.2 !important;">${symbolObj.val}</span>` 
                     : '';
 
-                symEl.innerHTML = `<div class="flex flex-col items-center justify-center">${contentHtml}${labelHtml}</div>`;
+                let contentHtml = `
+                    <div class="flex items-center justify-center">
+                        <img src="${symbolObj.icon}" class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain drop-shadow-md select-none pointer-events-none" style="${imgStyle}">
+                    </div>`;
+
+                // 3. Il contenitore ruota Tutto (immagine + etichetta) mantenendo la struttura verticale a colonna
+                symEl.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+                symEl.innerHTML = `<div class="flex flex-col items-center justify-center w-full">${contentHtml}${labelHtml}</div>`;
 
                 symEl.onclick = (e) => {
                     e.stopPropagation();
