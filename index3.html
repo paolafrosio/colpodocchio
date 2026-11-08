@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colpo d'occhio CPIA - Giochiamo Insieme</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Lexend', 'Fredoka', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .dobble-card {
+            aspect-ratio: 1 / 1;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 0 30px inset rgba(255, 255, 255, 0.9);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: visible !important;
+        }
+        .dobble-card:hover { transform: scale(1.02); }
+
+        .symbol-item {
+            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            padding: 0;
+            transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+            touch-action: manipulation;
+        }
+        .symbol-item:hover { z-index: 40 !important; }
+        .symbol-correct {
+            animation: pulse-green 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 50 !important;
+        }
+        .symbol-wrong { animation: shake-red 0.4s ease-in-out; }
+        .locked-card {
+            opacity: 0.35 !important;
+            pointer-events: none !important;
+            filter: grayscale(80%);
+        }
+        .player-badge-active { animation: pop-player 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        @keyframes pop-player {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.25); background-color: #10b981; }
+            100% { transform: scale(1); }
+        }
+        @keyframes pulse-green {
+            0%, 100% { transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(1); }
+            50%      { transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(1.4); }
+        }
+        @keyframes shake-red {
+            0%, 100% { transform: translate(-50%, -50%) translateX(0) rotate(var(--rot, 0deg)); }
+            20%, 60% { transform: translate(-50%, -50%) translateX(-8px) rotate(var(--rot, 0deg)); }
+            40%, 80% { transform: translate(-50%, -50%) translateX(8px) rotate(var(--rot, 0deg)); }
+        }
+        @keyframes card-appear {
+            0% { opacity: 0; transform: scale(0.7) rotate(-8deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+        .animate-card { animation: card-appear 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #2e1065; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb { background: #6b21a8; border-radius: 8px; }
+    </style>
+</head>
+<body class="bg-purple-950 text-slate-100 min-h-screen flex flex-col justify-between bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 overflow-x-hidden">
+
+    <!-- PAROLA VINCENTE (LIM e studenti) -->
+    <div id="word-flash" class="fixed inset-x-0 top-[38%] z-40 hidden flex justify-center pointer-events-none">
+        <div class="bg-amber-400 text-purple-950 px-8 py-4 rounded-3xl shadow-2xl border-4 border-purple-950 text-center">
+            <div id="word-flash-text" class="font-black text-4xl md:text-6xl"></div>
+            <div id="word-flash-name" class="text-sm font-semibold mt-1"></div>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="w-full bg-purple-900/90 backdrop-blur-md border-b border-purple-700/50 px-4 py-3 flex justify-between items-center z-10 shadow-lg">
+        <div class="flex items-center gap-3">
+            <div class="bg-amber-400 text-purple-950 p-2.5 rounded-2xl shadow-lg flex items-center justify-center font-bold text-xl">
+                <i class="fa-solid fa-comments"></i>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide flex items-center gap-2">
+                    Colpo d'occhio <span class="bg-amber-400/20 text-amber-300 text-xs px-2.5 py-0.5 rounded-full border border-amber-400/40 font-mono">CPIA</span>
+                </h1>
+                <p class="text-xs text-purple-200 hidden sm:block">Pronuncia la figura in comune al microfono o selezionala toccando lo schermo!</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 md:gap-3 flex-wrap justify-end">
+            <button id="btn-multiplayer" onclick="mostraModalConnessione()" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
+                <i class="fa-solid fa-users"></i>
+                <span id="txt-multiplayer">Giochiamo insieme</span>
+            </button>
+            <button id="toggle-touch-btn" onclick="toggleTouch()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva Touch">
+                <i id="touch-icon" class="fa-solid fa-hand-pointer text-amber-400"></i>
+                <span id="touch-status-text" class="hidden md:inline font-medium">Touch: ON</span>
+            </button>
+            <button id="btn-mic-toggle" onclick="toggleSpeechRecognition()" class="px-3.5 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva Microfono per Risposta Vocale">
+                <i id="mic-icon" class="fa-solid fa-microphone-slash text-purple-400"></i>
+                <span id="mic-status-text" class="hidden md:inline font-medium">Mic: OFF</span>
+            </button>
+            <button id="toggle-labels-btn" onclick="toggleLabels()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Mostra o nascondi il testo scritto">
+                <i id="labels-icon" class="fa-solid fa-font text-purple-400 opacity-40"></i>
+                <span id="labels-status-text" class="hidden md:inline font-medium">Testo: OFF</span>
+            </button>
+            <button id="toggle-voice-btn" onclick="toggleSpeech()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva pronuncia vocale">
+                <i id="voice-icon" class="fa-solid fa-volume-high text-amber-400"></i>
+                <span id="voice-status-text" class="hidden md:inline font-medium">Voce: ON</span>
+            </button>
+            <button onclick="requireSettingsAccess()" class="px-3.5 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
+                <i class="fa-solid fa-lock"></i>
+                <span class="hidden md:inline">Area Docente</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- AREA DI GIOCO -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-2 flex flex-col justify-center items-center gap-2">
+
+        <!-- STATUS BAR -->
+        <div class="w-full flex flex-col sm:flex-row justify-between items-center bg-purple-900/80 backdrop-blur-md rounded-2xl p-3 border border-purple-700/50 text-white shadow-xl gap-3">
+            <div class="flex items-center gap-2">
+                <span id="current-preset-badge" class="bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-semibold px-3 py-1 rounded-full flex items-center gap-2">
+                    <i class="fa-solid fa-user"></i> Il Corpo Umano (57 simboli)
+                </span>
+                <span id="symbols-count-badge" class="bg-fuchsia-500/20 border border-fuchsia-400/40 text-fuchsia-300 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full">
+                    8 Figure/Carta
+                </span>
+                <span id="connected-players-badge" class="bg-purple-500/20 border border-purple-400/40 text-purple-200 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full hidden">
+                    <i class="fa-solid fa-user-group"></i> Alunni: <b id="players-count">0</b>
+                </span>
+            </div>
+
+            <div id="last-word-container" class="flex items-center gap-3 bg-purple-950/80 px-4 py-1.5 rounded-xl border border-purple-800 min-h-[44px]">
+                <span class="text-xs text-purple-300 uppercase tracking-wider font-semibold">Parola:</span>
+                <span id="last-word-display" class="text-lg md:text-xl font-bold text-amber-300">---</span>
+                <button id="repeat-speech-btn" onclick="speakCurrentWord()" class="p-1.5 rounded-lg bg-amber-400/20 hover:bg-amber-400/40 text-amber-300 transition text-sm" title="Riascolta pronuncia">
+                    <i class="fa-solid fa-bullhorn"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <div id="timer-box" class="hidden flex items-center gap-2">
+                    <i class="fa-solid fa-stopwatch text-amber-300 text-xl"></i>
+                    <span id="timer-display" class="text-2xl font-bold font-mono text-amber-300">60</span>s
+                </div>
+                <div class="flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 px-3.5 py-1 rounded-xl">
+                    <i class="fa-solid fa-star text-amber-300"></i>
+                    <span class="text-xs font-semibold uppercase text-amber-200">Punti:</span>
+                    <span id="score-display" class="text-xl font-bold text-white">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- BARRA GIOCATORI -->
+        <div id="live-players-bar" class="hidden w-full bg-purple-950/60 border border-purple-800/80 rounded-xl p-2 flex items-center gap-2 overflow-x-auto min-h-[46px]">
+            <span class="text-xs text-purple-300 uppercase font-bold tracking-wider px-2 flex items-center gap-1">
+                <i class="fa-solid fa-users text-amber-400"></i> In gioco:
+            </span>
+            <div id="live-players-list" class="flex items-center gap-2 flex-wrap"></div>
+        </div>
+
+        <!-- BANNER AVVISI -->
+        <div id="penalty-banner" class="hidden w-full bg-red-600/90 text-white text-center py-1.5 px-4 rounded-xl text-xs font-bold shadow-md transition-all duration-300">
+            Errore! Attendi 3 secondi prima di poter riprovare...
+        </div>
+
+        <!-- BARRA MICROFONO -->
+        <div id="speech-live-bar" class="hidden w-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 text-center py-1.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 animate-pulse">
+            <i class="fa-solid fa-microphone text-emerald-400 text-sm"></i>
+            <span>Microfono attivo — In ascolto... <span class="text-purple-300 font-normal">(Hai detto: <b id="speech-heard-text" class="text-amber-300 font-bold">...</b>)</span></span>
+        </div>
+
+        <!-- LE DUE CARTE -->
+        <div class="w-full flex-1 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 my-1">
+            <div id="card1" class="dobble-card animate-card w-full max-w-[340px] sm:max-w-[420px] md:max-w-[460px] bg-gradient-to-b from-yellow-100 via-amber-200 to-yellow-300 rounded-full border-8 border-purple-900 relative overflow-hidden flex items-center justify-center"></div>
+            <div class="flex md:flex-col items-center justify-center gap-1 my-[-10px] md:my-0">
+                <div class="bg-amber-400 text-purple-950 w-12 h-12 rounded-full flex items-center justify-center font-black text-2xl shadow-xl border-4 border-purple-950 z-10">
+                    <i class="fa-solid fa-equals"></i>
+                </div>
+            </div>
+            <div id="card2" class="dobble-card animate-card w-full max-w-[340px] sm:max-w-[420px] md:max-w-[460px] bg-gradient-to-b from-yellow-100 via-amber-200 to-yellow-300 rounded-full border-8 border-purple-900 relative overflow-hidden flex items-center justify-center"></div>
+        </div>
+
+        <!-- CONTROLLI -->
+        <div class="flex flex-wrap justify-center gap-3 mt-1">
+            <button id="btn-next-pair" onclick="nextPair(true)" class="px-4 py-2 rounded-xl bg-purple-800 hover:bg-purple-700 text-purple-100 font-semibold transition flex items-center gap-2 border border-purple-600/50 text-sm">
+                <i class="fa-solid fa-arrows-rotate"></i> Cambia Carte
+            </button>
+            <button id="start-timer-btn" onclick="toggleTimeAttack()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm">
+                <i class="fa-solid fa-play"></i> Avvia Sfida 60s
+            </button>
+            <button onclick="resetScore()" class="px-3.5 py-2 rounded-xl bg-purple-950 hover:bg-purple-900 text-purple-300 hover:text-white border border-purple-800 font-medium transition text-xs">
+                Azzera Punti
+            </button>
+        </div>
+    </main>
+
+    <footer class="text-center py-2 text-xs text-purple-300/60">
+        Colpo d'occhio Didattico • Generatore Matematico Proiettivo • Gamification & Multiplayer
+    </footer>
+
+    <!-- MODALE CONNESSIONE -->
+    <div id="connection-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-purple-900 border border-purple-700 w-full max-w-md rounded-3xl p-6 text-white shadow-2xl flex flex-col">
+            <h2 class="text-xl font-bold mb-4 text-amber-300 flex items-center gap-2">
+                <i class="fa-solid fa-users"></i> Giochiamo Insieme (Stanza)
+            </h2>
+
+            <div id="role-selection" class="space-y-4">
+                <button onclick="avviaComeDocente()" class="w-full p-4 rounded-2xl bg-fuchsia-600 hover:bg-fuchsia-500 font-bold flex items-center gap-4 transition text-left shadow-md">
+                    <i class="fa-solid fa-desktop text-3xl"></i>
+                    <div>
+                        <div class="text-base">Crea una Stanza (Host)</div>
+                        <div class="text-xs font-normal text-purple-200">Genera il PIN a 4 cifre per invitare gli altri a giocare</div>
+                    </div>
+                </button>
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t border-purple-700"></div>
+                    <span class="flex-shrink mx-4 text-purple-300 text-xs uppercase font-semibold">oppure</span>
+                    <div class="flex-grow border-t border-purple-700"></div>
+                </div>
+                <div class="space-y-2">
+                    <input type="text" id="student-name" placeholder="Il tuo Nome" maxlength="20" class="w-full bg-purple-950 border border-purple-700 p-3 rounded-xl text-center text-white focus:border-amber-400 outline-none">
+                    <input type="text" id="room-pin-input" placeholder="PIN Stanza (es. 1234)" maxlength="4" inputmode="numeric" class="w-full bg-purple-950 border border-purple-700 p-3 rounded-xl text-center text-lg tracking-widest text-white focus:border-amber-400 outline-none">
+                    <button id="btn-enter-room" onclick="connettiComeStudente()" class="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition shadow-md">
+                        Entra con PIN
+                    </button>
+                </div>
+            </div>
+
+            <div id="teacher-qr-view" class="hidden flex-col items-center text-center space-y-4">
+                <div class="bg-white p-3 rounded-2xl inline-block shadow-lg" id="qrcode-box"></div>
+                <div class="text-lg font-bold text-amber-300">
+                    PIN Stanza: <span id="display-pin-code" class="text-2xl font-mono text-white bg-purple-950 px-3 py-1 rounded-xl shadow-inner">----</span>
+                </div>
+                <p class="text-xs text-purple-200">Inquadra il QR con il telefono/tablet o inserisci il PIN per unirti alla sfida!</p>
+            </div>
+
+            <button onclick="chiudiModalConnessione()" class="mt-6 w-full py-2 rounded-xl bg-purple-950 hover:bg-purple-800 text-purple-300 text-sm font-semibold transition">Chiudi</button>
+        </div>
+    </div>
+
+    <!-- MODALE IMPOSTAZIONI -->
+    <div id="settings-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-purple-900 border border-purple-700 w-full max-w-2xl rounded-3xl p-6 text-white shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center pb-4 border-b border-purple-800">
+                <h2 class="text-xl font-bold flex items-center gap-2 text-amber-300">
+                    <i class="fa-solid fa-sliders"></i> Pannello di Configurazione Docente
+                </h2>
+                <button onclick="closeSettingsModal()" class="text-purple-300 hover:text-white p-2 rounded-lg text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto flex-1 my-4 space-y-6 pr-2">
+                <div>
+                    <label class="block text-sm font-semibold text-purple-200 mb-2">Numero di Figure per Carta:</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="setDeckOrder(5)" id="order-5-btn" class="p-3 rounded-xl border border-purple-700 bg-purple-950/60 hover:bg-purple-800 text-center font-bold text-sm">
+                            6 Figure per Carta<br><span class="text-xs font-normal text-purple-300">(Intermedio • 31 carte)</span>
+                        </button>
+                        <button onclick="setDeckOrder(7)" id="order-7-btn" class="p-3 rounded-xl border border-amber-400 bg-amber-400/20 text-center font-bold text-sm">
+                            8 Figure per Carta<br><span class="text-xs font-normal text-purple-300">(Versione Classica • 57 carte)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-purple-950/60 p-4 rounded-2xl border border-purple-800 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-semibold text-purple-300 uppercase tracking-wider">Simboli Mazzo Corrente (<span id="loaded-count">0</span>):</span>
+                    </div>
+                    <div id="symbols-preview-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto p-2 bg-purple-950 rounded-xl border border-purple-800"></div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-purple-800 flex justify-end gap-3">
+                <button onclick="applySettings()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition shadow-lg">
+                    Chiudi e Rigenera Mazzo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE GAME OVER -->
+    <div id="gameover-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-purple-900 border border-amber-400/40 w-full max-w-md rounded-3xl p-6 text-white text-center shadow-2xl flex flex-col items-center">
+            <div class="w-20 h-20 bg-amber-400/20 text-amber-300 rounded-full flex items-center justify-center text-4xl mb-4">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-1">Tempo Scaduto!</h2>
+            <p class="text-sm text-purple-200 mb-4" id="gameover-sub">Ottimo esercizio di lettura e pronuncia!</p>
+
+            <div id="leaderboard-view" class="w-full mb-6 hidden">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-amber-300 mb-3"><i class="fa-solid fa-award"></i> Classifica Finale</h3>
+                <div id="leaderboard-list" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+            </div>
+
+            <div id="single-score-view" class="bg-purple-950 border border-purple-800 rounded-2xl p-4 w-full mb-6 relative">
+                <span class="text-xs uppercase tracking-wider text-purple-300 block mb-1">I tuoi punti finali</span>
+                <span id="final-score-display" class="text-5xl font-black text-white">0</span>
+                <div id="new-record-badge" class="hidden mt-3 text-sm font-bold text-emerald-400 animate-pulse bg-emerald-900/40 py-1 px-3 rounded-full inline-block border border-emerald-500/50">
+                    Nuovo Record Personale!
+                </div>
+                <div class="mt-3 text-xs text-purple-300 border-t border-purple-800 pt-2">
+                    Miglior Punteggio di sempre: <b id="best-score-display" class="text-amber-300 text-sm">0</b>
+                </div>
+            </div>
+
+            <button onclick="closeGameOverModal()" class="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition shadow-lg">
+                Gioca Ancora
+            </button>
+        </div>
+    </div>
+
+    <!-- MODALE PIN DOCENTE -->
+    <div id="pin-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-purple-900 border border-purple-700 w-full max-w-sm rounded-3xl p-6 text-white shadow-2xl flex flex-col">
+            <h2 class="text-xl font-bold mb-2 text-amber-300 flex items-center gap-2">
+                <i class="fa-solid fa-user-shield"></i> Accesso Riservato
+            </h2>
+            <p class="text-sm text-purple-200 mb-6">Inserisci la password per accedere alle impostazioni avanzate.</p>
+            <input type="password" id="teacher-pin" class="bg-purple-950 border border-purple-700 p-3 rounded-xl mb-4 text-center text-2xl tracking-[0.5em] focus:border-amber-400 outline-none transition" placeholder="****" onkeydown="if(event.key === 'Enter') checkPin()">
+            <div class="flex gap-3">
+                <button onclick="closePinModal()" class="flex-1 py-3 rounded-xl bg-purple-950 hover:bg-purple-800 transition font-semibold text-sm">Annulla</button>
+                <button onclick="checkPin()" class="flex-1 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition text-sm">Sblocca</button>
+            </div>
+            <p id="pin-error" class="text-red-400 text-sm font-semibold text-center mt-4 hidden animate-pulse">Password errata!</p>
+        </div>
+    </div>
+
+    <script>
+        /* ==================== COSTANTI ==================== */
+        const TEACHER_PIN = "1234";
+        const PREFISSO_STANZA = 'colpo-docchio-';
+        const DELAY_ROUND = 800;   // pausa tra un round e l'altro (ms)
+
+        const CARTELLA_IMMAGINI = [
+            { val: 'contagocce', file: 'img_corpoumano/contagocce.png' },
+            { val: 'alluce', file: 'img_corpoumano/alluce.png' },
+            { val: 'ambulanza', file: 'img_corpoumano/ambulanza.png' },
+            { val: 'barella', file: 'img_corpoumano/barella.png' },
+            { val: 'bisturi', file: 'img_corpoumano/bisturi.png' },
+            { val: 'bocca', file: 'img_corpoumano/bocca.png' },
+            { val: 'borsa del ghiaccio', file: 'img_corpoumano/borsa del ghiaccio.png' },
+            { val: 'braccio', file: 'img_corpoumano/braccio.png' },
+            { val: 'capelli', file: 'img_corpoumano/capelli.png' },
+            { val: 'cerotto', file: 'img_corpoumano/cerotto.png' },
+            { val: 'cervello', file: 'img_corpoumano/cervello.png' },
+            { val: 'ciglia', file: 'img_corpoumano/ciglia.png' },
+            { val: 'collo', file: 'img_corpoumano/collo.png' },
+            { val: 'coscia', file: 'img_corpoumano/coscia.png' },
+            { val: 'cuore', file: 'img_corpoumano/cuore.png' },
+            { val: 'dente', file: 'img_corpoumano/dente.png' },
+            { val: 'dito', file: 'img_corpoumano/dito.png' },
+            { val: 'fegato', file: 'img_corpoumano/fegato.png' },
+            { val: 'femore', file: 'img_corpoumano/femore.png' },
+            { val: 'gamba', file: 'img_corpoumano/gamba.png' },
+            { val: 'gesso', file: 'img_corpoumano/gesso.png' },
+            { val: 'ginocchio', file: 'img_corpoumano/ginocchio.png' },
+            { val: 'gomito', file: 'img_corpoumano/gomito.png' },
+            { val: 'intestino', file: 'img_corpoumano/intestino.png' },
+            { val: 'lingua', file: 'img_corpoumano/lingua.png' },
+            { val: 'mano', file: 'img_corpoumano/mano.png' },
+            { val: 'medico', file: 'img_corpoumano/medico.png' },
+            { val: 'mento', file: 'img_corpoumano/mento.png' },
+            { val: 'muscolo', file: 'img_corpoumano/muscolo.png' },
+            { val: 'narici', file: 'img_corpoumano/narici.png' },
+            { val: 'naso', file: 'img_corpoumano/naso.png' },
+            { val: 'occhiali', file: 'img_corpoumano/occhiali.png' },
+            { val: 'occhio', file: 'img_corpoumano/occhio.png' },
+            { val: 'ombelico', file: 'img_corpoumano/ombelico.png' },
+            { val: 'orecchio', file: 'img_corpoumano/orecchio.png' },
+            { val: 'ospedale', file: 'img_corpoumano/ospedale.png' },
+            { val: 'petto', file: 'img_corpoumano/petto.png' },
+            { val: 'piede', file: 'img_corpoumano/piede.png' },
+            { val: 'pillola', file: 'img_corpoumano/pillola.png' },
+            { val: 'polmoni', file: 'img_corpoumano/polmoni.png' },
+            { val: 'pomata', file: 'img_corpoumano/pomata.png' },
+            { val: 'reni', file: 'img_corpoumano/reni.png' },
+            { val: 'sangue', file: 'img_corpoumano/sangue.png' },
+            { val: 'scheletro', file: 'img_corpoumano/scheletro.png' },
+            { val: 'schiena', file: 'img_corpoumano/schiena.png' },
+            { val: 'sedia a rotelle', file: 'img_corpoumano/sedia a rotelle.png' },
+            { val: 'siringa', file: 'img_corpoumano/siringa.png' },
+            { val: 'sopracciglia', file: 'img_corpoumano/sopracciglia.png' },
+            { val: 'spalla', file: 'img_corpoumano/spalla.png' },
+            { val: 'spazzolino', file: 'img_corpoumano/spazzolino.png' },
+            { val: 'stampelle', file: 'img_corpoumano/stampelle.png' },
+            { val: 'stetoscopio', file: 'img_corpoumano/stetoscopio.png' },
+            { val: 'stomaco', file: 'img_corpoumano/stomaco.png' },
+            { val: 'tallone', file: 'img_corpoumano/tallone.png' },
+            { val: 'termometro', file: 'img_corpoumano/termometro.png' },
+            { val: 'teschio', file: 'img_corpoumano/teschio.png' },
+            { val: 'unghia', file: 'img_corpoumano/unghia.png' }
+        ];
+
+        const ICONE = Object.fromEntries(CARTELLA_IMMAGINI.map(i => [i.val, i.file]));
+        const immaginiCache = [];
+
+        /* ==================== STATO ==================== */
+        let peer = null;
+        let ruolounico = 'standalone';   // 'standalone' | 'docente' | 'studente'
+        let mappaConnessioniStudenti = new Map();   // studentId -> { conn, nome, score }
+        let connDocente = null;
+        let mioNomeStudente = "Alunno";
+        let stanzaPinCorrente = "";
+        let isTransitioning = false;
+        let isPenalized = false;
+        let roundId = 0;
+        let roundBloccato = false;       // studente: true dopo aver risposto o dopo ROUND_VINTO
+        let inStanza = false;
+        let matchRe = null;
+        let speechBase = 0, speechLastLen = 0;
+        let intervalloStato = null, timerLocaleInt = null, bannerTimeout = null, flashTimeout = null, wakeLock = null;
+
+        let recognition = null;
+        let isSpeechRecognitionActive = false;
+
+        let state = {
+            n: 7,
+            symbolsPerCard: 8,
+            activeSymbols: [],
+            deckCards: [],
+            card1Index: -1,
+            card2Index: -1,
+            carta1: null,
+            carta2: null,
+            matchingSymbol: null,
+            score: 0,
+            showLabels: false,
+            audioEnabled: true,
+            touchEnabled: true,
+            isTimeAttack: false,
+            timerFine: 0,
+            timerInterval: null,
+            synth: window.speechSynthesis,
+            lastSpokenWord: ''
+        };
+
+        let synthSound, wrongSound;
+
+        /* ==================== HELPER ==================== */
+        const norm = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                           .replace(/[^a-z\s]/g, ' ').replace(/\s+/g, ' ').trim();
+
+        function mescola(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function setMatching(val) {
+            state.matchingSymbol = val;
+            matchRe = val ? new RegExp(`(^| )${norm(val)}( |$)`) : null;
+        }
+
+        function broadcast(msg) {
+            mappaConnessioniStudenti.forEach(o => { if (o.conn.open) o.conn.send(msg); });
+        }
+
+        function inviaEventoSistemaStudenti(tipo, payload = {}) {
+            broadcast({ tipo, ...payload });
+        }
+
+        function evidenzia(val) {
+            document.querySelectorAll(`.symbol-item[data-val="${val}"]`).forEach(el => el.classList.add('symbol-correct'));
+        }
+
+        function idDispositivo() {
+            let id = sessionStorage.getItem('colpodocchio_device_id');
+            if (!id) {
+                id = 'alunno-' + Math.floor(Math.random() * 10000000);
+                sessionStorage.setItem('colpodocchio_device_id', id);
+            }
+            return id;
+        }
+
+        function preloadImmagini() {
+            CARTELLA_IMMAGINI.forEach(i => {
+                const im = new Image();
+                im.src = i.file;
+                if (im.decode) im.decode().catch(() => {});
+                immaginiCache.push(im);   // tiene le immagini in memoria
+            });
+        }
+
+        function classificaCorrente() {
+            return [...mappaConnessioniStudenti.entries()]
+                .map(([id, o]) => ({ id, nome: o.nome, score: o.score }))
+                .sort((a, b) => b.score - a.score);
+        }
+
+        function mostraParola(parola, chi) {
+            document.getElementById('word-flash-text').textContent = parola;
+            document.getElementById('word-flash-name').textContent = chi || '';
+            document.getElementById('word-flash').classList.remove('hidden');
+            clearTimeout(flashTimeout);
+            flashTimeout = setTimeout(nascondiParola, 1500);
+        }
+        function nascondiParola() { document.getElementById('word-flash').classList.add('hidden'); }
+
+        async function tieniSchermoAcceso() {
+            try { if (navigator.wakeLock) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+        }
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && ruolounico === 'studente') tieniSchermoAcceso();
+        });
+
+        function showWarningBanner(msg, duration = 3000, isError = false) {
+            const banner = document.getElementById('penalty-banner');
+            banner.innerHTML = msg;
+            banner.className = isError
+                ? "w-full bg-red-600/90 text-white text-center py-1.5 px-4 rounded-xl text-xs font-bold animate-bounce shadow-md"
+                : "w-full bg-amber-500/90 text-white text-center py-1.5 px-4 rounded-xl text-xs font-bold animate-pulse shadow-md";
+            banner.classList.remove('hidden');
+            clearTimeout(bannerTimeout);
+            bannerTimeout = setTimeout(() => banner.classList.add('hidden'), duration);
+        }
+
+        /* ==================== AVVIO E AUDIO ==================== */
+        window.onload = function () {
+            preloadImmagini();
+            initAudio();
+            initSpeechRecognition();
+
+            // Un solo listener per carta, su pointerdown: più veloce del click
+            ['card1', 'card2'].forEach(id => {
+                document.getElementById(id).addEventListener('pointerdown', (e) => {
+                    const el = e.target.closest('.symbol-item');
+                    if (!el) return;
+                    e.stopPropagation();
+                    if (!state.touchEnabled) {
+                        showWarningBanner("In questa partita vale solo la voce! Pronuncia la figura al microfono.", 3000, false);
+                        return;
+                    }
+                    handleSymbolClick(el.dataset.val, el);
+                });
+            });
+
+            caricaMazzoCorpoUmano();
+
+            document.getElementById('labels-icon').className = "fa-solid fa-font text-purple-400 opacity-40";
+            document.getElementById('labels-status-text').textContent = "Testo: OFF";
+
+            const pinParam = new URLSearchParams(window.location.search).get('pin');
+            if (pinParam) {
+                document.getElementById('room-pin-input').value = pinParam;
+                mostraModalConnessione();
+            }
+        };
+
+        function initAudio() {
+            try {
+                synthSound = new Tone.Synth({
+                    oscillator: { type: "triangle" },
+                    envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.1 }
+                }).toDestination();
+                wrongSound = new Tone.MembraneSynth({
+                    pitchDecay: 0.05, octaves: 2, oscillator: { type: "sine" },
+                    envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.1 }
+                }).toDestination();
+                try { Tone.getContext().lookAhead = 0.01; } catch (e) {}
+                document.addEventListener('pointerdown', () => Tone.start(), { once: true });
+            } catch (e) {}
+        }
+
+        /* ==================== INTERFACCIA ==================== */
+        function toggleTouch() {
+            state.touchEnabled = !state.touchEnabled;
+            const icon = document.getElementById('touch-icon');
+            const text = document.getElementById('touch-status-text');
+            if (state.touchEnabled) {
+                icon.className = "fa-solid fa-hand-pointer text-amber-400";
+                text.textContent = "Touch: ON";
+            } else {
+                icon.className = "fa-solid fa-hand-pointer text-purple-400 opacity-40";
+                text.textContent = "Touch: OFF";
+            }
+            if (ruolounico === 'docente') inviaEventoSistemaStudenti('SET_INPUT_MODE', { touchEnabled: state.touchEnabled });
+        }
+
+        function toggleSpeech() {
+            state.audioEnabled = !state.audioEnabled;
+            const icon = document.getElementById('voice-icon');
+            const text = document.getElementById('voice-status-text');
+            if (state.audioEnabled) {
+                icon.className = "fa-solid fa-volume-high text-amber-400";
+                text.textContent = "Voce: ON";
+            } else {
+                icon.className = "fa-solid fa-volume-xmark text-purple-400";
+                text.textContent = "Voce: OFF";
+            }
+        }
+
+        function toggleLabels() {
+            state.showLabels = !state.showLabels;
+            const icon = document.getElementById('labels-icon');
+            const text = document.getElementById('labels-status-text');
+            if (state.showLabels) {
+                icon.className = "fa-solid fa-font text-amber-400";
+                text.textContent = "Testo: ON";
+            } else {
+                icon.className = "fa-solid fa-font text-purple-400 opacity-40";
+                text.textContent = "Testo: OFF";
+            }
+            if (state.carta1) { renderCard('card1', state.carta1); renderCard('card2', state.carta2); }
+        }
+
+        function speakWord(text) {
+            if (ruolounico === 'studente' || !state.audioEnabled || !text) return;
+            if (state.synth.speaking) state.synth.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'it-IT';
+            utterance.rate = 0.85;
+            utterance.pitch = 1.0;
+            state.synth.speak(utterance);
+            state.lastSpokenWord = text;
+            document.getElementById('last-word-display').textContent = text;
+        }
+        function speakCurrentWord() {
+            if (state.lastSpokenWord && state.lastSpokenWord !== '---') speakWord(state.lastSpokenWord);
+        }
+
+        /* ==================== RICONOSCIMENTO VOCALE ==================== */
+        function initSpeechRecognition() {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SR) return;
+            recognition = new SR();
+            recognition.lang = 'it-IT';
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.maxAlternatives = 3;
+
+            recognition.onresult = function (event) {
+                speechLastLen = event.results.length;
+                if (isTransitioning || isPenalized || roundBloccato || !matchRe || state.synth.speaking) return;
+
+                let sentito = '', trovato = false;
+                for (let i = Math.max(event.resultIndex, speechBase); i < event.results.length; i++) {
+                    const res = event.results[i];
+                    for (let k = 0; k < res.length; k++) {
+                        const t = norm(res[k].transcript);
+                        if (k === 0) sentito += t + ' ';
+                        if (matchRe.test(t)) trovato = true;   // parola intera
+                    }
+                }
+                document.getElementById('speech-heard-text').textContent = sentito.trim() || '...';
+
+                if (trovato) {
+                    const el = document.querySelector(`.symbol-item[data-val="${state.matchingSymbol}"]`);
+                    handleSymbolClick(state.matchingSymbol, el);
+                }
+            };
+
+            recognition.onend = function () {
+                speechBase = 0; speechLastLen = 0;
+                if (isSpeechRecognitionActive) { try { recognition.start(); } catch (e) {} }
+            };
+        }
+
+        function toggleSpeechRecognition() {
+            if (!recognition) {
+                alert("Riconoscimento vocale non supportato in questo browser.");
+                return;
+            }
+            isSpeechRecognitionActive = !isSpeechRecognitionActive;
+            const icon = document.getElementById('mic-icon');
+            const text = document.getElementById('mic-status-text');
+            const liveBar = document.getElementById('speech-live-bar');
+
+            if (isSpeechRecognitionActive) {
+                try {
+                    recognition.start();
+                    icon.className = "fa-solid fa-microphone text-emerald-400";
+                    text.textContent = "Mic: ON";
+                    liveBar.classList.remove('hidden');
+                } catch (e) {}
+            } else {
+                try {
+                    recognition.stop();
+                    icon.className = "fa-solid fa-microphone-slash text-purple-400";
+                    text.textContent = "Mic: OFF";
+                    liveBar.classList.add('hidden');
+                } catch (e) {}
+            }
+        }
+
+        /* ==================== MAZZO E CARTE ==================== */
+        function caricaMazzoCorpoUmano() {
+            state.activeSymbols = CARTELLA_IMMAGINI.map(item => ({ type: 'image', icon: item.file, val: item.val }));
+            updateSymbolsPreviewGrid();
+            buildDeck();
+        }
+
+        function generateProjectivePlaneDeck(n, symbols) {
+            const cards = [];
+            const numSymbolsNeeded = n * n + n + 1;
+            if (symbols.length < numSymbolsNeeded) {
+                let extended = [...symbols];
+                let counter = 1;
+                while (extended.length < numSymbolsNeeded) {
+                    let base = symbols[(counter - 1) % symbols.length];
+                    extended.push({ ...base, val: `${base.val} ${counter}` });
+                    counter++;
+                }
+                symbols = extended;
+            }
+            for (let i = 0; i <= n; i++) {
+                let card = [0];
+                for (let j = 0; j < n; j++) card.push((j + 1) + (i * n));
+                cards.push(card);
+            }
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    let card = [i + 1];
+                    for (let k = 0; k < n; k++) card.push(n + 1 + k * n + (i * k + j) % n);
+                    cards.push(card);
+                }
+            }
+            return cards.map(c => c.map(idx => symbols[idx % symbols.length]));
+        }
+
+        function buildDeck() {
+            let pool = state.activeSymbols;
+            if (state.n === 5) pool = mescola(pool);   // mazzo da 31: parole diverse ogni volta
+            state.deckCards = generateProjectivePlaneDeck(state.n, pool);
+            document.getElementById('symbols-count-badge').textContent = state.symbolsPerCard + " Figure/Carta";
+            if (ruolounico !== 'studente') nextPair(false);
+        }
+
+        function updateSymbolsPreviewGrid() {
+            const grid = document.getElementById('symbols-preview-grid');
+            document.getElementById('loaded-count').textContent = state.activeSymbols.length;
+            grid.innerHTML = '';
+            state.activeSymbols.forEach((sym) => {
+                const item = document.createElement('div');
+                item.className = "flex items-center gap-2 bg-purple-900 p-1.5 rounded-lg border border-purple-700 text-xs";
+                item.innerHTML = `<img src="${sym.icon}" class="w-6 h-6 object-contain rounded"><span class="text-purple-200 text-xs truncate">${sym.val}</span>`;
+                grid.appendChild(item);
+            });
+        }
+
+        function nextPair(animate = true) {
+            const len = state.deckCards.length;
+            if (len < 2) return;
+            const idx1 = Math.floor(Math.random() * len);
+            let idx2;
+            do { idx2 = Math.floor(Math.random() * len); } while (idx2 === idx1);
+            state.card1Index = idx1;
+            state.card2Index = idx2;
+
+            const c1 = state.deckCards[idx1], c2 = state.deckCards[idx2];
+            const valsC2 = new Set(c2.map(s => s.val));
+            setMatching(c1.find(s => valsC2.has(s.val)).val);
+
+            roundId++;
+            speechBase = speechLastLen;   // ignora ciò che il microfono ha sentito finora
+            mostraCarte(c1, c2, animate);
+            if (ruolounico === 'docente') broadcast(messaggioCarte());
+        }
+
+        function mostraCarte(c1, c2, animate = true) {
+            state.carta1 = c1;
+            state.carta2 = c2;
+            nascondiParola();
+            const e1 = document.getElementById('card1'), e2 = document.getElementById('card2');
+            if (animate) {
+                e1.classList.remove('animate-card'); e2.classList.remove('animate-card');
+                void e1.offsetWidth;
+                e1.classList.add('animate-card'); e2.classList.add('animate-card');
+            }
+            renderCard('card1', c1);
+            renderCard('card2', c2);
+        }
+
+        // Le carte viaggiano come elenco di parole: lo studente non ha bisogno del mazzo
+        function messaggioCarte() {
+            return {
+                tipo: 'AGGIORNA_CARTE',
+                roundId,
+                c1: state.carta1.map(s => s.val),
+                c2: state.carta2.map(s => s.val),
+                m: state.matchingSymbol,
+                touchEnabled: state.touchEnabled
+            };
+        }
+
+        function applicaCarte(d) {
+            roundId = d.roundId;
+            roundBloccato = false;
+            speechBase = speechLastLen;
+            if (d.touchEnabled !== undefined) state.touchEnabled = d.touchEnabled;
+            setMatching(d.m);
+            const toSym = v => ({ val: v, icon: ICONE[v] });
+            mostraCarte(d.c1.map(toSym), d.c2.map(toSym), true);
+        }
+
+        function renderCard(cardId, symbols) {
+            const cardEl = document.getElementById(cardId);
+            const num = symbols.length;
+            const raggio = num === 8 ? 34 : 32;
+            const passo = 360 / (num - 1);
+
+            const pos = [{ r: 0, angle: 0 }];
+            for (let i = 0; i < num - 1; i++) {
+                pos.push({ r: raggio, angle: i * passo + (num === 8 ? Math.random() * 10 - 5 : 0) });
+            }
+
+            let html = '';
+            mescola(symbols).forEach((sym, i) => {
+                const p = pos[i];
+                const rad = p.angle * Math.PI / 180;
+                const left = (50 + p.r * Math.cos(rad)).toFixed(2);
+                const top = (50 + p.r * Math.sin(rad)).toFixed(2);
+                const scale = (0.75 + Math.random() * 0.65).toFixed(2);
+                const rot = Math.floor(Math.random() * 360) - 180;   // ruota immagine ed etichetta insieme
+                const label = state.showLabels
+                    ? `<span class="font-bold text-purple-950 bg-white/95 px-2 py-0.5 rounded-full shadow border border-purple-300 mt-1 whitespace-nowrap select-none z-10 block text-center" style="font-size:12px;line-height:1.2;">${sym.val}</span>`
+                    : '';
+                html += `<div class="symbol-item hover:bg-purple-900/15 hover:shadow-lg rounded-full" data-val="${sym.val}" style="left:${left}%;top:${top}%;--rot:${rot}deg">
+                    <div class="flex flex-col items-center justify-center w-full">
+                        <div class="flex items-center justify-center">
+                            <img src="${sym.icon}" decoding="async" draggable="false" class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain drop-shadow-md select-none pointer-events-none" style="transform:scale(${scale});display:block;margin:0 auto;">
+                        </div>${label}
+                    </div></div>`;
+            });
+            cardEl.innerHTML = html;   // un solo aggiornamento del DOM
+        }
+
+        /* ==================== RISPOSTA E PUNTEGGIO ==================== */
+        function handleSymbolClick(val, element) {
+            if (isTransitioning || isPenalized || roundBloccato) return;
+
+            if (val === state.matchingSymbol) {
+                if (ruolounico === 'studente') {
+                    if (!connDocente || !connDocente.open) {
+                        showWarningBanner("⚠️ Connessione persa, riconnessione in corso...", 2000, true);
+                        return;
+                    }
+                    // Lo studente NON assegna il punto: manda la risposta e aspetta il verdetto dell'host
+                    roundBloccato = true;
+                    evidenzia(val);
+                    connDocente.send({ tipo: 'RISPOSTA', roundId, valore: val, studentId: idDispositivo() });
+                    const r = roundId;
+                    setTimeout(() => { if (roundId === r) roundBloccato = false; }, 2500);   // sblocco di sicurezza
+                    return;
+                }
+                vittoriaRound(val, 'LIM', null);
+            } else {
+                if (element) element.classList.add('symbol-wrong');
+                if (wrongSound) wrongSound.triggerAttackRelease("G2", "8n");
+                setTimeout(() => { if (element) element.classList.remove('symbol-wrong'); }, 500);
+
+                if (ruolounico === 'studente') {
+                    isPenalized = true;
+                    const c1 = document.getElementById('card1'), c2 = document.getElementById('card2');
+                    c1.classList.add('locked-card'); c2.classList.add('locked-card');
+                    showWarningBanner("⚠️ Errore! Attendi 3 secondi prima di poter riprovare...", 3000, true);
+                    setTimeout(() => {
+                        isPenalized = false;
+                        c1.classList.remove('locked-card'); c2.classList.remove('locked-card');
+                    }, 3000);
+                }
+            }
+        }
+
+        // Solo host / modalità singola. Un solo vincitore per round.
+        function vittoriaRound(val, nomeVincitore, studentId) {
+            if (isTransitioning) return false;
+            isTransitioning = true;
+
+            evidenzia(val);
+            if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
+            confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
+            speakWord(val);
+            mostraParola(val, studentId ? nomeVincitore : '');
+
+            if (!studentId) {   // punto della LIM / modalità singola
+                state.score += 1;
+                document.getElementById('score-display').textContent = state.score;
+            }
+            document.getElementById('last-word-display').textContent = `${val} (${nomeVincitore})`;
+
+            if (ruolounico === 'docente') {
+                aggiornaBarraGiocatoriLIM();
+                broadcast({
+                    tipo: 'ROUND_VINTO', roundId, parola: val,
+                    vincitore: nomeVincitore, vincitoreId: studentId,
+                    classifica: classificaCorrente()
+                });
+                if (studentId) {
+                    const badge = document.querySelector(`.player-badge-item[data-player-id="${studentId}"]`);
+                    if (badge) {
+                        badge.classList.add('player-badge-active');
+                        setTimeout(() => badge.classList.remove('player-badge-active'), 600);
+                    }
+                }
+            }
+
+            setTimeout(() => { nextPair(true); isTransitioning = false; }, DELAY_ROUND);
+            return true;
+        }
+
+        function resetScore() {
+            state.score = 0;
+            mappaConnessioniStudenti.forEach(st => st.score = 0);
+            document.getElementById('score-display').textContent = "0";
+            document.getElementById('last-word-display').textContent = "---";
+            state.lastSpokenWord = '';
+            aggiornaBarraGiocatoriLIM();
+            if (ruolounico === 'docente') broadcast({ tipo: 'RESET_SCORES' });
+        }
+
+        /* ==================== MODALE CONNESSIONE ==================== */
+        function mostraModalConnessione() { document.getElementById('connection-modal').classList.remove('hidden'); }
+        function chiudiModalConnessione() { document.getElementById('connection-modal').classList.add('hidden'); }
+
+        /* ==================== LATO HOST ==================== */
+        function avviaComeDocente(tentativo = 0) {
+            if (ruolounico === 'docente' && peer && !peer.destroyed) return;   // niente doppie stanze
+            ruolounico = 'docente';
+            const pinStanza = Math.floor(1000 + Math.random() * 9000).toString();
+            stanzaPinCorrente = pinStanza;
+            resetScore();
+
+            peer = new Peer(PREFISSO_STANZA + pinStanza);
+
+            peer.on('open', () => {
+                document.getElementById('role-selection').classList.add('hidden');
+                document.getElementById('teacher-qr-view').classList.remove('hidden');
+                document.getElementById('teacher-qr-view').classList.add('flex');
+                document.getElementById('display-pin-code').textContent = pinStanza;
+                document.getElementById('connected-players-badge').classList.remove('hidden');
+                document.getElementById('live-players-bar').classList.remove('hidden');
+                document.getElementById('txt-multiplayer').textContent = "Host: " + pinStanza;
+                const qrBox = document.getElementById('qrcode-box');
+                qrBox.innerHTML = '';
+                const base = window.location.href.split('?')[0];
+                new QRCode(qrBox, { text: `${base}?pin=${pinStanza}`, width: 180, height: 180 });
+            });
+
+            peer.on('error', (err) => {
+                if (err.type === 'unavailable-id' && tentativo < 5) {   // PIN occupato: ne genera un altro
+                    try { peer.destroy(); } catch (e) {}
+                    peer = null; ruolounico = 'standalone';
+                    avviaComeDocente(tentativo + 1);
+                } else {
+                    showWarningBanner("⚠️ Errore di rete: " + err.type, 5000, true);
+                }
+            });
+            peer.on('disconnected', () => { try { peer.reconnect(); } catch (e) {} });
+            peer.on('connection', gestisciConnessioneAlunno);
+
+            if (!intervalloStato) {
+                let apertiPrima = -1;
+                intervalloStato = setInterval(() => {
+                    let n = 0;
+                    mappaConnessioniStudenti.forEach(o => { if (o.conn.open) n++; });
+                    if (n !== apertiPrima) { apertiPrima = n; aggiornaContatoreAlunni(); aggiornaBarraGiocatoriLIM(); }
+                }, 3000);
+            }
+        }
+
+        function gestisciConnessioneAlunno(conn) {
+            conn.on('data', (dati) => {
+                if (dati.tipo === 'STUDENTE_PRONTO') {
+                    const id = dati.studentId || conn.peer;
+                    const prec = mappaConnessioniStudenti.get(id);
+                    if (prec && prec.conn !== conn) { try { prec.conn.close(); } catch (e) {} }
+                    const nome = String(dati.nome || 'Alunno').slice(0, 20);
+                    // se l'alunno rientra (o il messaggio viene ripetuto) conserva il punteggio
+                    mappaConnessioniStudenti.set(id, { conn, nome, score: prec ? prec.score : 0 });
+                    aggiornaContatoreAlunni();
+                    aggiornaBarraGiocatoriLIM();
+                    conn.send({
+                        ...messaggioCarte(),
+                        tipo: 'BENVENUTO',
+                        score: mappaConnessioniStudenti.get(id).score,
+                        timerRestanteMs: state.isTimeAttack ? Math.max(0, state.timerFine - Date.now()) : null
+                    });
+                }
+                else if (dati.tipo === 'RISPOSTA') {
+                    if (isTransitioning || dati.roundId !== roundId || dati.valore !== state.matchingSymbol) return;
+                    const st = mappaConnessioniStudenti.get(dati.studentId);
+                    if (!st) return;
+                    st.score++;
+                    vittoriaRound(dati.valore, st.nome, dati.studentId);
+                }
+            });
+            conn.on('close', () => { aggiornaContatoreAlunni(); aggiornaBarraGiocatoriLIM(); });
+            conn.on('error', () => { aggiornaContatoreAlunni(); aggiornaBarraGiocatoriLIM(); });
+        }
+
+        function aggiornaBarraGiocatoriLIM() {
+            const listEl = document.getElementById('live-players-list');
+            listEl.innerHTML = '';
+            mappaConnessioniStudenti.forEach((obj, id) => {
+                const badge = document.createElement('div');
+                badge.setAttribute('data-player-id', id);
+                badge.className = "player-badge-item bg-purple-900 border border-purple-700 text-white text-xs font-semibold px-3 py-1 rounded-lg flex items-center gap-1.5 shadow-sm" + (obj.conn.open ? "" : " opacity-40");
+                badge.innerHTML = '<i class="fa-solid fa-user text-amber-300"></i>';
+                const nome = document.createElement('span');
+                nome.textContent = obj.nome;   // textContent: niente HTML iniettato
+                const pt = document.createElement('span');
+                pt.className = "bg-amber-400 text-purple-950 font-bold px-1.5 rounded-md text-[10px] ml-1";
+                pt.textContent = obj.score || 0;
+                badge.append(nome, pt);
+                listEl.appendChild(badge);
+            });
+        }
+
+        function aggiornaContatoreAlunni() {
+            let n = 0;
+            mappaConnessioniStudenti.forEach(o => { if (o.conn.open) n++; });
+            document.getElementById('players-count').textContent = n;
+        }
+
+        /* ==================== LATO STUDENTE ==================== */
+        function connettiComeStudente() {
+            const pin = document.getElementById('room-pin-input').value.trim();
+            mioNomeStudente = document.getElementById('student-name').value.trim().slice(0, 20) || "Alunno";
+            if (!pin) { alert("Inserisci il PIN della Stanza!"); return; }
+
+            const enterBtn = document.getElementById('btn-enter-room');
+            enterBtn.disabled = true;
+            enterBtn.textContent = "Connessione in corso...";
+
+            state.score = 0;
+            document.getElementById('score-display').textContent = "0";
+            stanzaPinCorrente = pin;
+            ruolounico = 'studente';
+            inStanza = false;
+            document.getElementById('start-timer-btn').classList.add('hidden');
+            document.getElementById('btn-next-pair').classList.add('hidden');
+
+            creaPeerStudente(enterBtn);
+        }
+
+        function creaPeerStudente(enterBtn) {
+            if (peer) { try { peer.destroy(); } catch (e) {} }
+            peer = new Peer(idDispositivo());
+
+            peer.on('open', () => collegaAlDocente(enterBtn));
+            peer.on('disconnected', () => { try { peer.reconnect(); } catch (e) {} });
+            peer.on('error', (err) => {
+                if (err.type === 'unavailable-id') {
+                    sessionStorage.setItem('colpodocchio_device_id', 'alunno-' + Math.floor(Math.random() * 10000000));
+                    creaPeerStudente(enterBtn);
+                } else if (err.type === 'peer-unavailable' && inStanza) {
+                    setTimeout(() => collegaAlDocente(), 2000);   // stanza momentaneamente irraggiungibile
+                } else {
+                    alert(err.type === 'peer-unavailable' ? "Stanza non trovata. Verifica il PIN!" : "Errore di rete durante la connessione. Riprova.");
+                    enterBtn.disabled = false;
+                    enterBtn.textContent = "Entra con PIN";
+                }
+            });
+        }
+
+        function collegaAlDocente(enterBtn) {
+            if (connDocente) { try { connDocente.close(); } catch (e) {} }
+            const conn = peer.connect(PREFISSO_STANZA + stanzaPinCorrente, { reliable: true });
+            connDocente = conn;
+            let benvenuto = false;
+
+            conn.on('open', () => {
+                chiudiModalConnessione();
+                document.getElementById('txt-multiplayer').textContent = `In Stanza: ${stanzaPinCorrente} • ${mioNomeStudente}`;
+                document.getElementById('repeat-speech-btn').classList.add('hidden');
+                document.getElementById('toggle-touch-btn').classList.add('hidden');
+                tieniSchermoAcceso();
+
+                // Un solo messaggio; si ripete solo se l'host non risponde entro 1,2 s
+                let tentativi = 0;
+                const invia = () => {
+                    if (benvenuto || !conn.open || connDocente !== conn) return;
+                    if (tentativi++ >= 6) { showWarningBanner("⚠️ L'host non risponde. Riprova a entrare.", 5000, true); return; }
+                    conn.send({ tipo: 'STUDENTE_PRONTO', studentId: idDispositivo(), nome: mioNomeStudente });
+                    setTimeout(invia, 1200);
+                };
+                invia();
+            });
+
+            conn.on('error', () => {
+                if (enterBtn) {
+                    alert("Impossibile connettersi alla stanza. Verifica il PIN!");
+                    enterBtn.disabled = false;
+                    enterBtn.textContent = "Entra con PIN";
+                }
+            });
+
+            conn.on('close', () => {
+                if (connDocente !== conn || ruolounico !== 'studente') return;
+                showWarningBanner("⚠️ Connessione persa, riprovo...", 3000, true);
+                setTimeout(() => {
+                    if (peer && !peer.destroyed && (!connDocente || !connDocente.open)) collegaAlDocente();
+                }, 1500);
+            });
+
+            conn.on('data', (d) => {
+                benvenuto = true;
+                switch (d.tipo) {
+                    case 'BENVENUTO':
+                        inStanza = true;
+                        showWarningBanner(`✅ Connesso alla stanza ${stanzaPinCorrente}!`, 2000, false);
+                        state.score = d.score || 0;
+                        document.getElementById('score-display').textContent = state.score;
+                        applicaCarte(d);
+                        if (d.timerRestanteMs != null) avviaTimerLocale(d.timerRestanteMs);
+                        break;
+
+                    case 'AGGIORNA_CARTE':
+                        applicaCarte(d);
+                        break;
+
+                    case 'ROUND_VINTO': {
+                        roundBloccato = true;
+                        evidenzia(d.parola);
+                        const io = idDispositivo();
+                        const mio = d.classifica.find(x => x.id === io);
+                        if (mio) { state.score = mio.score; document.getElementById('score-display').textContent = state.score; }
+                        document.getElementById('last-word-display').textContent = `${d.parola} (${d.vincitore})`;
+                        mostraParola(d.parola, d.vincitoreId === io ? "Bravo, hai vinto il round!" : d.vincitore);
+                        if (d.vincitoreId === io) {
+                            if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
+                            confetti({ particleCount: 25, spread: 60, origin: { y: 0.6 } });
+                        }
+                        break;
+                    }
+
+                    case 'RESET_SCORES':
+                        state.score = 0;
+                        document.getElementById('score-display').textContent = "0";
+                        break;
+
+                    case 'SET_INPUT_MODE':
+                        state.touchEnabled = d.touchEnabled;
+                        showWarningBanner(state.touchEnabled ? "Modalità Touch riattivata dall'Host!" : "L'Host ha attivato la modalità Solo Voce!", 3000, false);
+                        break;
+
+                    case 'TIMER_START': avviaTimerLocale(d.restanteMs); break;
+                    case 'TIMER_STOP':  fermaTimerLocale(); break;
+                    case 'GAMEOVER':
+                        fermaTimerLocale();
+                        showGameOverModal(d.classifica);
+                        break;
+                }
+            });
+        }
+
+        function avviaTimerLocale(restanteMs) {
+            clearInterval(timerLocaleInt);
+            const fine = Date.now() + restanteMs;
+            document.getElementById('timer-box').classList.remove('hidden');
+            const tick = () => {
+                const s = Math.max(0, Math.ceil((fine - Date.now()) / 1000));
+                document.getElementById('timer-display').textContent = s;
+                if (s <= 0) clearInterval(timerLocaleInt);
+            };
+            tick();
+            timerLocaleInt = setInterval(tick, 250);
+        }
+        function fermaTimerLocale() {
+            clearInterval(timerLocaleInt);
+            document.getElementById('timer-box').classList.add('hidden');
+        }
+
+        /* ==================== TIMER E CLASSIFICA ==================== */
+        function toggleTimeAttack() {
+            if (ruolounico === 'studente') return;
+            if (state.isTimeAttack) stopTimeAttack();
+            else startTimeAttack();
+        }
+
+        function startTimeAttack() {
+            state.isTimeAttack = true;
+            state.timerFine = Date.now() + 60000;
+            resetScore();
+
+            document.getElementById('timer-box').classList.remove('hidden');
+            document.getElementById('timer-display').textContent = 60;
+            document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-stop"></i> Ferma Sfida`;
+            document.getElementById('start-timer-btn').className = "px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold transition flex items-center gap-2 shadow-lg text-sm";
+
+            if (ruolounico === 'docente') broadcast({ tipo: 'TIMER_START', restanteMs: 60000 });
+
+            state.timerInterval = setInterval(() => {
+                const sec = Math.max(0, Math.ceil((state.timerFine - Date.now()) / 1000));
+                document.getElementById('timer-display').textContent = sec;
+                if (sec <= 0) {
+                    stopTimeAttack(true);
+                    showGameOverModal();
+                }
+            }, 250);
+        }
+
+        function stopTimeAttack(finita = false) {
+            state.isTimeAttack = false;
+            clearInterval(state.timerInterval);
+            document.getElementById('timer-box').classList.add('hidden');
+            document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-play"></i> Avvia Sfida 60s`;
+            document.getElementById('start-timer-btn').className = "px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm";
+            if (ruolounico === 'docente' && !finita) broadcast({ tipo: 'TIMER_STOP' });
+        }
+
+        function riempiClassifica(classifica, mioId) {
+            const listEl = document.getElementById('leaderboard-list');
+            listEl.innerHTML = '';
+            if (!classifica.length) {
+                listEl.innerHTML = '<p class="text-xs text-purple-300 italic">Nessun punto registrato dagli alunni.</p>';
+                return;
+            }
+            classifica.forEach((r, idx) => {
+                let colore = "bg-purple-950 text-purple-200 border-purple-700";
+                let rango = `#${idx + 1}`;
+                if (idx === 0) { colore = "bg-amber-400 text-purple-950 font-bold border-amber-300"; rango = "🥇 1°"; }
+                else if (idx === 1) { colore = "bg-slate-300 text-purple-950 font-bold border-white"; rango = "🥈 2°"; }
+                else if (idx === 2) { colore = "bg-amber-700 text-white font-bold border-amber-600"; rango = "🥉 3°"; }
+
+                const item = document.createElement('div');
+                item.className = `flex justify-between items-center p-2.5 rounded-xl border ${colore}` + (r.id === mioId ? " ring-2 ring-white" : "");
+                const a = document.createElement('span');
+                a.className = "text-sm font-semibold";
+                a.textContent = `${rango} ${r.nome}`;
+                const b = document.createElement('span');
+                b.className = "text-base font-extrabold font-mono";
+                b.textContent = `${r.score} pt`;
+                item.append(a, b);
+                listEl.appendChild(item);
+            });
+        }
+
+        function showGameOverModal(classifica) {
+            const isHost = ruolounico === 'docente';
+            if (isHost) {
+                classifica = classificaCorrente();
+                broadcast({ tipo: 'GAMEOVER', classifica });   // la classifica arriva anche agli studenti
+            }
+
+            document.getElementById('leaderboard-view').classList.toggle('hidden', !classifica);
+            document.getElementById('single-score-view').classList.toggle('hidden', isHost);
+
+            if (classifica) riempiClassifica(classifica, isHost ? null : idDispositivo());
+
+            if (!isHost) {
+                if (classifica) {
+                    const mio = classifica.find(x => x.id === idDispositivo());
+                    if (mio) { state.score = mio.score; document.getElementById('score-display').textContent = state.score; }
+                }
+                document.getElementById('final-score-display').textContent = state.score;
+                let best = parseInt(localStorage.getItem('colpodocchio_best_score')) || 0;
+                if (state.score > best) {
+                    best = state.score;
+                    localStorage.setItem('colpodocchio_best_score', best);
+                    document.getElementById('new-record-badge').classList.remove('hidden');
+                    confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
+                } else {
+                    document.getElementById('new-record-badge').classList.add('hidden');
+                }
+                document.getElementById('best-score-display').textContent = best;
+            }
+            document.getElementById('gameover-modal').classList.remove('hidden');
+        }
+
+        function closeGameOverModal() {
+            document.getElementById('gameover-modal').classList.add('hidden');
+            if (ruolounico !== 'studente') nextPair(true);
+        }
+
+        /* ==================== AREA DOCENTE ==================== */
+        function requireSettingsAccess() {
+            document.getElementById('pin-modal').classList.remove('hidden');
+            const pinInput = document.getElementById('teacher-pin');
+            pinInput.value = '';
+            document.getElementById('pin-error').classList.add('hidden');
+            setTimeout(() => pinInput.focus(), 100);
+        }
+        function closePinModal() { document.getElementById('pin-modal').classList.add('hidden'); }
+        function checkPin() {
+            const input = document.getElementById('teacher-pin').value;
+            if (input === TEACHER_PIN) {
+                closePinModal();
+                openSettingsModal();
+            } else {
+                document.getElementById('pin-error').classList.remove('hidden');
+                document.getElementById('teacher-pin').value = '';
+                document.getElementById('teacher-pin').focus();
+            }
+        }
+        function openSettingsModal() { document.getElementById('settings-modal').classList.remove('hidden'); }
+        function closeSettingsModal() { document.getElementById('settings-modal').classList.add('hidden'); }
+
+        function setDeckOrder(orderN) {
+            state.n = orderN;
+            state.symbolsPerCard = orderN + 1;
+            const btn5 = document.getElementById('order-5-btn');
+            const btn7 = document.getElementById('order-7-btn');
+            const on = "p-3 rounded-xl border border-amber-400 bg-amber-400/20 text-center font-bold text-sm";
+            const off = "p-3 rounded-xl border border-purple-700 bg-purple-950/60 hover:bg-purple-800 text-center font-bold text-sm";
+            btn5.className = orderN === 5 ? on : off;
+            btn7.className = orderN === 7 ? on : off;
+        }
+
+        function applySettings() {
+            buildDeck();
+            closeSettingsModal();
+        }
+    </script>
+</body>
+</html>
