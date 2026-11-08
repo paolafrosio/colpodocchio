@@ -4,65 +4,169 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Colpo d'occhio - Giochiamo Insieme</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Tone.js for Sound Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- PeerJS e QR Code -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Lexend', 'Fredoka', sans-serif; user-select: none; -webkit-user-select: none; overflow-x: hidden; }
-        .dobble-card { aspect-ratio: 1 / 1; box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 0 30px inset rgba(255, 255, 255, 0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); overflow: visible !important; }
-        .dobble-card:hover { transform: scale(1.02); }
-        .symbol-item { transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 9999px; padding: 0; }
-        .symbol-item:hover { z-index: 40 !important; transform: scale(1.15); }
-        .symbol-correct { animation: pulse-green 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 50 !important; }
-        .symbol-wrong { animation: shake-red 0.5s ease-in-out; }
-        .locked-card { opacity: 0.35 !important; pointer-events: none !important; filter: grayscale(80%); }
-        @keyframes pulse-green { 0% { transform: scale(1); } 50% { transform: scale(1.5); } 100% { transform: scale(1); } }
-        @keyframes shake-red { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
-        @keyframes card-appear { 0% { opacity: 0; transform: scale(0.65) rotate(-12deg); } 100% { opacity: 1; transform: scale(1) rotate(0deg); } }
-        .animate-card { animation: card-appear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #2e1065; border-radius: 8px; }
-        ::-webkit-scrollbar-thumb { background: #6b21a8; border-radius: 8px; }
+        body {
+            font-family: 'Lexend', 'Fredoka', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .dobble-card {
+            aspect-ratio: 1 / 1;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 0 30px inset rgba(255, 255, 255, 0.9);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: visible !important;
+        }
+
+        .dobble-card:hover {
+            transform: scale(1.02);
+        }
+        
+        .symbol-item {
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            padding: 0; 
+        }
+
+        .symbol-item:hover {
+            z-index: 40 !important;
+        }
+
+        .symbol-correct {
+            animation: pulse-green 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 50 !important;
+        }
+
+        .symbol-wrong {
+            animation: shake-red 0.5s ease-in-out;
+        }
+
+        .locked-card {
+            opacity: 0.35 !important;
+            pointer-events: none !important;
+            filter: grayscale(80%);
+        }
+
+        @keyframes pulse-green {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.5); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        @keyframes shake-red {
+            0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+            20%, 60% { transform: translate(-50%, -50%) translateX(-10px); }
+            40%, 80% { transform: translate(-50%, -50%) translateX(10px); }
+        }
+
+        @keyframes card-appear {
+            0% { opacity: 0; transform: scale(0.65) rotate(-12deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+
+        .animate-card {
+            animation: card-appear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #2e1065;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #6b21a8;
+            border-radius: 8px;
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 text-slate-100 min-h-screen flex flex-col justify-between">
+<body class="bg-purple-950 text-slate-100 min-h-screen flex flex-col justify-between bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 overflow-x-hidden">
 
-    <!-- HEADER -->
+    <!-- HEADER / BARRA SUPERIORE -->
     <header class="w-full bg-purple-900/90 backdrop-blur-md border-b border-purple-700/50 px-4 py-3 flex justify-between items-center z-10 shadow-lg">
         <div class="flex items-center gap-3">
             <div class="bg-amber-400 text-purple-950 p-2.5 rounded-2xl shadow-lg flex items-center justify-center font-bold text-xl">
-                <i class="fa-solid fa-eye"></i>
+                <i class="fa-solid fa-comments"></i>
             </div>
             <div>
-                <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide flex items-center gap-2">Colpo d'occhio</h1>
-                <p class="text-xs text-purple-200 hidden sm:block">Tocca l'immagine in comune o dilla al microfono!</p>
+                <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide flex items-center gap-2">
+                    Colpo d'occhio
+                </h1>
+                <p class="text-xs text-purple-200 hidden sm:block">Pronuncia la figura in comune al microfono o selezionala toccando lo schermo!</p>
             </div>
         </div>
 
         <div class="flex items-center gap-2 md:gap-3 flex-wrap justify-end">
             <button id="btn-multiplayer" onclick="mostraModalConnessione()" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
-                <i class="fa-solid fa-users"></i><span id="txt-multiplayer">Giochiamo insieme</span>
+                <i class="fa-solid fa-users"></i>
+                <span id="txt-multiplayer">Giochiamo insieme</span>
             </button>
-            <button id="btn-mic-toggle" onclick="toggleSpeechRecognition()" class="px-3.5 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva Microfono">
-                <!-- PARTE DEFAULT OFF -->
+            <button id="toggle-touch-btn" onclick="toggleTouch()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva Touch">
+                <i id="touch-icon" class="fa-solid fa-hand-pointer text-amber-400"></i>
+                <span id="touch-status-text" class="hidden md:inline font-medium">Touch: ON</span>
+            </button>
+            <button id="btn-mic-toggle" onclick="toggleSpeechRecognition()" class="px-3.5 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva Microfono per Risposta Vocale">
                 <i id="mic-icon" class="fa-solid fa-microphone-slash text-purple-400"></i>
                 <span id="mic-status-text" class="hidden md:inline font-medium">Mic: OFF</span>
+            </button>
+            <button id="toggle-labels-btn" onclick="toggleLabels()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Mostra o nascondi il testo scritto">
+                <i id="labels-icon" class="fa-solid fa-font text-purple-400 opacity-40"></i>
+                <span id="labels-status-text" class="hidden md:inline font-medium">Testo: OFF</span>
+            </button>
+            <button id="toggle-voice-btn" onclick="toggleSpeech()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva pronuncia vocale">
+                <i id="voice-icon" class="fa-solid fa-volume-high text-amber-400"></i>
+                <span id="voice-status-text" class="hidden md:inline font-medium">Voce: ON</span>
+            </button>
+            <button onclick="requireSettingsAccess()" class="px-3.5 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
+                <i class="fa-solid fa-lock"></i>
+                <span class="hidden md:inline">Area Docente</span>
             </button>
         </div>
     </header>
 
-    <!-- AREA DI GIOCO -->
+    <!-- AREA DI GIOCO PRINCIPALE -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-2 flex flex-col justify-center items-center gap-3">
-        <!-- STATUS BAR -->
+        <!-- STATUS BAR & FEEDBACK VOCALE -->
         <div class="w-full flex flex-col sm:flex-row justify-between items-center bg-purple-900/80 backdrop-blur-md rounded-2xl p-3 border border-purple-700/50 text-white shadow-xl gap-3">
             <div class="flex items-center gap-2">
+                <span id="current-preset-badge" class="bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-semibold px-3 py-1 rounded-full flex items-center gap-2">
+                    <i class="fa-solid fa-user"></i> Il Corpo Umano (57 simboli)
+                </span>
+                <span id="symbols-count-badge" class="bg-fuchsia-500/20 border border-fuchsia-400/40 text-fuchsia-300 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full">
+                    8 Figure/Carta
+                </span>
                 <span id="connected-players-badge" class="bg-purple-500/20 border border-purple-400/40 text-purple-200 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full hidden">
                     <i class="fa-solid fa-user-group"></i> Alunni: <b id="players-count">0</b>
                 </span>
             </div>
+
+            <div id="last-word-container" class="flex items-center gap-3 bg-purple-950/80 px-4 py-1.5 rounded-xl border border-purple-800 min-h-[44px]">
+                <span class="text-xs text-purple-300 uppercase tracking-wider font-semibold">Parola:</span>
+                <span id="last-word-display" class="text-lg md:text-xl font-bold text-amber-300">---</span>
+                <button id="repeat-speech-btn" onclick="speakCurrentWord()" class="p-1.5 rounded-lg bg-amber-400/20 hover:bg-amber-400/40 text-amber-300 transition text-sm" title="Riascolta pronuncia">
+                    <i class="fa-solid fa-bullhorn"></i>
+                </button>
+            </div>
+
             <div class="flex items-center gap-6">
                 <div id="timer-box" class="hidden flex items-center gap-2">
                     <i class="fa-solid fa-stopwatch text-amber-300 text-xl"></i>
@@ -76,327 +180,157 @@
             </div>
         </div>
 
-        <!-- BARRA MICROFONO (NASCOSTA DI DEFAULT) -->
+        <!-- INDICATORE WARNING / PENALITÀ (STUDENTE / TOUCH BLOCCATO) -->
+        <div id="penalty-banner" class="hidden w-full bg-red-600/90 text-white text-center py-1.5 px-4 rounded-xl text-xs font-bold shadow-md transition-all duration-300">
+             Errore! Attendi 3 secondi prima di poter riprovare...
+        </div>
+
+        <!-- BARRA RICONOSCIMENTO VOCALE IN TEMPO REALE -->
         <div id="speech-live-bar" class="hidden w-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 text-center py-1.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 animate-pulse">
             <i class="fa-solid fa-microphone text-emerald-400 text-sm"></i>
-            <span>In ascolto... <span class="text-purple-300 font-normal">(Hai detto: <b id="speech-heard-text" class="text-amber-300 font-bold">...</b>)</span></span>
+            <span>Microfono attivo — In ascolto... <span class="text-purple-300 font-normal">(Hai detto: <b id="speech-heard-text" class="text-amber-300 font-bold">...</b>)</span></span>
         </div>
 
-        <!-- CARTE -->
+        <!-- LE DUE CARTE CIRCOLARI -->
         <div class="w-full flex-1 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 my-1">
-            <div id="card1" class="dobble-card animate-card w-full max-w-[340px] md:max-w-[460px] bg-gradient-to-b from-yellow-100 to-yellow-300 rounded-full border-8 border-purple-900 relative"></div>
-            <div class="bg-amber-400 text-purple-950 w-12 h-12 rounded-full flex items-center justify-center font-black text-2xl shadow-xl border-4 border-purple-950 z-10"><i class="fa-solid fa-equals"></i></div>
-            <div id="card2" class="dobble-card animate-card w-full max-w-[340px] md:max-w-[460px] bg-gradient-to-b from-yellow-100 to-yellow-300 rounded-full border-8 border-purple-900 relative"></div>
+            <div id="card1" class="dobble-card animate-card w-full max-w-[340px] sm:max-w-[420px] md:max-w-[460px] bg-gradient-to-b from-yellow-100 via-amber-200 to-yellow-300 rounded-full border-8 border-purple-900 relative overflow-hidden flex items-center justify-center">
+            </div>
+            <div class="flex md:flex-col items-center justify-center gap-1 my-[-10px] md:my-0">
+                <div class="bg-amber-400 text-purple-950 w-12 h-12 rounded-full flex items-center justify-center font-black text-2xl shadow-xl border-4 border-purple-950 z-10">
+                    <i class="fa-solid fa-equals"></i>
+                </div>
+            </div>
+            <div id="card2" class="dobble-card animate-card w-full max-w-[340px] sm:max-w-[420px] md:max-w-[460px] bg-gradient-to-b from-yellow-100 via-amber-200 to-yellow-300 rounded-full border-8 border-purple-900 relative overflow-hidden flex items-center justify-center">
+            </div>
         </div>
 
-        <!-- CONTROLLI (SOLO HOST/SINGOLO) -->
-        <div id="host-controls" class="flex flex-wrap justify-center gap-3 mt-1">
-            <button onclick="nextPair(true)" class="px-4 py-2 rounded-xl bg-purple-800 hover:bg-purple-700 text-purple-100 font-semibold border border-purple-600/50 text-sm"><i class="fa-solid fa-arrows-rotate"></i> Cambia Carte</button>
-            <button onclick="avviaTimer()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-purple-950 font-bold shadow-lg text-sm"><i class="fa-solid fa-play"></i> Avvia Sfida 60s</button>
+        <!-- CONTROLLI DI GIOCO -->
+        <div class="flex flex-wrap justify-center gap-3 mt-1">
+            <button id="btn-next-pair" onclick="nextPair(true)" class="px-4 py-2 rounded-xl bg-purple-800 hover:bg-purple-700 text-purple-100 font-semibold transition flex items-center gap-2 border border-purple-600/50 text-sm">
+                <i class="fa-solid fa-arrows-rotate"></i> Cambia Carte
+            </button>
+            <button id="start-timer-btn" onclick="toggleTimeAttack()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm">
+                <i class="fa-solid fa-play"></i> Avvia Sfida 60s
+            </button>
+            <button onclick="resetScore()" class="px-3.5 py-2 rounded-xl bg-purple-950 hover:bg-purple-900 text-purple-300 hover:text-white border border-purple-800 font-medium transition text-xs">
+                Azzera Punti
+            </button>
         </div>
     </main>
 
-    <!-- MODALE CONNESSIONE -->
+    <footer class="text-center py-2 text-xs text-purple-300/60">
+        Colpo d'occhio Didattico • Generatore Matematico Proiettivo • Gamification & Multiplayer
+    </footer>
+
+    <!-- MODALE CONNETTIVITÀ MULTIPLAYER (PEERJS) -->
     <div id="connection-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-purple-900 border border-purple-700 w-full max-w-md rounded-3xl p-6 text-white shadow-2xl flex flex-col">
-            <h2 class="text-xl font-bold mb-4 text-amber-300"><i class="fa-solid fa-users"></i> Giochiamo Insieme</h2>
+            <h2 class="text-xl font-bold mb-4 text-amber-300 flex items-center gap-2">
+                <i class="fa-solid fa-users"></i> Giochiamo Insieme (Stanza)
+            </h2>
             
             <div id="role-selection" class="space-y-4">
-                <button onclick="avviaComeDocente()" class="w-full p-4 rounded-2xl bg-fuchsia-600 font-bold flex items-center gap-4 text-left">
+                <button onclick="avviaComeDocente()" class="w-full p-4 rounded-2xl bg-fuchsia-600 hover:bg-fuchsia-500 font-bold flex items-center gap-4 transition text-left shadow-md">
                     <i class="fa-solid fa-desktop text-3xl"></i>
-                    <div>Crea una Stanza (LIM/Host)<div class="text-xs font-normal">Genera PIN per gli alunni</div></div>
+                    <div>
+                        <div class="text-base">Crea una Stanza (Host)</div>
+                        <div class="text-xs font-normal text-purple-200">Genera il PIN a 4 cifre per invitare gli altri a giocare</div>
+                    </div>
                 </button>
-                <div class="border-t border-purple-700 my-2"></div>
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t border-purple-700"></div>
+                    <span class="flex-shrink mx-4 text-purple-300 text-xs uppercase font-semibold">oppure</span>
+                    <div class="flex-grow border-t border-purple-700"></div>
+                </div>
                 <div class="space-y-2">
-                    <input type="text" id="student-name" placeholder="Il tuo Nome" class="w-full bg-purple-950 border p-3 rounded-xl text-center text-white outline-none">
-                    <input type="text" id="room-pin-input" placeholder="PIN (es. 1234)" maxlength="4" class="w-full bg-purple-950 border p-3 rounded-xl text-center text-lg tracking-widest text-white outline-none">
-                    <button onclick="connettiComeStudente()" class="w-full py-3 rounded-xl bg-amber-400 text-purple-950 font-bold">Entra</button>
+                    <input type="text" id="student-name" placeholder="Il tuo Nome" class="w-full bg-purple-950 border border-purple-700 p-3 rounded-xl text-center text-white focus:border-amber-400 outline-none">
+                    <input type="text" id="room-pin-input" placeholder="PIN Stanza (es. 1234)" maxlength="4" class="w-full bg-purple-950 border border-purple-700 p-3 rounded-xl text-center text-lg tracking-widest text-white focus:border-amber-400 outline-none">
+                    <button onclick="connettiComeStudente()" class="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition shadow-md">
+                        Entra con PIN
+                    </button>
                 </div>
             </div>
 
-            <div id="teacher-qr-view" class="hidden flex-col items-center text-center space-y-4 mt-4">
-                <div class="bg-white p-3 rounded-2xl" id="qrcode-box"></div>
-                <div class="text-lg font-bold text-amber-300">PIN: <span id="display-pin-code" class="text-2xl font-mono text-white bg-purple-950 px-3 py-1 rounded-xl">----</span></div>
+            <div id="teacher-qr-view" class="hidden flex-col items-center text-center space-y-4">
+                <div class="bg-white p-3 rounded-2xl inline-block shadow-lg" id="qrcode-box"></div>
+                <div class="text-lg font-bold text-amber-300">
+                    PIN Stanza: <span id="display-pin-code" class="text-2xl font-mono text-white bg-purple-950 px-3 py-1 rounded-xl shadow-inner">----</span>
+                </div>
+                <p class="text-xs text-purple-200">Inquadra il QR con il telefono/tablet o inserisci il PIN per unirti alla sfida!</p>
             </div>
-            <button onclick="document.getElementById('connection-modal').classList.add('hidden')" class="mt-6 w-full py-2 rounded-xl bg-purple-950 text-purple-300 text-sm font-semibold">Chiudi</button>
+
+            <button onclick="chiudiModalConnessione()" class="mt-6 w-full py-2 rounded-xl bg-purple-950 hover:bg-purple-800 text-purple-300 text-sm font-semibold transition">Chiudi</button>
         </div>
     </div>
 
-    <script>
-        // DATI DI GIOCO DI BASE (Esempio Simboli)
-        const allSymbols = ["❤️ Cuore", "⭐ Stella", "☀️ Sole", "🌙 Luna", "☁️ Nuvola", "⚡ Fulmine", "❄️ Neve", "🔥 Fuoco", "💧 Goccia", "🍎 Mela", "🍌 Banana", "🍇 Uva", "🍓 Fragola", "🍕 Pizza", "🍔 Hamburger", "🍟 Patatine", "🍩 Ciambella", "🍪 Biscotto", "🍦 Gelato", "🍫 Cioccolato", "🏀 Basket", "⚽ Calcio", "🎾 Tennis", "⚾ Baseball", "🎱 Biliardo", "🚗 Auto", "🚕 Taxi", "🚓 Polizia", "🚑 Ambulanza", "🚒 Pompieri", "✈️ Aereo", "🚀 Razzo", "🚁 Elicottero", "⛵ Barca", "🚢 Nave", "🚲 Bici", "🛵 Moto", "🚜 Trattore", "🐶 Cane", "🐱 Gatto", "🐭 Topo", "🐹 Cralo", "🐰 Coniglio", "🦊 Volpe", "🐻 Orso", "🐼 Panda", "🐨 Koala", "🐯 Tigre", "🦁 Leone", "🐮 Mucca", "🐷 Maiale", "🐸 Rana", "🐵 Scimmia", "🐔 Gallina", "🐧 Pinguino", "🐦 Uccello", "🐤 Pulcino"];
-        
-        // STATO DI GIOCO
-        let state = {
-            deck: [], card1: [], card2: [], matchingSymbol: "", score: 0,
-            isHost: false, isStudent: false, timer: 60, timerInterval: null
-        };
-
-        // VARIABILI PEERJS & MULTIPLAYER
-        let peer = null;
-        let connDocente = null;
-        let connessioniStudenti = [];
-        let mioNomeStudente = "";
-
-        // VARIABILI MICROFONO (DEFAULT OFF)
-        let recognition = null;
-        let isSpeechRecognitionActive = false; // <-- QUI IL DEFAULT E' IMPOSTATO SU FALSE
-
-        // Inizializzazione Riconoscimento Vocale (se supportato)
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.lang = 'it-IT';
-            recognition.continuous = true;
-            recognition.interimResults = false;
-
-            recognition.onresult = (event) => {
-                const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
-                document.getElementById('speech-heard-text').textContent = transcript;
-                controllaRisposta(transcript, true);
-            };
-
-            recognition.onend = () => {
-                if (isSpeechRecognitionActive) recognition.start(); // Riavvia se è ancora attivo
-            };
-        }
-
-        // --- LOGICA MICROFONO ---
-        function toggleSpeechRecognition() {
-            if (!recognition) {
-                alert("Riconoscimento vocale non supportato in questo browser. Usa Chrome o Edge.");
-                return;
-            }
+    <!-- MODALE IMPOSTAZIONI E CARICAMENTO SIMBOLI -->
+    <div id="settings-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-purple-900 border border-purple-700 w-full max-w-2xl rounded-3xl p-6 text-white shadow-2xl flex flex-col max-h-[90vh]">
             
-            isSpeechRecognitionActive = !isSpeechRecognitionActive;
-            const icon = document.getElementById('mic-icon');
-            const text = document.getElementById('mic-status-text');
-            const liveBar = document.getElementById('speech-live-bar');
+            <div class="flex justify-between items-center pb-4 border-b border-purple-800">
+                <h2 class="text-xl font-bold flex items-center gap-2 text-amber-300">
+                    <i class="fa-solid fa-sliders"></i> Pannello di Configurazione Docente
+                </h2>
+                <button onclick="closeSettingsModal()" class="text-purple-300 hover:text-white p-2 rounded-lg text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
 
-            if (isSpeechRecognitionActive) {
-                recognition.start();
-                icon.className = "fa-solid fa-microphone text-emerald-400";
-                text.textContent = "Mic: ON";
-                liveBar.classList.remove('hidden');
-            } else {
-                recognition.stop();
-                icon.className = "fa-solid fa-microphone-slash text-purple-400";
-                text.textContent = "Mic: OFF";
-                liveBar.classList.add('hidden');
-            }
-        }
+            <div class="overflow-y-auto flex-1 my-4 space-y-6 pr-2">
+                <!-- SELEZIONE DIFFICOLTÀ -->
+                <div>
+                    <label class="block text-sm font-semibold text-purple-200 mb-2">Numero di Figure per Carta:</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="setDeckOrder(5)" id="order-5-btn" class="p-3 rounded-xl border border-purple-700 bg-purple-950/60 hover:bg-purple-800 text-center font-bold text-sm">
+                            6 Figure per Carta<br><span class="text-xs font-normal text-purple-300">(Intermedio • 31 carte)</span>
+                        </button>
+                        <button onclick="setDeckOrder(7)" id="order-7-btn" class="p-3 rounded-xl border border-amber-400 bg-amber-400/20 text-center font-bold text-sm">
+                            8 Figure per Carta<br><span class="text-xs font-normal text-purple-300">(Versione Classica • 57 carte)</span>
+                        </button>
+                    </div>
+                </div>
 
-        // --- LOGICA GIOCO E CARTE ---
-        function generaMazzoDobble(n = 7) {
-            // Genera mazzo piano proiettivo
-            let cards = [];
-            for (let i = 0; i <= n; i++) {
-                let card = [allSymbols[0]];
-                for (let j = 0; j < n; j++) card.push(allSymbols[(i * n) + j + 1]);
-                cards.push(card);
-            }
-            for (let i = 0; i < n; i++) {
-                for (let j = 0; j < n; j++) {
-                    let card = [allSymbols[i + 1]];
-                    for (let k = 0; k < n; k++) {
-                        let val = (n + 1) + n * k + ((i * k + j) % n);
-                        card.push(allSymbols[val]);
-                    }
-                    cards.push(card);
-                }
-            }
-            return cards;
-        }
+                <!-- GRIGLIA ANTEPRIMA SIMBOLI ATTIVI -->
+                <div class="bg-purple-950/60 p-4 rounded-2xl border border-purple-800 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-semibold text-purple-300 uppercase tracking-wider">Simboli Mazzo Corrente (<span id="loaded-count">0</span>):</span>
+                    </div>
+                    <div id="symbols-preview-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto p-2 bg-purple-950 rounded-xl border border-purple-800">
+                    </div>
+                </div>
+            </div>
 
-        function nextPair(broadcast = false) {
-            if(state.deck.length === 0) state.deck = generaMazzoDobble(7);
+            <div class="pt-4 border-t border-purple-800 flex justify-end gap-3">
+                <button onclick="applySettings()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition shadow-lg">
+                    Chiudi e Rigenera Mazzo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE GAMEOVER & CLASSIFICA -->
+    <div id="gameover-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-purple-900 border border-amber-400/40 w-full max-w-md rounded-3xl p-6 text-white text-center shadow-2xl flex flex-col items-center">
+            <div class="w-20 h-20 bg-amber-400/20 text-amber-300 rounded-full flex items-center justify-center text-4xl mb-4">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-1">Tempo Scaduto!</h2>
+            <p class="text-sm text-purple-200 mb-4" id="gameover-sub">Ottimo esercizio di lettura e pronuncia!</p>
             
-            let idx1 = Math.floor(Math.random() * state.deck.length);
-            let idx2 = Math.floor(Math.random() * state.deck.length);
-            while(idx1 === idx2) idx2 = Math.floor(Math.random() * state.deck.length);
+            <!-- VISTA CLASSIFICA (HOST/LIM) -->
+            <div id="leaderboard-view" class="w-full mb-6 hidden">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-amber-300 mb-3"><i class="fa-solid fa-award"></i> Classifica Finale</h3>
+                <div id="leaderboard-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                </div>
+            </div>
 
-            state.card1 = state.deck[idx1];
-            state.card2 = state.deck[idx2];
-            
-            // Trova simbolo comune
-            state.matchingSymbol = state.card1.find(sym => state.card2.includes(sym));
-
-            disegnaCarte();
-
-            if (broadcast && state.isHost) {
-                connessioniStudenti.forEach(conn => {
-                    conn.send({ tipo: 'AGGIORNA_CARTE', card1: state.card1, card2: state.card2, matchingSymbol: state.matchingSymbol });
-                });
-            }
-        }
-
-        function disegnaCarte() {
-            const renderCard = (cardData, elementId) => {
-                const container = document.getElementById(elementId);
-                container.innerHTML = '';
-                // Rimuove e rimette classe per animazione
-                container.classList.remove('animate-card');
-                void container.offsetWidth; 
-                container.classList.add('animate-card');
-
-                cardData.forEach((sym, i) => {
-                    let el = document.createElement('div');
-                    el.className = 'symbol-item text-xl md:text-3xl font-bold bg-white/80 p-2 rounded-xl shadow-sm border border-purple-200';
-                    // Posizionamento sparso circolare approssimativo
-                    const angle = (i / cardData.length) * Math.PI * 2;
-                    const radius = 35 + Math.random() * 15; // tra 35% e 50%
-                    el.style.left = `calc(50% + ${Math.cos(angle) * radius}% - 20px)`;
-                    el.style.top = `calc(50% + ${Math.sin(angle) * radius}% - 20px)`;
-                    
-                    let [emoji, ...textArr] = sym.split(" ");
-                    el.innerHTML = `<span class="text-4xl drop-shadow-md">${emoji}</span><span class="text-xs mt-1 text-purple-900">${textArr.join(" ")}</span>`;
-                    
-                    el.onclick = () => controllaRisposta(sym, false);
-                    container.appendChild(el);
-                });
-            };
-            renderCard(state.card1, 'card1');
-            renderCard(state.card2, 'card2');
-        }
-
-        function controllaRisposta(risposta, isVocale) {
-            let nomeRisposta = isVocale ? risposta : risposta;
-            let matchText = state.matchingSymbol.toLowerCase();
-            
-            // Controllo tollerante (se vocale) o esatto (se click)
-            let isCorrect = isVocale ? matchText.includes(nomeRisposta) : (risposta === state.matchingSymbol);
-
-            if (isCorrect) {
-                confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
-                state.score += 10;
-                document.getElementById('score-display').textContent = state.score;
+            <!-- VISTA PUNTEGGIO SINGOLO E PERSONAL BEST -->
+            <div id="single-score-view" class="bg-purple-950 border border-purple-800 rounded-2xl p-4 w-full mb-6 relative">
+                <span class="text-xs uppercase tracking-wider text-purple-300 block mb-1">I tuoi punti finali</span>
+                <span id="final-score-display" class="text-5xl font-black text-white">0</span>
                 
-                if (state.isStudent && connDocente) {
-                    connDocente.send({ tipo: 'RISPOSTA_CORRETTA', nome: mioNomeStudente, score: state.score });
-                } else {
-                    setTimeout(() => nextPair(true), 1000); // Docente cambia carta
-                }
-            } else if (!isVocale) {
-                alert("Sbagliato! Riprova."); // Feedback semplice
-            }
-        }
-
-        // --- TIMER LOGIC ---
-        function avviaTimer() {
-            state.timer = 60;
-            document.getElementById('timer-box').classList.remove('hidden');
-            document.getElementById('timer-display').textContent = state.timer;
-            
-            if (state.isHost) {
-                connessioniStudenti.forEach(c => c.send({ tipo: 'START_TIMER' }));
-            }
-
-            if(state.timerInterval) clearInterval(state.timerInterval);
-            state.timerInterval = setInterval(() => {
-                state.timer--;
-                document.getElementById('timer-display').textContent = state.timer;
-                if (state.isHost) connessioniStudenti.forEach(c => c.send({ tipo: 'SYNC_TIMER', time: state.timer }));
-                
-                if (state.timer <= 0) {
-                    clearInterval(state.timerInterval);
-                    alert("Tempo scaduto! Punti: " + state.score);
-                }
-            }, 1000);
-        }
-
-        // --- MULTIPLAYER E HANDSHAKE ---
-        function mostraModalConnessione() { document.getElementById('connection-modal').classList.remove('hidden'); }
-
-        function avviaComeDocente() {
-            const pin = Math.floor(1000 + Math.random() * 9000).toString();
-            const peerId = `colpo-docente-${pin}`;
-            
-            peer = new Peer(peerId);
-            
-            peer.on('open', (id) => {
-                state.isHost = true;
-                document.getElementById('role-selection').classList.add('hidden');
-                document.getElementById('teacher-qr-view').classList.remove('hidden');
-                document.getElementById('teacher-qr-view').classList.add('flex');
-                document.getElementById('display-pin-code').textContent = pin;
-                document.getElementById('connected-players-badge').classList.remove('hidden');
-                
-                new QRCode(document.getElementById("qrcode-box"), {
-                    text: pin, width: 150, height: 150
-                });
-            });
-
-            // MODIFICA 1: LA LIM ASPETTA CHE LO STUDENTE SIA PRONTO
-            peer.on('connection', (conn) => {
-                connessioniStudenti.push(conn);
-                document.getElementById('players-count').textContent = connessioniStudenti.length;
-
-                conn.on('data', (dati) => {
-                    // HANDSHAKE: Inviamo i dati solo quando il telefono dice di essere pronto
-                    if (dati.tipo === 'STUDENTE_PRONTO') {
-                        conn.send({
-                            tipo: 'AGGIORNA_CARTE',
-                            card1: state.card1,
-                            card2: state.card2,
-                            matchingSymbol: state.matchingSymbol
-                        });
-                        if (state.timer < 60 && state.timer > 0) {
-                            conn.send({ tipo: 'START_TIMER' });
-                            conn.send({ tipo: 'SYNC_TIMER', time: state.timer });
-                        }
-                    }
-                    else if (dati.tipo === 'RISPOSTA_CORRETTA') {
-                        // Lo studente ha indovinato, cambia carte per tutti
-                        nextPair(true);
-                    }
-                });
-
-                conn.on('close', () => {
-                    connessioniStudenti = connessioniStudenti.filter(c => c !== conn);
-                    document.getElementById('players-count').textContent = connessioniStudenti.length;
-                });
-            });
-        }
-
-        function connettiComeStudente() {
-            const pin = document.getElementById('room-pin-input').value.trim();
-            mioNomeStudente = document.getElementById('student-name').value.trim() || "Studente";
-            
-            if (pin.length !== 4) return alert("Inserisci un PIN di 4 cifre.");
-            
-            if (!peer) peer = new Peer(); // Inizializza peer se non esiste
-            
-            peer.on('open', () => {
-                connDocente = peer.connect(`colpo-docente-${pin}`);
-                
-                connDocente.on('open', () => {
-                    document.getElementById('connection-modal').classList.add('hidden');
-                    document.getElementById('txt-multiplayer').textContent = `Connesso: ${mioNomeStudente}`;
-                    document.getElementById('host-controls').classList.add('hidden'); // Nasconde controlli host
-                    state.isStudent = true;
-
-                    // MODIFICA 2: IL TELEFONO E' PRONTO, BUSSA ALLA LIM
-                    connDocente.send({ tipo: 'STUDENTE_PRONTO' });
-                });
-
-                connDocente.on('data', (dati) => {
-                    if (dati.tipo === 'AGGIORNA_CARTE') {
-                        state.card1 = dati.card1;
-                        state.card2 = dati.card2;
-                        state.matchingSymbol = dati.matchingSymbol;
-                        disegnaCarte();
-                    } else if (dati.tipo === 'START_TIMER') {
-                        document.getElementById('timer-box').classList.remove('hidden');
-                    } else if (dati.tipo === 'SYNC_TIMER') {
-                        document.getElementById('timer-display').textContent = dati.time;
-                    }
-                });
-            });
-        }
-
-        // Inizializza primo mazzo all'avvio
-        nextPair();
-
-    </script>
-</body>
-</html>
+                <div id="new-record-badge" class="hidden mt-3 text-sm font-bold text-emerald-400 animate-pulse bg-emerald-900/40 py-1 px-3 rounded-full inline-block border border-emerald-500/50">
+                    🏆 Nuovo Record Personale!
+                </div>
+                <div class="mt-3 text-xs text-purple-300 border-t border-purple-800 pt-2">
+                    Miglior Punteggio di sempre: <b id="best-score-display" class="text-amber-300 text-sm">0</b>
