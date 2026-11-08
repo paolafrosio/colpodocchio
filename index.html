@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Colpo d'Occhio CPIA - Live Class</title>
+    <title>Colpo d'occhio CPIA - Live Class</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -123,7 +123,7 @@
             </div>
             <div>
                 <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide flex items-center gap-2">
-                    Colpo d'Occhio <span class="bg-emerald-500/20 text-emerald-400 text-xs px-2.5 py-0.5 rounded-full border border-emerald-500/40 font-mono">CPIA L2</span>
+                    Colpo d'occhio <span class="bg-emerald-500/20 text-emerald-400 text-xs px-2.5 py-0.5 rounded-full border border-emerald-500/40 font-mono">CPIA</span>
                 </h1>
                 <p class="text-xs text-slate-400 hidden sm:block">Individua l'unica figura in comune, dilla a voce alta e ascolta la pronuncia!</p>
             </div>
@@ -219,7 +219,7 @@
     </main>
 
     <footer class="text-center py-2 text-xs text-slate-500">
-        Colpo d'Occhio Didattico • Generatore Matematico Proiettivo • Per LIM e Tablet
+        Colpo d'occhio Didattico • Generatore Matematico Proiettivo • Per LIM e Tablet
     </footer>
 
     <!-- MODALE CONNETTIVITÀ MULTIPLAYER (PEERJS) -->
@@ -234,7 +234,7 @@
                     <i class="fa-solid fa-desktop text-3xl"></i>
                     <div>
                         <div class="text-base">Sono sulla LIM (Crea Stanza)</div>
-                        <div class="text-xs font-normal text-indigo-200">Genera il PIN per far collegare gli alunni</div>
+                        <div class="text-xs font-normal text-indigo-200">Genera il PIN a 4 cifre per far collegare gli alunni</div>
                     </div>
                 </button>
                 <div class="relative flex py-1 items-center">
@@ -244,7 +244,7 @@
                 </div>
                 <div class="space-y-2">
                     <input type="text" id="student-name" placeholder="Il tuo Nome" class="w-full bg-slate-950 border border-slate-700 p-3 rounded-xl text-center text-white focus:border-emerald-400 outline-none">
-                    <input type="text" id="room-pin-input" placeholder="PIN Stanza (es. 123456)" class="w-full bg-slate-950 border border-slate-700 p-3 rounded-xl text-center text-lg tracking-widest text-white focus:border-emerald-400 outline-none">
+                    <input type="text" id="room-pin-input" placeholder="PIN Stanza (es. 1234)" maxlength="4" class="w-full bg-slate-950 border border-slate-700 p-3 rounded-xl text-center text-lg tracking-widest text-white focus:border-emerald-400 outline-none">
                     <button onclick="connettiComeStudente()" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition">
                         Entra nel Gioco (Studente)
                     </button>
@@ -254,7 +254,7 @@
             <div id="teacher-qr-view" class="hidden flex-col items-center text-center space-y-4">
                 <div class="bg-white p-3 rounded-2xl inline-block shadow-lg" id="qrcode-box"></div>
                 <div class="text-lg font-bold text-emerald-400">
-                    PIN Stanza: <span id="display-pin-code" class="text-2xl font-mono text-white bg-slate-800 px-3 py-1 rounded-xl">------</span>
+                    PIN Stanza: <span id="display-pin-code" class="text-2xl font-mono text-white bg-slate-800 px-3 py-1 rounded-xl">----</span>
                 </div>
                 <p class="text-xs text-slate-400">Inquadra il QR con il tablet o inserisci il PIN per giocare!</p>
             </div>
@@ -431,7 +431,7 @@
         let isPenalized = false;
         let punteggiClasse = {}; // Mantiene i punteggi di tutti gli studenti sulla LIM
 
-        /* --- SET PREDEFINITI VOCABOLARIO CPIA L2 COMPLETI --- */
+        /* --- SET PREDEFINITI VOCABOLARIO CPIA COMPLETI --- */
         const PRESETS = {
             corpo: {
                 name: "Il Corpo Umano (30+ Parti)",
@@ -769,7 +769,6 @@
             renderCard('card1', state.deckCards[idx1]);
             renderCard('card2', state.deckCards[idx2]);
 
-            // TRASMETTI CARTE AGLI STUDENTI SE DOCENTE
             if (ruolounico === 'docente') {
                 inviaStatoAGliStudenti();
             }
@@ -848,13 +847,12 @@
 
         /* --- CLIC SUL SIMBOLO & SISTEMA ANTI-SPAM PENALITÀ --- */
         function handleSymbolClick(val, element) {
-            if (isTransitioning || isPenalized) return; // Blocco se in cambio carta o in penalità
+            if (isTransitioning || isPenalized) return;
 
             if (val === state.matchingSymbol) {
                 isTransitioning = true;
                 element.classList.add('symbol-correct');
                 
-                // SE SONO LO STUDENTE: AUMENTO IL MIO PUNTEGGIO E INVIO ALLA LIM
                 if (ruolounico === 'studente' && connDocente && connDocente.open) {
                     state.score += 1;
                     document.getElementById('score-display').textContent = state.score;
@@ -875,17 +873,14 @@
                     return;
                 }
 
-                // GIOCO SINGOLO O DIRETTO SULLA LIM:
                 registraEsitoPositivo(val, element, "LIM", true);
 
             } else {
-                // ERRORE: BLOCCO PENALITÀ ANTI-CLIC A CASO (3 SECONDI)
                 element.classList.add('symbol-wrong');
                 if (wrongSound) {
                     wrongSound.triggerAttackRelease("G2", "8n");
                 }
                 
-                // Se studente, applica il blocco a schermo per 3 secondi
                 if (ruolounico === 'studente') {
                     isPenalized = true;
                     document.getElementById('card1').classList.add('locked-card');
@@ -947,7 +942,8 @@
 
         function avviaComeDocente() {
             ruolounico = 'docente';
-            const pinStanza = Math.floor(100000 + Math.random() * 900000).toString();
+            // Genera PIN a 4 cifre
+            const pinStanza = Math.floor(1000 + Math.random() * 9000).toString();
             
             if (typeof Peer === 'undefined') {
                 alert("Errore caricamento PeerJS online. Verifica la connessione internet e ricarica la pagina.");
@@ -988,7 +984,7 @@
 
                 conn.on('data', (dati) => {
                     if (dati.tipo === 'RISPOSTA_CORRETTA' && dati.valore === state.matchingSymbol) {
-                        punteggiClasse[dati.nome] = dati.score; // Memorizza i punti per la classifica
+                        punteggiClasse[dati.nome] = dati.score;
                         const targetEl = document.querySelector('.symbol-correct') || document.getElementById('card1');
                         registraEsitoPositivo(dati.valore, targetEl, dati.nome, false);
                     }
@@ -1009,7 +1005,6 @@
 
             ruolounico = 'studente';
             
-            // NASCONDE I PULSANTI CONTROLLO TIMER E CARTE SUL TABLET STUDENTE
             document.getElementById('start-timer-btn').classList.add('hidden');
             document.getElementById('btn-next-pair').classList.add('hidden');
 
@@ -1068,7 +1063,7 @@
 
         /* --- TIMER E CLASSIFICA FINALE --- */
         function toggleTimeAttack() {
-            if (ruolounico === 'studente') return; // Lo studente non può attivare il timer
+            if (ruolounico === 'studente') return;
 
             if (state.isTimeAttack) {
                 stopTimeAttack();
@@ -1114,14 +1109,12 @@
             if (ruolounico === 'docente') {
                 inviaEventoSistemaStudenti('GAMEOVER');
                 
-                // Genera la classifica ordinata sulla LIM
                 document.getElementById('single-score-view').classList.add('hidden');
                 document.getElementById('leaderboard-view').classList.remove('hidden');
                 
                 const listEl = document.getElementById('leaderboard-list');
                 listEl.innerHTML = '';
 
-                // Ordina punteggi
                 const sorted = Object.entries(punteggiClasse).sort((a, b) => b[1] - a[1]);
                 
                 if (sorted.length === 0) {
