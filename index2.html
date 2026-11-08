@@ -792,7 +792,7 @@ function speakWord(text) {
             });
         }
 
-        function handleSymbolClick(val, element) {
+function handleSymbolClick(val, element) {
             if (isTransitioning || isPenalized) return;
 
             if (val === state.matchingSymbol) {
@@ -805,9 +805,7 @@ function speakWord(text) {
                     if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
                     confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
                     
-                    // Nota: speakWord(val) disattivato sul tablet per evitare l'eco.
-                    // Sarà la LIM a riprodurre l'audio per tutta la classe!
-
+                    // Invia il punto alla LIM (la LIM riceverà il dato ed eseguirà speakWord per tutta la classe)
                     connDocente.send({
                         tipo: 'RISPOSTA_CORRETTA',
                         valore: val,
@@ -822,7 +820,6 @@ function speakWord(text) {
                 }
 
                 registraEsitoPositivo(val, element, "LIM", true);
-
             } else {
                 element.classList.add('symbol-wrong');
                 if (wrongSound) {
