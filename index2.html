@@ -634,7 +634,11 @@
             });
         }
 
-        function speakWord(text) {
+function speakWord(text) {
+            // BLOCCO ANTI-ECO: Se chi esegue il codice è uno studente in multiplayer, NON pronunciare la parola!
+            // La pronuncia verrà gestita unicamente dalla LIM (Docente).
+            if (ruolounico === 'studente') return;
+
             if (!state.audioEnabled || !text) return;
             
             if (state.synth.speaking) {
