@@ -211,7 +211,7 @@
                 <i class="fa-solid fa-arrows-rotate"></i> Cambia Carte
             </button>
             <button id="start-timer-btn" onclick="toggleTimeAttack()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm">
-                <i class="fa-solid fa-play"></i> Allenamento 60s
+                <i class="fa-solid fa-play"></i> Avvia Sfida 60s
             </button>
             <button onclick="resetScore()" class="px-3.5 py-2 rounded-xl bg-purple-950 hover:bg-purple-900 text-purple-300 hover:text-white border border-purple-800 font-medium transition text-xs">
                 Azzera Punti
@@ -434,6 +434,7 @@
         let connessioniStudenti = [];
         let connDocente = null;
         let mioNomeStudente = "Alunno";
+        let stanzaPinCorrente = "";
         let isTransitioning = false;
         let isPenalized = false;
         let punteggiClasse = {}; 
@@ -454,7 +455,7 @@
             score: 0,
             showLabels: false, 
             audioEnabled: true,
-            touchEnabled: true, // Nuova flag blocco tocco
+            touchEnabled: true,
             isTimeAttack: false,
             timeLeft: 60,
             timerInterval: null,
@@ -471,9 +472,16 @@
             
             document.getElementById('labels-icon').className = "fa-solid fa-font text-purple-400 opacity-40";
             document.getElementById('labels-status-text').textContent = "Testo: OFF";
+
+            // CONTROLLO PARAMETRO QR CODE DALL'URL (es. ?pin=1234)
+            const urlParams = new URLSearchParams(window.location.search);
+            const pinParam = urlParams.get('pin');
+            if (pinParam) {
+                document.getElementById('room-pin-input').value = pinParam;
+                mostraModalConnessione();
+            }
         };
 
-        // --- SISTEMA DI WARNING / PENALITÀ UI ---
         function showWarningBanner(msg, duration = 3000, isError = false) {
             const banner = document.getElementById('penalty-banner');
             banner.innerHTML = msg;
@@ -488,7 +496,6 @@
             }, duration);
         }
 
-        // --- BLOCCO TOCCO (SOLO VOCE) ---
         function toggleTouch() {
             state.touchEnabled = !state.touchEnabled;
             const icon = document.getElementById('touch-icon');
@@ -562,8 +569,6 @@
                 if (transcript.includes(wordTarget) || cleanedTranscript.includes(wordTarget)) {
                     const targetEls = document.querySelectorAll(`.symbol-item[data-val="${state.matchingSymbol}"]`);
                     targetEls.forEach(el => el.classList.add('symbol-correct'));
-                    
-                    // La chiamata da microfono bypassa il controllo Touch
                     handleSymbolClick(state.matchingSymbol, targetEls[0]);
                 }
             };
@@ -671,7 +676,6 @@
         }
 
         function speakWord(text) {
-            // BLOCCO ECO
             if (ruolounico === 'studente') return;
 
             if (!state.audioEnabled || !text) return;
@@ -815,7 +819,6 @@
                 symEl.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
                 symEl.innerHTML = `<div class="flex flex-col items-center justify-center w-full">${contentHtml}${labelHtml}</div>`;
 
-                // Controllo tocco e inoltro gestore
                 symEl.onclick = (e) => {
                     e.stopPropagation();
                     if (!state.touchEnabled) {
@@ -925,7 +928,8 @@
         function avviaComeDocente() {
             ruolounico = 'docente';
             const pinStanza = Math.floor(1000 + Math.random() * 9000).toString();
-            
+            stanzaPinCorrente = pinStanza;
+
             if (typeof Peer === 'undefined') {
                 alert("Errore caricamento PeerJS online. Verifica la connessione internet e ricarica la pagina.");
                 return;
@@ -945,8 +949,10 @@
                 const qrBox = document.getElementById('qrcode-box');
                 qrBox.innerHTML = '';
                 if (typeof QRCode !== 'undefined') {
+                    // LINK CORRETTO PER IL QR CODE (Invia il PIN direttamente come parametro dell'URL)
+                    const currentBaseUrl = window.location.href.split('?')[0];
                     new QRCode(qrBox, {
-                        text: window.location.href.split('?')[0] + '?pin=' + pinStanza,
+                        text: `${currentBaseUrl}?pin=${pinStanza}`,
                         width: 180, 
                         height: 180
                     });
@@ -983,8 +989,12 @@
             let pin = document.getElementById('room-pin-input').value.trim();
             mioNomeStudente = document.getElementById('student-name').value.trim() || "Alunno";
             
-            if (!pin) { alert("Inserisci il PIN della Stanza!"); return; }
+            if (!pin) { 
+                alert("Inserisci il PIN della Stanza!"); 
+                return; 
+            }
 
+            stanzaPinCorrente = pin;
             ruolounico = 'studente';
             
             document.getElementById('start-timer-btn').classList.add('hidden');
@@ -997,18 +1007,23 @@
                 
                 connDocente.on('open', () => {
                     chiudiModalConnessione();
-                    document.getElementById('txt-multiplayer').textContent = "In Stanza: " + mioNomeStudente;
                     
-                    // DISATTIVA TASTO RIASCOLTO ALLO STUDENTE
+                    // MOSTRA NOME E PIN NELL'HEADER STUDENTE
+                    document.getElementById('txt-multiplayer').textContent = `In Stanza: ${pin} • ${mioNomeStudente}`;
+                    
+                    // DISATTIVA TASTO RIASCOLTO E DISABILITA TOGGLE TOUCH PER LO STUDENTE
                     document.getElementById('repeat-speech-btn').classList.add('hidden');
-                    // DISATTIVA IL TOGGLE DEL TOUCH SE STUDENTE
                     document.getElementById('toggle-touch-btn').classList.add('hidden');
 
                     if (recognition) {
                         toggleSpeechRecognition();
                     }
 
-                    alert("Connesso al gioco! Buona fortuna!");
+                    alert(`Connesso alla stanza ${pin}! Buona fortuna!`);
+                });
+
+                connDocente.on('error', (err) => {
+                    alert("Impossibile connettersi alla stanza. Verifica che il PIN sia corretto!");
                 });
 
                 connDocente.on('data', (dati) => {
@@ -1018,7 +1033,6 @@
                             state.symbolsPerCard = dati.symbolsPerCard;
                             buildDeck();
                         }
-                        // Sincronizza stato input (nel caso fosse entrato a partita iniziata)
                         if (dati.touchEnabled !== undefined) {
                             state.touchEnabled = dati.touchEnabled;
                         }
@@ -1045,6 +1059,10 @@
                         showGameOverModal();
                     }
                 });
+            });
+
+            peer.on('error', (err) => {
+                alert("Errore di rete durante la connessione. Riprova tra qualche istante.");
             });
         }
 
@@ -1114,7 +1132,7 @@
             state.isTimeAttack = false;
             clearInterval(state.timerInterval);
             document.getElementById('timer-box').classList.add('hidden');
-            document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-play"></i> Allenamento 60s`;
+            document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-play"></i> Avvia Sfida 60s`;
             document.getElementById('start-timer-btn').className = "px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm";
         }
 
@@ -1153,7 +1171,6 @@
                 document.getElementById('leaderboard-view').classList.add('hidden');
                 document.getElementById('final-score-display').textContent = state.score;
                 
-                // GAMIFICATION: Gestione Record Personale
                 let bestScore = parseInt(localStorage.getItem('colpodocchio_best_score')) || 0;
                 
                 if (state.score > bestScore) {
