@@ -368,7 +368,7 @@
             <p class="text-sm text-slate-300 mb-4">Ottimo esercizio di lettura e pronuncia!</p>
             
             <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 w-full mb-6">
-                <span class="text-xs uppercase tracking-wider text-slate-400 block mb-1">Figure Individuate</span>
+                <span class="text-xs uppercase tracking-wider text-slate-400 block mb-1">I tuoi punti finali</span>
                 <span id="final-score-display" class="text-5xl font-black text-emerald-400">0</span>
             </div>
 
@@ -407,8 +407,9 @@
         let connessioniStudenti = [];
         let connDocente = null;
         let mioNomeStudente = "Alunno";
+        let isTransitioning = false;
 
-        /* --- SET PREDEFINITI VOCABOLARIO CPIA L2 COMPLETI CON EMOJI RIPRISTINATE --- */
+        /* --- SET PREDEFINITI VOCABOLARIO CPIA L2 COMPLETI --- */
         const PRESETS = {
             corpo: {
                 name: "Il Corpo Umano (30+ Parti)",
@@ -673,7 +674,7 @@
 
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'it-IT';
-            utterance.rate = 0.9;
+            utterance.rate = 0.85; // Pronuncia leggermente più lenta e nitida
             utterance.pitch = 1.0;
             
             state.synth.speak(utterance);
@@ -792,14 +793,10 @@
                 symEl.style.top = `${top}%`;
                 symEl.style.transform = `translate(-50%, -50%)`;
 
-                // PARAMETRI CASUALI DI SCALA PER L'IMMAGINE
                 const scale = (0.70 + Math.random() * 0.70).toFixed(2);
                 const rotation = Math.floor(Math.random() * 360) - 180;
 
-                // 1. GRAFICA (Foto/Emoji): RUOTA E SCALA
                 const graphicStyle = `transform: scale(${scale}) rotate(${rotation}deg); display: block; margin: 0 auto;`;
-                
-                // 2. SCRITTA: RUOTA MA MANTIENE DIMENSIONE FISSA DI 12px
                 const labelStyle = `transform: rotate(${rotation}deg); font-size: 12px !important; line-height: 1 !important; display: inline-block;`;
 
                 let contentHtml = '';
@@ -827,12 +824,15 @@
             });
         }
 
-        /* --- CLIC SUL SIMBOLO & VERIFICA CORRETTEZZA (CON FIX PUNTI STUDENTE) --- */
+        /* --- CLIC SUL SIMBOLO & VERIFICA CORRETTEZZA (CON PAUSA RALLENTATA) --- */
         function handleSymbolClick(val, element) {
+            if (isTransitioning) return; // Evita doppi clic rapidi durante la pausa
+
             if (val === state.matchingSymbol) {
+                isTransitioning = true;
                 element.classList.add('symbol-correct');
                 
-                // SE SONO LO STUDENTE: AGGIORNO SUBITO I MIEI PUNTI SULLO SCHERMO
+                // SE SONO LO STUDENTE: AUMENTO SOLO IL MIO PUNTEGGIO LOCALE
                 if (ruolounico === 'studente' && connDocente && connDocente.open) {
                     state.score += 1;
                     document.getElementById('score-display').textContent = state.score;
@@ -845,11 +845,15 @@
                         valore: val,
                         nome: mioNomeStudente
                     });
+
+                    setTimeout(() => {
+                        isTransitioning = false;
+                    }, 1500);
                     return;
                 }
 
-                // IN LOCALE O SULLA LIM:
-                registraEsitoPositivo(val, element, "LIM");
+                // GIOCO SINGOLO O DIRETTO SULLA LIM:
+                registraEsitoPositivo(val, element, "LIM", true);
 
             } else {
                 element.classList.add('symbol-wrong');
@@ -862,7 +866,8 @@
             }
         }
 
-        function registraEsitoPositivo(val, element, nomeVincitore) {
+        function registraEsitoPositivo(val, element, nomeVincitore, incrementaPuntiHost = false) {
+            isTransitioning = true;
             if (synthSound) {
                 synthSound.triggerAttackRelease("C5", "8n");
             }
@@ -870,13 +875,18 @@
             confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
             speakWord(val);
 
-            state.score += 1;
-            document.getElementById('score-display').textContent = state.score;
+            if (incrementaPuntiHost || ruolounico === 'standalone') {
+                state.score += 1;
+                document.getElementById('score-display').textContent = state.score;
+            }
+
             document.getElementById('last-word-display').textContent = `${val} (${nomeVincitore})`;
 
+            // Pausa di 1.5 secondi per permettere alla voce di finire di parlare prima di cambiare carta
             setTimeout(() => {
                 nextPair(true);
-            }, 450);
+                isTransitioning = false;
+            }, 1500);
         }
 
         function resetScore() {
@@ -914,7 +924,6 @@
                 document.getElementById('connected-players-badge').classList.remove('hidden');
                 document.getElementById('txt-multiplayer').textContent = "LIM (Host)";
 
-                // Genera QR Code con controllo di fallback
                 const qrBox = document.getElementById('qrcode-box');
                 qrBox.innerHTML = '';
                 if (typeof QRCode !== 'undefined') {
@@ -939,7 +948,7 @@
                 conn.on('data', (dati) => {
                     if (dati.tipo === 'RISPOSTA_CORRETTA' && dati.valore === state.matchingSymbol) {
                         const targetEl = document.querySelector('.symbol-correct') || document.getElementById('card1');
-                        registraEsitoPositivo(dati.valore, targetEl, dati.nome);
+                        registraEsitoPositivo(dati.valore, targetEl, dati.nome, false);
                     }
                 });
 
