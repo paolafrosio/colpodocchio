@@ -27,7 +27,7 @@
         .dobble-card {
             aspect-ratio: 1 / 1;
             box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 0 30px inset rgba(255, 255, 255, 0.9);
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             overflow: visible !important;
         }
 
@@ -36,7 +36,7 @@
         }
         
         .symbol-item {
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
             position: absolute;
             display: flex;
@@ -51,12 +51,12 @@
         }
 
         .symbol-correct {
-            animation: pulse-green 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: pulse-green 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 50 !important;
         }
 
         .symbol-wrong {
-            animation: shake-red 0.5s ease-in-out;
+            animation: shake-red 0.4s ease-in-out;
         }
 
         .locked-card {
@@ -65,38 +65,40 @@
             filter: grayscale(80%);
         }
 
+        .player-badge-active {
+            animation: pop-player 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes pop-player {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.25); background-color: #10b981; }
+            100% { transform: scale(1); }
+        }
+
         @keyframes pulse-green {
             0% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.5); }
+            50% { transform: translate(-50%, -50%) scale(1.4); }
             100% { transform: translate(-50%, -50%) scale(1); }
         }
 
         @keyframes shake-red {
             0%, 100% { transform: translate(-50%, -50%) translateX(0); }
-            20%, 60% { transform: translate(-50%, -50%) translateX(-10px); }
-            40%, 80% { transform: translate(-50%, -50%) translateX(10px); }
+            20%, 60% { transform: translate(-50%, -50%) translateX(-8px); }
+            40%, 80% { transform: translate(-50%, -50%) translateX(8px); }
         }
 
         @keyframes card-appear {
-            0% { opacity: 0; transform: scale(0.65) rotate(-12deg); }
+            0% { opacity: 0; transform: scale(0.7) rotate(-8deg); }
             100% { opacity: 1; transform: scale(1) rotate(0deg); }
         }
 
         .animate-card {
-            animation: card-appear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: card-appear 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #2e1065;
-            border-radius: 8px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #6b21a8;
-            border-radius: 8px;
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #2e1065; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb { background: #6b21a8; border-radius: 8px; }
     </style>
 </head>
 <body class="bg-purple-950 text-slate-100 min-h-screen flex flex-col justify-between bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 overflow-x-hidden">
@@ -144,8 +146,8 @@
     </header>
 
     <!-- AREA DI GIOCO PRINCIPALE -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-2 flex flex-col justify-center items-center gap-3">
-        <!-- STATUS BAR & FEEDBACK VOCALE -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-2 flex flex-col justify-center items-center gap-2">
+        <!-- STATUS BAR -->
         <div class="w-full flex flex-col sm:flex-row justify-between items-center bg-purple-900/80 backdrop-blur-md rounded-2xl p-3 border border-purple-700/50 text-white shadow-xl gap-3">
             <div class="flex items-center gap-2">
                 <span id="current-preset-badge" class="bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-semibold px-3 py-1 rounded-full flex items-center gap-2">
@@ -177,6 +179,16 @@
                     <span class="text-xs font-semibold uppercase text-amber-200">Punti:</span>
                     <span id="score-display" class="text-xl font-bold text-white">0</span>
                 </div>
+            </div>
+        </div>
+
+        <!-- NUOVA BARRA GIOCATORI CONNESSI SULLA LIM -->
+        <div id="live-players-bar" class="hidden w-full bg-purple-950/60 border border-purple-800/80 rounded-xl p-2 flex items-center gap-2 overflow-x-auto min-h-[46px]">
+            <span class="text-xs text-purple-300 uppercase font-bold tracking-wider px-2 flex items-center gap-1">
+                <i class="fa-solid fa-users text-amber-400"></i> In gioco:
+            </span>
+            <div id="live-players-list" class="flex items-center gap-2 flex-wrap">
+                <!-- I badge dei giocatori compaiono qui in tempo reale -->
             </div>
         </div>
 
@@ -277,7 +289,6 @@
             </div>
 
             <div class="overflow-y-auto flex-1 my-4 space-y-6 pr-2">
-                <!-- SELEZIONE DIFFICOLTÀ -->
                 <div>
                     <label class="block text-sm font-semibold text-purple-200 mb-2">Numero di Figure per Carta:</label>
                     <div class="grid grid-cols-2 gap-3">
@@ -290,7 +301,6 @@
                     </div>
                 </div>
 
-                <!-- GRIGLIA ANTEPRIMA SIMBOLI ATTIVI -->
                 <div class="bg-purple-950/60 p-4 rounded-2xl border border-purple-800 space-y-4">
                     <div class="flex justify-between items-center">
                         <span class="text-xs font-semibold text-purple-300 uppercase tracking-wider">Simboli Mazzo Corrente (<span id="loaded-count">0</span>):</span>
@@ -317,14 +327,12 @@
             <h2 class="text-2xl font-bold mb-1">Tempo Scaduto!</h2>
             <p class="text-sm text-purple-200 mb-4" id="gameover-sub">Ottimo esercizio di lettura e pronuncia!</p>
             
-            <!-- VISTA CLASSIFICA (HOST/LIM) -->
             <div id="leaderboard-view" class="w-full mb-6 hidden">
                 <h3 class="text-sm font-bold uppercase tracking-wider text-amber-300 mb-3"><i class="fa-solid fa-award"></i> Classifica Finale</h3>
                 <div id="leaderboard-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
                 </div>
             </div>
 
-            <!-- VISTA PUNTEGGIO SINGOLO E PERSONAL BEST -->
             <div id="single-score-view" class="bg-purple-950 border border-purple-800 rounded-2xl p-4 w-full mb-6 relative">
                 <span class="text-xs uppercase tracking-wider text-purple-300 block mb-1">I tuoi punti finali</span>
                 <span id="final-score-display" class="text-5xl font-black text-white">0</span>
@@ -427,10 +435,10 @@
             { val: 'unghia', file: 'img_corpoumano/unghia.png' }
         ];
 
-        /* --- STATO PEERJS / MULTIPLAYER --- */
+        /* --- STATO MULTIPLAYER E NOMI --- */
         let peer = null;
         let ruolounico = 'standalone'; 
-        let mappaConnessioniStudenti = new Map(); // Map idStudente -> conn
+        let mappaConnessioniStudenti = new Map(); // id -> { conn, nome, score }
         let connDocente = null;
         let mioNomeStudente = "Alunno";
         let stanzaPinCorrente = "";
@@ -490,9 +498,7 @@
                 banner.className = "w-full bg-amber-500/90 text-white text-center py-1.5 px-4 rounded-xl text-xs font-bold animate-pulse shadow-md";
             }
             banner.classList.remove('hidden');
-            setTimeout(() => {
-                banner.classList.add('hidden');
-            }, duration);
+            setTimeout(() => { banner.classList.add('hidden'); }, duration);
         }
 
         function toggleTouch() {
@@ -535,9 +541,7 @@
                     oscillator: { type: "sine" },
                     envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.1 }
                 }).toDestination();
-            } catch (e) {
-                console.log("Audio Web API non avviata direttamente");
-            }
+            } catch (e) {}
         }
 
         function initSpeechRecognition() {
@@ -876,6 +880,17 @@
 
             document.getElementById('last-word-display').textContent = `${val} (${nomeVincitore})`;
 
+            // Animazione Badge Giocatore sulla LIM
+            if (ruolounico === 'docente') {
+                const playerBadges = document.querySelectorAll(`.player-badge-item`);
+                playerBadges.forEach(badge => {
+                    if (badge.getAttribute('data-player-name') === nomeVincitore) {
+                        badge.classList.add('player-badge-active');
+                        setTimeout(() => badge.classList.remove('player-badge-active'), 600);
+                    }
+                });
+            }
+
             setTimeout(() => {
                 nextPair(true);
                 isTransitioning = false;
@@ -888,12 +903,13 @@
             document.getElementById('score-display').textContent = "0";
             document.getElementById('last-word-display').textContent = "---";
             state.lastSpokenWord = '';
+            aggiornaBarraGiocatoriLIM();
         }
 
         function mostraModalConnessione() { document.getElementById('connection-modal').classList.remove('hidden'); }
         function chiudiModalConnessione() { document.getElementById('connection-modal').classList.add('hidden'); }
 
-        /* --- CORREZIONE HOST: GESTIONE DISPOSITIVI ESISTENTI & HEARTBEAT --- */
+        /* --- INVIO PACCHETTI ULTRALEGGERI DALLA LIM --- */
         function avviaComeDocente() {
             ruolounico = 'docente';
             const pinStanza = Math.floor(1000 + Math.random() * 9000).toString();
@@ -907,6 +923,7 @@
                 document.getElementById('teacher-qr-view').classList.add('flex');
                 document.getElementById('display-pin-code').textContent = pinStanza;
                 document.getElementById('connected-players-badge').classList.remove('hidden');
+                document.getElementById('live-players-bar').classList.remove('hidden');
                 document.getElementById('txt-multiplayer').textContent = "Host: " + pinStanza;
 
                 const qrBox = document.getElementById('qrcode-box');
@@ -918,25 +935,23 @@
             peer.on('connection', (conn) => {
                 conn.on('data', (dati) => {
                     if (dati.tipo === 'STUDENTE_PRONTO') {
-                        // Salva/Sostituisce la connessione basandosi sull'ID univoco reale del dispositivo
                         const idStudente = dati.studentId || conn.peer;
                         
-                        // Se c'era una vecchia connessione per questo dispositivo la sostituisce pulitamente
                         if (mappaConnessioniStudenti.has(idStudente)) {
-                            try { mappaConnessioniStudenti.get(idStudente).close(); } catch(e){}
+                            try { mappaConnessioniStudenti.get(idStudente).conn.close(); } catch(e){}
                         }
                         
-                        mappaConnessioniStudenti.set(idStudente, conn);
+                        mappaConnessioniStudenti.set(idStudente, { conn: conn, nome: dati.nome, score: 0 });
+                        punteggiClasse[dati.nome] = 0;
                         aggiornaContatoreAlunni();
+                        aggiornaBarraGiocatoriLIM();
 
-                        // Risponde subito al dispositivo inviando carte e stato
+                        // PACCHETTO ULTRALEGGERO: invia solo indici carte
                         conn.send({
                             tipo: 'AGGIORNA_CARTE',
-                            card1Index: state.card1Index,
-                            card2Index: state.card2Index,
-                            matchingSymbol: state.matchingSymbol,
+                            c1: state.card1Index,
+                            c2: state.card2Index,
                             n: state.n,
-                            symbolsPerCard: state.symbolsPerCard,
                             touchEnabled: state.touchEnabled
                         });
                         
@@ -946,35 +961,47 @@
                     }
                     else if (dati.tipo === 'RISPOSTA_CORRETTA' && dati.valore === state.matchingSymbol) {
                         punteggiClasse[dati.nome] = dati.score;
+                        if (mappaConnessioniStudenti.has(dati.studentId)) {
+                            mappaConnessioniStudenti.get(dati.studentId).score = dati.score;
+                        }
+                        aggiornaBarraGiocatoriLIM();
                         const targetEls = document.querySelectorAll(`.symbol-item[data-val="${state.matchingSymbol}"]`);
                         targetEls.forEach(el => el.classList.add('symbol-correct'));
                         registraEsitoPositivo(dati.valore, targetEls[0], dati.nome, false);
                     }
                 });
 
-                conn.on('close', () => {
-                    puliziaConnessioniMorte();
-                });
-
-                conn.on('error', () => {
-                    puliziaConnessioniMorte();
-                });
+                conn.on('close', () => { puliziaConnessioniMorte(); });
+                conn.on('error', () => { puliziaConnessioniMorte(); });
             });
 
-            // Controlla ogni 5 secondi la salute delle connessioni attive
-            setInterval(puliziaConnessioniMorte, 5000);
+            setInterval(puliziaConnessioniMorte, 4000);
         }
 
         function puliziaConnessioniMorte() {
-            mappaConnessioniStudenti.forEach((conn, id) => {
-                if (!conn.open) {
+            mappaConnessioniStudenti.forEach((obj, id) => {
+                if (!obj.conn.open) {
                     mappaConnessioniStudenti.delete(id);
                 }
             });
             aggiornaContatoreAlunni();
+            aggiornaBarraGiocatoriLIM();
         }
 
-        /* --- CORREZIONE STUDENTE: HANDSHAKE PERSISTENTE & DEVICE ID IN STORAGE --- */
+        function aggiornaBarraGiocatoriLIM() {
+            const listEl = document.getElementById('live-players-list');
+            listEl.innerHTML = '';
+
+            mappaConnessioniStudenti.forEach((obj) => {
+                const badge = document.createElement('div');
+                badge.setAttribute('data-player-name', obj.nome);
+                badge.className = "player-badge-item bg-purple-900 border border-purple-700 text-white text-xs font-semibold px-3 py-1 rounded-lg flex items-center gap-1.5 shadow-sm";
+                badge.innerHTML = `<i class="fa-solid fa-user text-amber-300"></i> ${obj.nome} <span class="bg-amber-400 text-purple-950 font-bold px-1.5 rounded-md text-[10px] ml-1">${obj.score || 0}</span>`;
+                listEl.appendChild(badge);
+            });
+        }
+
+        /* --- CONNETTIVITÀ STUDENTE CON STOP HANDSHAKE IMMEDIATO --- */
         function connettiComeStudente() {
             let pin = document.getElementById('room-pin-input').value.trim();
             mioNomeStudente = document.getElementById('student-name').value.trim() || "Alunno";
@@ -991,14 +1018,12 @@
             document.getElementById('start-timer-btn').classList.add('hidden');
             document.getElementById('btn-next-pair').classList.add('hidden');
 
-            // Mantiene lo stesso ID univoco anche se lo studente ricarica la pagina/rientra
             let uniqueDeviceStudentId = sessionStorage.getItem('colpodocchio_device_id');
             if (!uniqueDeviceStudentId) {
                 uniqueDeviceStudentId = 'alunno-' + Math.floor(Math.random() * 10000000);
                 sessionStorage.setItem('colpodocchio_device_id', uniqueDeviceStudentId);
             }
 
-            // Inizializza Peer con l'ID univoco persistente del dispositivo
             if (peer) { try { peer.destroy(); } catch(e){} }
             peer = new Peer(uniqueDeviceStudentId);
 
@@ -1007,7 +1032,6 @@
             });
 
             peer.on('error', (err) => {
-                // Se l'ID è già occupato dal vecchio socket non ancora terminato sul server, rigenera l'ID
                 if (err.type === 'unavailable-id') {
                     uniqueDeviceStudentId = 'alunno-' + Math.floor(Math.random() * 10000000);
                     sessionStorage.setItem('colpodocchio_device_id', uniqueDeviceStudentId);
@@ -1032,12 +1056,11 @@
 
                 showWarningBanner(`✅ Connesso alla stanza ${pin}!`, 3000, false);
 
-                // Handshake continuo a intervalli fini alla prima risposta del server (risolve il blocco dell'ultimo telefono)
                 if (studentHandshakeInterval) clearInterval(studentHandshakeInterval);
                 
                 const inviaHandshake = () => {
                     if (connDocente && connDocente.open) {
-                        connDocente.send({ tipo: 'STUDENTE_PRONTO', studentId: studentId });
+                        connDocente.send({ tipo: 'STUDENTE_PRONTO', studentId: studentId, nome: mioNomeStudente });
                     }
                 };
 
@@ -1052,30 +1075,34 @@
             });
 
             connDocente.on('data', (dati) => {
-                // Non appena riceviamo i dati fermiamo il ciclo di handshake
+                // RICEZIONE CONFERMA: STOP HANDSHAKE PER LIBERARE LA RETE
                 if (studentHandshakeInterval) {
                     clearInterval(studentHandshakeInterval);
                     studentHandshakeInterval = null;
                 }
 
                 if (dati.tipo === 'AGGIORNA_CARTE') {
-                    if (dati.n && (state.n !== dati.n || state.symbolsPerCard !== dati.symbolsPerCard)) {
+                    if (dati.n && (state.n !== dati.n)) {
                         state.n = dati.n;
-                        state.symbolsPerCard = dati.symbolsPerCard;
+                        state.symbolsPerCard = dati.n + 1;
                         buildDeck();
                     }
                     if (dati.touchEnabled !== undefined) state.touchEnabled = dati.touchEnabled;
 
-                    state.card1Index = dati.card1Index;
-                    state.card2Index = dati.card2Index;
-                    state.matchingSymbol = dati.matchingSymbol;
-                    renderCard('card1', state.deckCards[dati.card1Index]);
-                    renderCard('card2', state.deckCards[dati.card2Index]);
+                    state.card1Index = dati.c1;
+                    state.card2Index = dati.c2;
+                    
+                    const card1Vals = state.deckCards[dati.c1].map(s => s.val);
+                    const card2Vals = state.deckCards[dati.c2].map(s => s.val);
+                    state.matchingSymbol = card1Vals.find(val => card2Vals.includes(val));
+
+                    renderCard('card1', state.deckCards[dati.c1]);
+                    renderCard('card2', state.deckCards[dati.c2]);
                 } 
                 else if (dati.tipo === 'SET_INPUT_MODE') {
                     state.touchEnabled = dati.touchEnabled;
                     if (!state.touchEnabled) {
-                        showWarningBanner("🎙️ L'Host ha attivato la modalità Solo Voce! Il tocco è disabilitato.", 4500, false);
+                        showWarningBanner("🎙️ L'Host ha attivato la modalità Solo Voce!", 4000, false);
                     } else {
                         showWarningBanner("👆 Modalità Touch riattivata dall'Host!", 3000, false);
                     }
@@ -1091,15 +1118,13 @@
         }
 
         function inviaStatoAGliStudenti() {
-            mappaConnessioniStudenti.forEach((conn) => {
-                if (conn.open) {
-                    conn.send({
+            mappaConnessioniStudenti.forEach((obj) => {
+                if (obj.conn.open) {
+                    obj.conn.send({
                         tipo: 'AGGIORNA_CARTE',
-                        card1Index: state.card1Index,
-                        card2Index: state.card2Index,
-                        matchingSymbol: state.matchingSymbol,
+                        c1: state.card1Index,
+                        c2: state.card2Index,
                         n: state.n,
-                        symbolsPerCard: state.symbolsPerCard,
                         touchEnabled: state.touchEnabled
                     });
                 }
@@ -1107,9 +1132,9 @@
         }
 
         function inviaEventoSistemaStudenti(tipo, payload = {}) {
-            mappaConnessioniStudenti.forEach((conn) => {
-                if (conn.open) {
-                    conn.send({ tipo: tipo, ...payload });
+            mappaConnessioniStudenti.forEach((obj) => {
+                if (obj.conn.open) {
+                    obj.conn.send({ tipo: tipo, ...payload });
                 }
             });
         }
