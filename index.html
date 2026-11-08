@@ -17,12 +17,20 @@
             user-select: none;
             -webkit-user-select: none;
         }
-        .dobble-card {
-            aspect-ratio: 1 / 1;
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 0 30px inset rgba(255, 255, 255, 0.9);
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-            overflow: visible !important;
-        }
+.dobble-card {
+    aspect-ratio: 1 / 1;
+    /* Fondo viola chiaro interno */
+    background: radial-gradient(circle, #8b5cf6 0%, #6d28d9 70%, #4c1d95 100%);
+    
+    /* Bordo viola scuro spesso + ombra sfumata esterna ed interna */
+    border: 10px solid #2e1065;
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.6),            /* Ombra esterna d'appoggio */
+        inset 0 0 25px rgba(30, 10, 60, 0.8);      /* Sfumatura scura interna ai bordi */
+        
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: visible !important;
+}
         .dobble-card:hover { transform: scale(1.02); }
 
         .symbol-item {
