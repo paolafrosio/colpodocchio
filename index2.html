@@ -13,19 +13,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-    body {
-        font-family: 'Lexend', 'Fredoka', sans-serif;
-        user-select: none;
-        -webkit-user-select: none;
-        
-        /* 1. Sfondo Viola profondo di base */
-        background-color: #2e1065;
-        
-        /* 2. Pattern vettoriale SVG trasparente con icone bianche leggere direttamente nel CSS */
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg stroke='rgba(255,255,255,0.14)' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='30' cy='30' r='10'/%3E%3Cpath d='M30 14v-4M30 46v4M14 30h-4M46 30h4M19 19l-3-3M41 41l3 3M19 41l-3 3M41 19l3-3'/%3E%3Cpath d='M110 25c-6-8-20 0-20 12c0 12 14 20 20 20c6 0 20-8 20-20c0-12-14-20-20-12z'/%3E%3Cpath d='M110 20c0-5 4-8 6-8'/%3E%3Cpolygon points='40,110 43,119 52,119 45,125 47,134 40,129 33,134 35,125 28,119 37,119'/%3E%3Ccircle cx='120' cy='115' r='10'/%3E%3Cpath d='M116 125h8v4h-8z'/%3E%3C/g%3E%3C/svg%3E");
-        background-repeat: repeat;
-        background-size: 140px 140px;
-    }
+body {
+    background-color: #2e1065;
+    background-image: url('pattern.svg');
+    background-repeat: repeat;
+    background-size: 300px 300px;
+}
 
     /* Carte Colpo d'occhio con bordo scuro e sfumatura interna */
     .colpo-card {
