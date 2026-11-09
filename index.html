@@ -17,20 +17,31 @@
             user-select: none;
             -webkit-user-select: none;
         }
-.colpo-card {
-    aspect-ratio: 1 / 1;
-    /* Fondo viola chiaro interno */
-    background: radial-gradient(circle, #8b5cf6 0%, #6d28d9 70%, #4c1d95 100%);
-    
-    /* Bordo viola scuro spesso + ombra sfumata esterna ed interna */
-    border: 10px solid #2e1065;
-    box-shadow: 
-        0 20px 50px rgba(0, 0, 0, 0.6),            /* Ombra esterna d'appoggio */
-        inset 0 0 25px rgba(30, 10, 60, 0.8);      /* Sfumatura scura interna ai bordi */
-        
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    overflow: visible !important;
-}
+
+        /* Sfondo a pattern (SVG che si ripete) */
+        #bg-pattern {
+            position: fixed;
+            inset: 0;
+            z-index: -1;                    /* sta dietro a tutto */
+            pointer-events: none;           /* non intercetta i tocchi */
+            background-image: url('pattern.svg');
+            background-repeat: repeat;
+            background-size: 120px 120px;   /* dimensione della piastrella */
+            opacity: 0.25;                  /* 0 = invisibile, 1 = pieno */
+        }
+
+        .colpo-card {
+            aspect-ratio: 1 / 1;
+            /* Fondo viola */
+            background: radial-gradient(circle, #8b5cf6 0%, #6d28d9 70%, #4c1d95 100%);
+            /* Bordo viola scuro spesso + ombra sfumata esterna ed interna */
+            border: 10px solid #2e1065;
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.6),            /* ombra esterna d'appoggio */
+                inset 0 0 25px rgba(30, 10, 60, 0.8);      /* sfumatura scura interna ai bordi */
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: visible !important;
+        }
         .colpo-card:hover { transform: scale(1.02); }
 
         .symbol-item {
@@ -85,6 +96,9 @@
 </head>
 <body class="bg-purple-950 text-slate-100 min-h-screen flex flex-col justify-between bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 overflow-x-hidden">
 
+    <!-- PATTERN DI SFONDO -->
+    <div id="bg-pattern"></div>
+
     <!-- PAROLA VINCENTE (LIM e studenti) -->
     <div id="word-flash" class="fixed inset-x-0 top-[38%] z-40 hidden flex justify-center pointer-events-none">
         <div class="bg-amber-400 text-purple-950 px-8 py-4 rounded-3xl shadow-2xl border-4 border-purple-950 text-center">
@@ -127,9 +141,9 @@
                 <i id="voice-icon" class="fa-solid fa-volume-high text-amber-400"></i>
                 <span id="voice-status-text" class="hidden md:inline font-medium">Voce: ON</span>
             </button>
-            <button onclick="requireSettingsAccess()" class="px-3.5 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
-                <i class="fa-solid fa-lock"></i>
-                <span class="hidden md:inline">Area Docente</span>
+            <button id="btn-settings" onclick="openSettingsModal()" class="px-3.5 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
+                <i class="fa-solid fa-gear"></i>
+                <span class="hidden md:inline">Impostazioni</span>
             </button>
         </div>
     </header>
@@ -193,13 +207,13 @@
 
         <!-- LE DUE CARTE -->
         <div class="w-full flex-1 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 my-1">
-            <div id="card1" class="colpo-card animate-card w-full max-w-[340px] sm:max-w-[420px] md:max-w-[460px] bg-gradient-to-b from-yellow-100 via-amber-200 to-yellow-300 rounded-full border-8 border-purple-900 relative overflow-hidden flex items-center justify-center"></div>
+            <div id="card1" class="colpo-card animate-card w-full max-w-[340px] sm:max-w-[420px] md:max-w-[460px] rounded-full relative overflow-hidden flex items-center justify-center"></div>
             <div class="flex md:flex-col items-center justify-center gap-1 my-[-10px] md:my-0">
                 <div class="bg-amber-400 text-purple-950 w-12 h-12 rounded-full flex items-center justify-center font-black text-2xl shadow-xl border-4 border-purple-950 z-10">
                     <i class="fa-solid fa-equals"></i>
                 </div>
             </div>
-            <div id="card2" class="colpo-card animate-card w-full max-w-[340px] sm:max-w-[420px] md:max-w-[460px] bg-gradient-to-b from-yellow-100 via-amber-200 to-yellow-300 rounded-full border-8 border-purple-900 relative overflow-hidden flex items-center justify-center"></div>
+            <div id="card2" class="colpo-card animate-card w-full max-w-[340px] sm:max-w-[420px] md:max-w-[460px] rounded-full relative overflow-hidden flex items-center justify-center"></div>
         </div>
 
         <!-- CONTROLLI -->
@@ -266,7 +280,7 @@
         <div class="bg-purple-900 border border-purple-700 w-full max-w-2xl rounded-3xl p-6 text-white shadow-2xl flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center pb-4 border-b border-purple-800">
                 <h2 class="text-xl font-bold flex items-center gap-2 text-amber-300">
-                    <i class="fa-solid fa-sliders"></i> Pannello di Configurazione Docente
+                    <i class="fa-solid fa-gear"></i> Impostazioni
                 </h2>
                 <button onclick="closeSettingsModal()" class="text-purple-300 hover:text-white p-2 rounded-lg text-xl">
                     <i class="fa-solid fa-xmark"></i>
@@ -353,25 +367,8 @@
         </div>
     </div>
 
-    <!-- MODALE PIN DOCENTE -->
-    <div id="pin-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
-        <div class="bg-purple-900 border border-purple-700 w-full max-w-sm rounded-3xl p-6 text-white shadow-2xl flex flex-col">
-            <h2 class="text-xl font-bold mb-2 text-amber-300 flex items-center gap-2">
-                <i class="fa-solid fa-user-shield"></i> Accesso Riservato
-            </h2>
-            <p class="text-sm text-purple-200 mb-6">Inserisci la password per accedere alle impostazioni avanzate.</p>
-            <input type="password" id="teacher-pin" class="bg-purple-950 border border-purple-700 p-3 rounded-xl mb-4 text-center text-2xl tracking-[0.5em] focus:border-amber-400 outline-none transition" placeholder="****" onkeydown="if(event.key === 'Enter') checkPin()">
-            <div class="flex gap-3">
-                <button onclick="closePinModal()" class="flex-1 py-3 rounded-xl bg-purple-950 hover:bg-purple-800 transition font-semibold text-sm">Annulla</button>
-                <button onclick="checkPin()" class="flex-1 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition text-sm">Sblocca</button>
-            </div>
-            <p id="pin-error" class="text-red-400 text-sm font-semibold text-center mt-4 hidden animate-pulse">Password errata!</p>
-        </div>
-    </div>
-
     <script>
         /* ==================== COSTANTI ==================== */
-        const TEACHER_PIN = "1234";
         const PREFISSO_STANZA = 'colpo-docchio-';
         const DELAY_ROUND = 800;      // pausa tra un round e l'altro (ms)
         const DEBUG_TEMPI = true;     // mostra sul telefono quanto ha impiegato l'ingresso; a fine misure metti false
@@ -1378,6 +1375,27 @@
             });
         }
 
+        // Jingle di fine gara, generato da Tone.js (nessun file audio)
+        let fanfareSynth;
+        function suonoFinale() {
+            try {
+                if (!window.Tone) return;                                   // Tone.js non ancora caricato
+                if (Tone.context.state !== 'running') Tone.start();
+                if (!fanfareSynth) {
+                    fanfareSynth = new Tone.PolySynth(Tone.Synth, {
+                        oscillator: { type: 'triangle' },
+                        envelope: { attack: 0.01, decay: 0.2, sustain: 0.3, release: 0.8 }
+                    }).toDestination();
+                    fanfareSynth.volume.value = -6;                         // più basso = più piano
+                }
+                const t = Tone.now() + 0.05;
+                fanfareSynth.triggerAttackRelease('C5', '8n', t);           // do
+                fanfareSynth.triggerAttackRelease('E5', '8n', t + 0.18);    // mi
+                fanfareSynth.triggerAttackRelease('G5', '8n', t + 0.36);    // sol
+                fanfareSynth.triggerAttackRelease(['C6', 'E6', 'G5'], '2n', t + 0.6);   // accordo finale
+            } catch (e) {}
+        }
+
         function showGameOverModal(classifica) {
             const isHost = ruolounico === 'docente';
             if (isHost) {
@@ -1408,6 +1426,7 @@
                 document.getElementById('best-score-display').textContent = best;
             }
             document.getElementById('gameover-modal').classList.remove('hidden');
+            suonoFinale();   // jingle di fine gara
         }
 
         function closeGameOverModal() {
@@ -1415,26 +1434,7 @@
             if (ruolounico !== 'studente') nextPair(true);
         }
 
-        /* ==================== AREA DOCENTE ==================== */
-        function requireSettingsAccess() {
-            document.getElementById('pin-modal').classList.remove('hidden');
-            const pinInput = document.getElementById('teacher-pin');
-            pinInput.value = '';
-            document.getElementById('pin-error').classList.add('hidden');
-            setTimeout(() => pinInput.focus(), 100);
-        }
-        function closePinModal() { document.getElementById('pin-modal').classList.add('hidden'); }
-        function checkPin() {
-            const input = document.getElementById('teacher-pin').value;
-            if (input === TEACHER_PIN) {
-                closePinModal();
-                openSettingsModal();
-            } else {
-                document.getElementById('pin-error').classList.remove('hidden');
-                document.getElementById('teacher-pin').value = '';
-                document.getElementById('teacher-pin').focus();
-            }
-        }
+        /* ==================== IMPOSTAZIONI ==================== */
         function openSettingsModal() {
             evidenziaOpzioni('penalty-options', state.penaltySec);
             evidenziaOpzioni('duration-options', state.durataSec);
