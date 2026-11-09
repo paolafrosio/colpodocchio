@@ -1375,6 +1375,27 @@
             });
         }
 
+        // Jingle di fine gara, generato da Tone.js (nessun file audio)
+        let fanfareSynth;
+        function suonoFinale() {
+            try {
+                if (!window.Tone) return;                                   // Tone.js non ancora caricato
+                if (Tone.context.state !== 'running') Tone.start();
+                if (!fanfareSynth) {
+                    fanfareSynth = new Tone.PolySynth(Tone.Synth, {
+                        oscillator: { type: 'triangle' },
+                        envelope: { attack: 0.01, decay: 0.2, sustain: 0.3, release: 0.8 }
+                    }).toDestination();
+                    fanfareSynth.volume.value = -6;                         // più basso = più piano
+                }
+                const t = Tone.now() + 0.05;
+                fanfareSynth.triggerAttackRelease('C5', '8n', t);           // do
+                fanfareSynth.triggerAttackRelease('E5', '8n', t + 0.18);    // mi
+                fanfareSynth.triggerAttackRelease('G5', '8n', t + 0.36);    // sol
+                fanfareSynth.triggerAttackRelease(['C6', 'E6', 'G5'], '2n', t + 0.6);   // accordo finale
+            } catch (e) {}
+        }
+
         function showGameOverModal(classifica) {
             const isHost = ruolounico === 'docente';
             if (isHost) {
@@ -1405,6 +1426,7 @@
                 document.getElementById('best-score-display').textContent = best;
             }
             document.getElementById('gameover-modal').classList.remove('hidden');
+            suonoFinale();   // jingle di fine gara
         }
 
         function closeGameOverModal() {
