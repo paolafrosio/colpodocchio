@@ -150,7 +150,13 @@
 
     <!-- AREA DI GIOCO -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-2 flex flex-col justify-center items-center gap-2">
+<!-- PIN STANZA SEMPRE VISIBILE (solo host) -->
+<div id="room-pin-bar" class="hidden w-full bg-amber-400 text-purple-950 rounded-2xl px-4 py-1 flex items-center justify-center gap-4 shadow-xl">
+    <span class="text-xs md:text-base font-bold uppercase tracking-widest">Entra con il PIN</span>
+    <span id="room-pin-big" class="text-4xl md:text-6xl font-black font-mono tracking-[0.15em] leading-tight">----</span>
+</div>
 
+        
         <!-- STATUS BAR -->
         <div class="w-full flex flex-col sm:flex-row justify-between items-center bg-purple-900/80 backdrop-blur-md rounded-2xl p-3 border border-purple-700/50 text-white shadow-xl gap-3">
             <div class="flex items-center gap-2">
@@ -265,9 +271,10 @@
 
             <div id="teacher-qr-view" class="hidden flex-col items-center text-center space-y-4">
                 <div class="bg-white p-3 rounded-2xl inline-block shadow-lg" id="qrcode-box"></div>
-                <div class="text-lg font-bold text-amber-300">
-                    PIN Stanza: <span id="display-pin-code" class="text-2xl font-mono text-white bg-purple-950 px-3 py-1 rounded-xl shadow-inner">----</span>
-                </div>
+       <div class="w-full text-center">
+    <div class="text-sm font-bold uppercase tracking-widest text-amber-300 mb-1">PIN Stanza</div>
+    <div id="display-pin-code" class="text-8xl font-black font-mono tracking-[0.15em] text-white bg-purple-950 px-6 py-3 rounded-2xl shadow-inner leading-none">----</div>
+</div>
                 <p class="text-xs text-purple-200">Inquadra il QR con il telefono/tablet o inserisci il PIN per unirti alla sfida!</p>
             </div>
 
@@ -1019,6 +1026,8 @@
                 document.getElementById('connected-players-badge').classList.remove('hidden');
                 document.getElementById('live-players-bar').classList.remove('hidden');
                 document.getElementById('txt-multiplayer').textContent = "Host: " + pinStanza;
+                document.getElementById('room-pin-big').textContent = pinStanza;
+                document.getElementById('room-pin-bar').classList.remove('hidden');
                 const qrBox = document.getElementById('qrcode-box');
                 qrBox.innerHTML = '';
                 const base = window.location.href.split('?')[0];
