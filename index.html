@@ -150,12 +150,6 @@
 
     <!-- AREA DI GIOCO -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-2 flex flex-col justify-center items-center gap-2">
-<!-- PIN STANZA SEMPRE VISIBILE (solo host) -->
-<div id="room-pin-bar" class="hidden w-full bg-amber-400 text-purple-950 rounded-2xl px-4 py-1 flex items-center justify-center gap-4 shadow-xl">
-    <span class="text-xs md:text-base font-bold uppercase tracking-widest">Entra con il PIN</span>
-    <span id="room-pin-big" class="text-4xl md:text-6xl font-black font-mono tracking-[0.15em] leading-tight">----</span>
-</div>
-
         
         <!-- STATUS BAR -->
         <div class="w-full flex flex-col sm:flex-row justify-between items-center bg-purple-900/80 backdrop-blur-md rounded-2xl p-3 border border-purple-700/50 text-white shadow-xl gap-3">
@@ -1026,8 +1020,7 @@
                 document.getElementById('connected-players-badge').classList.remove('hidden');
                 document.getElementById('live-players-bar').classList.remove('hidden');
                 document.getElementById('txt-multiplayer').textContent = "Host: " + pinStanza;
-                document.getElementById('room-pin-big').textContent = pinStanza;
-                document.getElementById('room-pin-bar').classList.remove('hidden');
+                document.getElementById('txt-multiplayer').className = "text-base md:text-xl font-black tracking-wider";
                 const qrBox = document.getElementById('qrcode-box');
                 qrBox.innerHTML = '';
                 const base = window.location.href.split('?')[0];
