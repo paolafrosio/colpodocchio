@@ -277,7 +277,7 @@
 
                     <div class="relative flex py-2 items-center">
                         <div class="flex-grow border-t-2 border-purple-600"></div>
-                        <span class="flex-shrink mx-4 text-amber-300 text-base md:text-lg uppercase font-black tracking-wider bg-purple-900 px-2">OPPURE PARTECIPA</span>
+                        <span class="flex-shrink mx-4 text-amber-300 text-base md:text-lg uppercase font-black tracking-wider bg-purple-900 px-2">OPPUR PARTECIPA</span>
                         <div class="flex-grow border-t-2 border-purple-600"></div>
                     </div>
                 </div>
@@ -290,7 +290,6 @@
                 </div>
             </div>
 
-            <!-- VISTA STANZA CREATA -->
             <div id="teacher-qr-view" class="hidden flex-col items-center text-center space-y-4">
                 <div class="bg-white p-3 rounded-2xl inline-block shadow-lg" id="qrcode-box"></div>
                 <div class="w-full text-center">
@@ -758,14 +757,14 @@
         }
 
         function toggleTrainingMode() {
+            if (state.isTimeAttack) return;
+
             isTrainingMode = !isTrainingMode;
             const btnLabel = document.getElementById('btn-training-label');
             const btn = document.getElementById('btn-training');
             const banner = document.getElementById('training-banner');
             const scoreBox = document.getElementById('score-box');
             const startTimerBtn = document.getElementById('start-timer-btn');
-
-            if (state.isTimeAttack) stopTimeAttack();
 
             if (isTrainingMode) {
                 btnLabel.textContent = "Esci da Allenamento";
@@ -1316,6 +1315,7 @@
             ingressoRichiesto = true;
             document.getElementById('start-timer-btn').classList.add('hidden');
             document.getElementById('btn-next-pair').classList.add('hidden');
+            document.getElementById('btn-training').classList.add('hidden');
 
             const pronta = preparazione && preparazione.pin === pin && !preparazione.fallita;
             if (!pronta) preparaStudente(pin, true);
@@ -1486,12 +1486,15 @@
         }
 
         function startTimeAttack() {
+            if (isTrainingMode) toggleTrainingMode();
+
             state.isTimeAttack = true;
             impostaStatoAttesaStart(false);
             state.timerFine = Date.now() + state.durataSec * 1000;
             resetScore();
             nextPair(true);
 
+            document.getElementById('btn-training').classList.add('hidden');
             document.getElementById('timer-box').classList.remove('hidden');
             document.getElementById('timer-display').textContent = state.durataSec;
             document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-stop"></i> <span id="timer-btn-label">Ferma Sfida</span>`;
@@ -1514,6 +1517,7 @@
         function stopTimeAttack(finita = false) {
             state.isTimeAttack = false;
             clearInterval(state.timerInterval);
+            document.getElementById('btn-training').classList.remove('hidden');
             document.getElementById('timer-box').classList.add('hidden');
             document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-play"></i> <span id="timer-btn-label"></span>`;
             document.getElementById('start-timer-btn').className = "px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-purple-950 font-black transition flex items-center gap-2 shadow-lg text-base";
