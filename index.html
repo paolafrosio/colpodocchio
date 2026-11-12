@@ -112,38 +112,39 @@
 
     <!-- HEADER -->
     <!-- HEADER -->
-    <header class="w-full bg-purple-900/90 backdrop-blur-md border-b border-purple-700/50 px-4 py-3 flex justify-between items-center z-10 shadow-lg">
-        <div class="flex items-center gap-3">
-            <img src="logo.png" alt="Logo Colpo d'occhio" class="w-12 h-12 object-contain">
+   <!-- HEADER -->
+    <header class="w-full bg-purple-900/90 backdrop-blur-md border-b border-purple-700/50 px-3 sm:px-4 py-2.5 flex flex-col md:flex-row justify-between items-center gap-2.5 z-10 shadow-lg">
+        <div class="flex items-center justify-center md:justify-start gap-2.5 w-full md:w-auto">
+            <img src="logo.png" alt="Logo Colpo d'occhio" class="w-10 h-10 sm:w-12 sm:h-12 object-contain shrink-0">
             <div>
-                <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide flex items-center gap-2">
+                <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-white tracking-wide leading-tight">
                     Colpo d'occhio
                 </h1>
                 <p class="text-xs text-purple-200 hidden sm:block">Pronuncia la figura in comune al microfono o selezionala toccando lo schermo!</p>
             </div>
         </div>
-        <div class="flex items-center gap-2 md:gap-3 flex-wrap justify-end">
-            <button id="btn-multiplayer" onclick="mostraModalConnessione()" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
+        <div class="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-wrap justify-center md:justify-end w-full md:w-auto">
+            <button id="btn-multiplayer" onclick="mostraModalConnessione()" class="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition flex items-center gap-1.5 sm:gap-2 text-xs md:text-sm shadow-md">
                 <i class="fa-solid fa-users"></i>
                 <span id="txt-multiplayer">Giochiamo insieme</span>
             </button>
-            <button id="toggle-touch-btn" onclick="toggleTouch()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva Touch">
+            <button id="toggle-touch-btn" onclick="toggleTouch()" class="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva Touch">
                 <i id="touch-icon" class="fa-solid fa-hand-pointer text-amber-400"></i>
                 <span id="touch-status-text" class="hidden md:inline font-medium">Touch: ON</span>
             </button>
-            <button id="btn-mic-toggle" onclick="toggleSpeechRecognition()" class="px-3.5 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva Microfono per Risposta Vocale">
+            <button id="btn-mic-toggle" onclick="toggleSpeechRecognition()" class="px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva Microfono per Risposta Vocale">
                 <i id="mic-icon" class="fa-solid fa-microphone-slash text-purple-400"></i>
                 <span id="mic-status-text" class="hidden md:inline font-medium">Mic: OFF</span>
             </button>
-            <button id="toggle-labels-btn" onclick="toggleLabels()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Mostra o nascondi il testo scritto">
+            <button id="toggle-labels-btn" onclick="toggleLabels()" class="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Mostra o nascondi il testo scritto">
                 <i id="labels-icon" class="fa-solid fa-font text-purple-400 opacity-40"></i>
                 <span id="labels-status-text" class="hidden md:inline font-medium">Testo: OFF</span>
             </button>
-            <button id="toggle-voice-btn" onclick="toggleSpeech()" class="px-3 py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva pronuncia vocale">
+            <button id="toggle-voice-btn" onclick="toggleSpeech()" class="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-purple-800/80 hover:bg-purple-700 text-purple-100 transition flex items-center gap-2 text-xs md:text-sm border border-purple-600/50 shadow-sm" title="Attiva/Disattiva pronuncia vocale">
                 <i id="voice-icon" class="fa-solid fa-volume-high text-amber-400"></i>
                 <span id="voice-status-text" class="hidden md:inline font-medium">Voce: ON</span>
             </button>
-            <button id="btn-settings" onclick="openSettingsModal()" class="px-3.5 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
+            <button id="btn-settings" onclick="openSettingsModal()" class="px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold transition flex items-center gap-2 text-xs md:text-sm shadow-md">
                 <i class="fa-solid fa-gear"></i>
                 <span class="hidden md:inline">Impostazioni</span>
             </button>
