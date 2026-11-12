@@ -253,31 +253,39 @@
             </h2>
 
             <div id="role-selection" class="space-y-5">
+                <!-- BADGE DA QR CODE (Nascosto se apertura normale) -->
+                <div id="qr-room-badge" class="hidden bg-amber-400/20 border border-amber-400/50 text-amber-300 text-center py-2.5 px-4 rounded-xl text-sm font-bold">
+                    <i class="fa-solid fa-qrcode mr-1"></i> Stai entrando nella stanza <span id="qr-pin-label" class="font-mono text-base underline font-black">----</span>
+                </div>
+
                 <!-- CAMPO NOME GRANDE E VISIBILE -->
                 <div>
                     <label class="block text-lg font-extrabold text-amber-300 mb-2 tracking-wide">Il tuo Nome:</label>
                     <input type="text" id="student-name" placeholder="Scrivi qui il tuo nome..." maxlength="20" class="w-full bg-purple-950 border-2 border-amber-400/70 p-4 rounded-2xl text-center text-2xl font-black text-white placeholder-purple-400/60 focus:border-amber-300 focus:ring-4 focus:ring-amber-400/20 outline-none shadow-inner">
                 </div>
 
-                <button onclick="avviaComeDocente()" class="w-full p-4 rounded-2xl bg-fuchsia-600 hover:bg-fuchsia-500 font-bold flex items-center gap-4 transition text-left shadow-lg border border-fuchsia-400/30">
-                    <i class="fa-solid fa-desktop text-3xl"></i>
-                    <div>
-                        <div class="text-lg">Crea una Stanza</div>
-                        <div class="text-xs font-normal text-purple-200">Genera il PIN a 4 cifre per invitare gli altri</div>
-                    </div>
-                </button>
+                <!-- SEZIONE CREA STANZA (Nascosta se apertura da QR Code) -->
+                <div id="host-create-section" class="space-y-5">
+                    <button onclick="avviaComeDocente()" class="w-full p-4 rounded-2xl bg-fuchsia-600 hover:bg-fuchsia-500 font-bold flex items-center gap-4 transition text-left shadow-lg border border-fuchsia-400/30">
+                        <i class="fa-solid fa-desktop text-3xl"></i>
+                        <div>
+                            <div class="text-lg">Crea una Stanza</div>
+                            <div class="text-xs font-normal text-purple-200">Genera il PIN a 4 cifre per invitare gli altri</div>
+                        </div>
+                    </button>
 
-                <!-- SEPARATORE "OPPURE PARTECIPA" -->
-                <div class="relative flex py-2 items-center">
-                    <div class="flex-grow border-t-2 border-purple-600"></div>
-                    <span class="flex-shrink mx-4 text-amber-300 text-base md:text-lg uppercase font-black tracking-wider bg-purple-900 px-2">OPPURE PARTECIPA</span>
-                    <div class="flex-grow border-t-2 border-purple-600"></div>
+                    <!-- SEPARATORE "OPPURE PARTECIPA" -->
+                    <div class="relative flex py-2 items-center">
+                        <div class="flex-grow border-t-2 border-purple-600"></div>
+                        <span class="flex-shrink mx-4 text-amber-300 text-base md:text-lg uppercase font-black tracking-wider bg-purple-900 px-2">OPPURE PARTECIPA</span>
+                        <div class="flex-grow border-t-2 border-purple-600"></div>
+                    </div>
                 </div>
 
                 <div class="space-y-3">
                     <input type="text" id="room-pin-input" placeholder="PIN Stanza (es. 1234)" maxlength="4" inputmode="numeric" class="w-full bg-purple-950 border-2 border-purple-600 p-3.5 rounded-2xl text-center text-2xl font-black tracking-widest text-white focus:border-amber-400 outline-none">
-                    <button id="btn-enter-room" onclick="connettiComeStudente()" class="w-full py-3.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-purple-950 text-lg font-black transition shadow-lg">
-                        Entra con PIN
+                    <button id="btn-enter-room" onclick="connettiComeStudente()" class="w-full py-4 rounded-2xl bg-amber-400 hover:bg-amber-300 text-purple-950 text-xl font-black transition shadow-lg">
+                        ENTRA NELLA GARA!
                     </button>
                 </div>
             </div>
@@ -654,8 +662,17 @@
                 if (v.length === 4) preparaStudente(v);
             });
 
+            // GESTIONE ACCESSO DA QR CODE (SENZA CONFUSIONE)
             if (pinParam) {
                 campoPin.value = pinParam;
+                // Nasconde la sezione "Crea Stanza" e il campo PIN duplicato
+                document.getElementById('host-create-section').classList.add('hidden');
+                campoPin.classList.add('hidden');
+                
+                // Mostra il badge elegante con il numero di stanza
+                document.getElementById('qr-room-badge').classList.remove('hidden');
+                document.getElementById('qr-pin-label').textContent = '#' + pinParam;
+
                 mostraModalConnessione();
                 preparaStudente(pinParam);
                 if (!campoNome.value) campoNome.focus();
@@ -1242,7 +1259,7 @@
         function ripristinaBottoneIngresso() {
             const b = document.getElementById('btn-enter-room');
             b.disabled = false;
-            b.textContent = "Entra con PIN";
+            b.textContent = "ENTRA NELLA GARA!";
         }
 
         function erroreIngresso(msg) {
@@ -1454,10 +1471,10 @@
 
         function startTimeAttack() {
             state.isTimeAttack = true;
-            impostaStatoAttesaStart(false); // Sblocca le carte per tutti!
+            impostaStatoAttesaStart(false);
             state.timerFine = Date.now() + state.durataSec * 1000;
             resetScore();
-            nextPair(true); // Cambia carte allo start così nessuno le ha già studiate!
+            nextPair(true);
 
             document.getElementById('timer-box').classList.remove('hidden');
             document.getElementById('timer-display').textContent = state.durataSec;
