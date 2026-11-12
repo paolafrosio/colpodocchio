@@ -519,7 +519,7 @@
             isTimeAttack: false,
             timerFine: 0,
             timerInterval: null,
-            synth: window.speechSynthesis,
+            synth: 'speechSynthesis' in window ? window.speechSynthesis : null,
             lastSpokenWord: ''
         };
 
@@ -825,13 +825,15 @@
         }
 
         function speakWord(text) {
-            if (ruolounico === 'studente' || !state.audioEnabled || !text) return;
-            if (state.synth.speaking) state.synth.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'it-IT';
-            utterance.rate = 0.85;
-            utterance.pitch = 1.0;
-            state.synth.speak(utterance);
+            if (ruolounico === 'studente' || !state.audioEnabled || !text || !state.synth) return;
+            try {
+                if (state.synth.speaking) state.synth.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'it-IT';
+                utterance.rate = 0.85;
+                utterance.pitch = 1.0;
+                state.synth.speak(utterance);
+            } catch(e) {}
             state.lastSpokenWord = text;
             document.getElementById('last-word-display').textContent = text;
         }
@@ -851,7 +853,7 @@
 
             recognition.onresult = function (event) {
                 speechLastLen = event.results.length;
-                if (!garaIniziata || isTransitioning || isPenalized || roundBloccato || !matchRe || state.synth.speaking) return;
+                if (!garaIniziata || isTransitioning || isPenalized || roundBloccato || !matchRe || (state.synth && state.synth.speaking)) return;
 
                 let sentito = '', trovato = false;
                 for (let i = Math.max(event.resultIndex, speechBase); i < event.results.length; i++) {
