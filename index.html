@@ -874,6 +874,17 @@
                 }
             };
 
+        recognition.onerror = function (event) {
+             if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                 isSpeechRecognitionActive = false;
+                 document.getElementById('mic-icon').className = "fa-solid fa-microphone-slash text-purple-400";
+                 document.getElementById('mic-status-text').textContent = "Mic: OFF";
+                 document.getElementById('speech-live-bar').classList.add('hidden');
+                 showWarningBanner("⚠️ Permesso microfono negato dal browser.", 4000, true);
+             }
+         };
+
+            
             recognition.onend = function () {
                 speechBase = 0; speechLastLen = 0;
                 if (isSpeechRecognitionActive) { try { recognition.start(); } catch (e) {} }
@@ -1127,6 +1138,7 @@
         }
 
         function resetScore() {
+            if (state.isTimeAttack) return;
             state.score = 0;
             mappaConnessioniStudenti.forEach(st => st.score = 0);
             document.getElementById('score-display').textContent = "0";
@@ -1291,7 +1303,10 @@
                         connessi++;
                         const tag = document.createElement('span');
                         tag.className = "bg-fuchsia-600 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow";
-                        tag.innerHTML = `<i class="fa-solid fa-user-check text-amber-300"></i> ${obj.nome}`;
+                        const icona = document.createElement('i');
+                        icona.className = "fa-solid fa-user-check text-amber-300";
+                        const testoNome = document.createTextNode(" " + obj.nome);
+                        tag.append(icona, testoNome);
                         modalList.appendChild(tag);
                     }
                 });
