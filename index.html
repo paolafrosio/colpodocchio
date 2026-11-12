@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Colpo d'occhio CPIA - Giochiamo Insieme</title>
+    <title>Colpo d'occhio - Giochiamo Insieme</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Script non bloccanti: la pagina compare subito; Tone.js viene caricato da codice, dopo -->
+    <!-- Script non bloccanti per velocizzare l'apertura su smartphone -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
@@ -18,27 +18,24 @@
             -webkit-user-select: none;
         }
 
-        /* Sfondo a pattern (SVG che si ripete) */
         #bg-pattern {
             position: fixed;
             inset: 0;
-            z-index: -1;                    /* sta dietro a tutto */
-            pointer-events: none;           /* non intercetta i tocchi */
+            z-index: -1;
+            pointer-events: none;
             background-image: url('pattern.svg');
             background-repeat: repeat;
-            background-size: 120px 120px;   /* dimensione della piastrella */
-            opacity: 0.25;                  /* 0 = invisibile, 1 = pieno */
+            background-size: 120px 120px;
+            opacity: 0.25;
         }
 
         .colpo-card {
             aspect-ratio: 1 / 1;
-            /* Fondo viola */
             background: radial-gradient(circle, #8b5cf6 0%, #6d28d9 70%, #4c1d95 100%);
-            /* Bordo viola scuro spesso + ombra sfumata esterna ed interna */
             border: 10px solid #2e1065;
             box-shadow:
-                0 20px 50px rgba(0, 0, 0, 0.6),            /* ombra esterna d'appoggio */
-                inset 0 0 25px rgba(30, 10, 60, 0.8);      /* sfumatura scura interna ai bordi */
+                0 20px 50px rgba(0, 0, 0, 0.6),
+                inset 0 0 25px rgba(30, 10, 60, 0.8);
             transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             overflow: visible !important;
         }
@@ -66,6 +63,11 @@
             opacity: 0.35 !important;
             pointer-events: none !important;
             filter: grayscale(80%);
+        }
+        .waiting-card {
+            opacity: 0.15 !important;
+            pointer-events: none !important;
+            filter: blur(8px) grayscale(100%);
         }
         .player-badge-active { animation: pop-player 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
@@ -96,10 +98,9 @@
 </head>
 <body class="bg-purple-950 text-slate-100 min-h-screen flex flex-col justify-between bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 overflow-x-hidden">
 
-    <!-- PATTERN DI SFONDO -->
     <div id="bg-pattern"></div>
 
-    <!-- PAROLA VINCENTE (LIM e studenti) -->
+    <!-- PAROLA VINCENTE -->
     <div id="word-flash" class="fixed inset-x-0 top-[38%] z-40 hidden flex justify-center pointer-events-none">
         <div class="bg-amber-400 text-purple-950 px-8 py-4 rounded-3xl shadow-2xl border-4 border-purple-950 text-center">
             <div id="word-flash-text" class="font-black text-4xl md:text-6xl"></div>
@@ -111,11 +112,11 @@
     <header class="w-full bg-purple-900/90 backdrop-blur-md border-b border-purple-700/50 px-4 py-3 flex justify-between items-center z-10 shadow-lg">
         <div class="flex items-center gap-3">
             <div class="bg-amber-400 text-purple-950 p-2.5 rounded-2xl shadow-lg flex items-center justify-center font-bold text-xl">
-                <i class="fa-solid fa-comments"></i>
+                <i class="fa-solid fa-eye"></i>
             </div>
             <div>
                 <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide flex items-center gap-2">
-                    Colpo d'occhio <span class="bg-amber-400/20 text-amber-300 text-xs px-2.5 py-0.5 rounded-full border border-amber-400/40 font-mono">CPIA</span>
+                    Colpo d'occhio
                 </h1>
                 <p class="text-xs text-purple-200 hidden sm:block">Pronuncia la figura in comune al microfono o selezionala toccando lo schermo!</p>
             </div>
@@ -161,7 +162,7 @@
                     8 Figure/Carta
                 </span>
                 <span id="connected-players-badge" class="bg-purple-500/20 border border-purple-400/40 text-purple-200 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full hidden">
-                    <i class="fa-solid fa-user-group"></i> Alunni: <b id="players-count">0</b>
+                    <i class="fa-solid fa-user-group"></i> Giocatori connessi: <b id="players-count">0</b>
                 </span>
             </div>
 
@@ -178,7 +179,7 @@
                     <i class="fa-solid fa-stopwatch text-amber-300 text-xl"></i>
                     <span id="timer-display" class="text-2xl font-bold font-mono text-amber-300">60</span>s
                 </div>
-                <div class="flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 px-3.5 py-1 rounded-xl">
+                <div id="score-box" class="flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 px-3.5 py-1 rounded-xl">
                     <i class="fa-solid fa-star text-amber-300"></i>
                     <span class="text-xs font-semibold uppercase text-amber-200">Punti:</span>
                     <span id="score-display" class="text-xl font-bold text-white">0</span>
@@ -192,6 +193,18 @@
                 <i class="fa-solid fa-users text-amber-400"></i> In gioco:
             </span>
             <div id="live-players-list" class="flex items-center gap-2 flex-wrap"></div>
+        </div>
+
+        <!-- BANNER ATTESA START -->
+        <div id="waiting-start-banner" class="hidden w-full bg-amber-400 text-purple-950 text-center py-2.5 px-4 rounded-xl text-sm md:text-base font-black shadow-lg animate-pulse flex items-center justify-center gap-2">
+            <i class="fa-solid fa-hourglass-half"></i>
+            <span id="waiting-start-text">In attesa che inizi la gara... Preparati!</span>
+        </div>
+
+        <!-- BANNER ALLENAMENTO -->
+        <div id="training-banner" class="hidden w-full bg-cyan-500/90 text-purple-950 text-center py-1.5 px-4 rounded-xl text-xs font-extrabold shadow-md flex items-center justify-center gap-2">
+            <i class="fa-solid fa-bullseye text-sm"></i>
+            <span>Modalità Allenamento Attiva — Nessun timer, nessuna penalità, gioco libero!</span>
         </div>
 
         <!-- BANNER AVVISI -->
@@ -221,8 +234,11 @@
             <button id="btn-next-pair" onclick="nextPair(true)" class="px-4 py-2 rounded-xl bg-purple-800 hover:bg-purple-700 text-purple-100 font-semibold transition flex items-center gap-2 border border-purple-600/50 text-sm">
                 <i class="fa-solid fa-arrows-rotate"></i> Cambia Carte
             </button>
-            <button id="start-timer-btn" onclick="toggleTimeAttack()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm">
-                <i class="fa-solid fa-play"></i> <span id="timer-btn-label">Avvia Sfida 60s</span>
+            <button id="btn-training" onclick="toggleTrainingMode()" class="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold transition flex items-center gap-2 shadow-md text-sm">
+                <i class="fa-solid fa-bullseye"></i> <span id="btn-training-label">Allenamento</span>
+            </button>
+            <button id="start-timer-btn" onclick="toggleTimeAttack()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-purple-950 font-black transition flex items-center gap-2 shadow-lg text-base">
+                <i class="fa-solid fa-play"></i> <span id="timer-btn-label">START! (60s)</span>
             </button>
             <button onclick="resetScore()" class="px-3.5 py-2 rounded-xl bg-purple-950 hover:bg-purple-900 text-purple-300 hover:text-white border border-purple-800 font-medium transition text-xs">
                 Azzera Punti
@@ -231,48 +247,75 @@
     </main>
 
     <footer class="text-center py-2 text-xs text-purple-300/60">
-        Colpo d'occhio Didattico • Generatore Matematico Proiettivo • Gamification & Multiplayer
+        Colpo d'occhio • Generatore Matematico Proiettivo • Gamification & Multiplayer
     </footer>
 
     <!-- MODALE CONNESSIONE -->
     <div id="connection-modal" class="fixed inset-0 bg-purple-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-purple-900 border border-purple-700 w-full max-w-md rounded-3xl p-6 text-white shadow-2xl flex flex-col">
-            <h2 class="text-xl font-bold mb-4 text-amber-300 flex items-center gap-2">
-                <i class="fa-solid fa-users"></i> Giochiamo Insieme (Stanza)
+            <h2 class="text-2xl font-bold mb-5 text-amber-300 flex items-center gap-2">
+                <i class="fa-solid fa-users"></i> Giochiamo Insieme
             </h2>
 
-            <div id="role-selection" class="space-y-4">
-                <button onclick="avviaComeDocente()" class="w-full p-4 rounded-2xl bg-fuchsia-600 hover:bg-fuchsia-500 font-bold flex items-center gap-4 transition text-left shadow-md">
-                    <i class="fa-solid fa-desktop text-3xl"></i>
-                    <div>
-                        <div class="text-base">Crea una Stanza (Host)</div>
-                        <div class="text-xs font-normal text-purple-200">Genera il PIN a 4 cifre per invitare gli altri a giocare</div>
-                    </div>
-                </button>
-                <div class="relative flex py-1 items-center">
-                    <div class="flex-grow border-t border-purple-700"></div>
-                    <span class="flex-shrink mx-4 text-purple-300 text-xs uppercase font-semibold">oppure</span>
-                    <div class="flex-grow border-t border-purple-700"></div>
+            <div id="role-selection" class="space-y-5">
+                <div id="qr-room-badge" class="hidden bg-amber-400/20 border border-amber-400/50 text-amber-300 text-center py-2.5 px-4 rounded-xl text-sm font-bold">
+                    <i class="fa-solid fa-qrcode mr-1"></i> Stai entrando nella stanza <span id="qr-pin-label" class="font-mono text-base underline font-black">----</span>
                 </div>
-                <div class="space-y-2">
-                    <input type="text" id="student-name" placeholder="Il tuo Nome" maxlength="20" class="w-full bg-purple-950 border border-purple-700 p-3 rounded-xl text-center text-white focus:border-amber-400 outline-none">
-                    <input type="text" id="room-pin-input" placeholder="PIN Stanza (es. 1234)" maxlength="4" inputmode="numeric" class="w-full bg-purple-950 border border-purple-700 p-3 rounded-xl text-center text-lg tracking-widest text-white focus:border-amber-400 outline-none">
-                    <button id="btn-enter-room" onclick="connettiComeStudente()" class="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition shadow-md">
-                        Entra con PIN
+
+                <div>
+                    <label class="block text-lg font-extrabold text-amber-300 mb-2 tracking-wide">Il tuo Nome:</label>
+                    <input type="text" id="student-name" placeholder="Scrivi qui il tuo nome..." maxlength="20" class="w-full bg-purple-950 border-2 border-amber-400/70 p-4 rounded-2xl text-center text-2xl font-black text-white placeholder-purple-400/60 focus:border-amber-300 focus:ring-4 focus:ring-amber-400/20 outline-none shadow-inner">
+                </div>
+
+                <div id="host-create-section" class="space-y-5">
+                    <button onclick="avviaComeDocente()" class="w-full p-4 rounded-2xl bg-fuchsia-600 hover:bg-fuchsia-500 font-bold flex items-center gap-4 transition text-left shadow-lg border border-fuchsia-400/30">
+                        <i class="fa-solid fa-desktop text-3xl"></i>
+                        <div>
+                            <div class="text-lg">Crea una Stanza</div>
+                            <div class="text-xs font-normal text-purple-200">Genera il PIN a 4 cifre per invitare gli altri</div>
+                        </div>
+                    </button>
+
+                    <div class="relative flex py-2 items-center">
+                        <div class="flex-grow border-t-2 border-purple-600"></div>
+                        <span class="flex-shrink mx-4 text-amber-300 text-base md:text-lg uppercase font-black tracking-wider bg-purple-900 px-2">OPPURE PARTECIPA</span>
+                        <div class="flex-grow border-t-2 border-purple-600"></div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <input type="text" id="room-pin-input" placeholder="PIN Stanza (es. 1234)" maxlength="4" inputmode="numeric" class="w-full bg-purple-950 border-2 border-purple-600 p-3.5 rounded-2xl text-center text-2xl font-black tracking-widest text-white focus:border-amber-400 outline-none">
+                    <button id="btn-enter-room" onclick="connettiComeStudente()" class="w-full py-4 rounded-2xl bg-amber-400 hover:bg-amber-300 text-purple-950 text-xl font-black transition shadow-lg">
+                        ENTRA NELLA GARA!
                     </button>
                 </div>
             </div>
 
             <div id="teacher-qr-view" class="hidden flex-col items-center text-center space-y-4">
                 <div class="bg-white p-3 rounded-2xl inline-block shadow-lg" id="qrcode-box"></div>
-       <div class="w-full text-center">
-    <div class="text-sm font-bold uppercase tracking-widest text-amber-300 mb-1">PIN Stanza</div>
-    <div id="display-pin-code" class="text-8xl font-black font-mono tracking-[0.15em] text-white bg-purple-950 px-6 py-3 rounded-2xl shadow-inner leading-none">----</div>
-</div>
-                <p class="text-xs text-purple-200">Inquadra il QR con il telefono/tablet o inserisci il PIN per unirti alla sfida!</p>
+                <div class="w-full text-center">
+                    <div class="text-sm font-bold uppercase tracking-widest text-amber-300 mb-1">PIN Stanza</div>
+                    <div id="display-pin-code" class="text-7xl md:text-8xl font-black font-mono tracking-[0.15em] text-white bg-purple-950 px-6 py-3 rounded-2xl shadow-inner leading-none">----</div>
+                </div>
+
+                <div class="w-full bg-purple-950/90 border border-purple-700 rounded-2xl p-3 text-left">
+                    <div class="text-xs uppercase tracking-wider text-amber-300 font-bold mb-2 flex justify-between">
+                        <span><i class="fa-solid fa-users"></i> Sfidanti in sala d'attesa:</span>
+                        <span id="modal-players-count">0</span>
+                    </div>
+                    <div id="modal-players-list" class="flex flex-wrap gap-2 max-h-28 overflow-y-auto">
+                        <span class="text-xs text-purple-400 italic">In attesa che qualcuno entri...</span>
+                    </div>
+                </div>
+
+                <p class="text-xs text-purple-200">Aspetta che tutti entrino nella stanza, poi premi START!</p>
+                
+                <button onclick="avviaGaraDaModale()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-purple-950 font-black text-2xl tracking-wider transition shadow-xl flex items-center justify-center gap-3 animate-bounce mt-2">
+                    <i class="fa-solid fa-play"></i> START!
+                </button>
             </div>
 
-            <button onclick="chiudiModalConnessione()" class="mt-6 w-full py-2 rounded-xl bg-purple-950 hover:bg-purple-800 text-purple-300 text-sm font-semibold transition">Chiudi</button>
+            <button onclick="chiudiModalConnessione()" class="mt-5 w-full py-2.5 rounded-xl bg-purple-950 hover:bg-purple-800 text-purple-300 text-sm font-semibold transition">Chiudi finestra</button>
         </div>
     </div>
 
@@ -302,7 +345,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-purple-200 mb-2">Penalità per errore (solo alunni):</label>
+                    <label class="block text-sm font-semibold text-purple-200 mb-2">Penalità per errore:</label>
                     <div id="penalty-options" class="grid grid-cols-4 gap-2">
                         <button data-v="0" onclick="setPenalita(0)" class="opt-btn p-2 rounded-xl border text-center font-bold text-sm">Nessuna</button>
                         <button data-v="1" onclick="setPenalita(1)" class="opt-btn p-2 rounded-xl border text-center font-bold text-sm">1 s</button>
@@ -344,7 +387,7 @@
                 <i class="fa-solid fa-trophy"></i>
             </div>
             <h2 class="text-2xl font-bold mb-1">Tempo Scaduto!</h2>
-            <p class="text-sm text-purple-200 mb-4" id="gameover-sub">Ottimo esercizio di lettura e pronuncia!</p>
+            <p class="text-sm text-purple-200 mb-4" id="gameover-sub">Ottima partita!</p>
 
             <div id="leaderboard-view" class="w-full mb-6 hidden">
                 <h3 class="text-sm font-bold uppercase tracking-wider text-amber-300 mb-3"><i class="fa-solid fa-award"></i> Classifica Finale</h3>
@@ -371,8 +414,7 @@
     <script>
         /* ==================== COSTANTI ==================== */
         const PREFISSO_STANZA = 'colpo-docchio-';
-        const DELAY_ROUND = 800;      // pausa tra un round e l'altro (ms)
-        const DEBUG_TEMPI = true;     // mostra sul telefono quanto ha impiegato l'ingresso; a fine misure metti false
+        const DELAY_ROUND = 800;
 
         const CARTELLA_IMMAGINI = [
             { val: 'contagocce', file: 'img_corpoumano/contagocce.png' },
@@ -439,15 +481,17 @@
 
         /* ==================== STATO ==================== */
         let peer = null;
-        let ruolounico = 'standalone';   // 'standalone' | 'docente' | 'studente'
-        let mappaConnessioniStudenti = new Map();   // studentId -> { conn, nome, score }
+        let ruolounico = 'standalone';
+        let mappaConnessioniStudenti = new Map();
         let connDocente = null;
-        let mioNomeStudente = "Alunno";
+        let mioNomeStudente = "Giocatore";
         let stanzaPinCorrente = "";
         let isTransitioning = false;
         let isPenalized = false;
+        let garaIniziata = true;
+        let isTrainingMode = false;
         let roundId = 0;
-        let roundBloccato = false;       // studente: true dopo aver risposto o dopo ROUND_VINTO
+        let roundBloccato = false;
         let inStanza = false;
         let matchRe = null;
         let speechBase = 0, speechLastLen = 0;
@@ -470,18 +514,84 @@
             showLabels: false,
             audioEnabled: true,
             touchEnabled: true,
-            penaltySec: 3,      // penalità per errore (0 = nessuna)
-            durataSec: 60,      // durata della sfida
+            penaltySec: 3,
+            durataSec: 60,
             isTimeAttack: false,
             timerFine: 0,
             timerInterval: null,
-            synth: window.speechSynthesis,
+            synth: 'speechSynthesis' in window ? window.speechSynthesis : null,
             lastSpokenWord: ''
         };
 
-        let synthSound, wrongSound;
+        /* ==================== MOTORE AUDIO NATIVO (NO GRACCHIO) ==================== */
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
 
-        /* ==================== HELPER ==================== */
+        function playSoundSuccess() {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.15);
+            } catch (e) {}
+        }
+
+        function playSoundWrong() {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.2);
+            } catch (e) {}
+        }
+
+        function suonoFinale() {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.12);
+                    gain.gain.setValueAtTime(0, ctx.currentTime + idx * 0.12);
+                    gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + idx * 0.12 + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.12 + (idx === 3 ? 0.8 : 0.25));
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime + idx * 0.12);
+                    osc.stop(ctx.currentTime + idx * 0.12 + (idx === 3 ? 0.8 : 0.25));
+                });
+            } catch (e) {}
+        }
+
         const norm = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
                            .replace(/[^a-z\s]/g, ' ').replace(/\s+/g, ' ').trim();
 
@@ -514,7 +624,7 @@
         function idDispositivo() {
             let id = sessionStorage.getItem('colpodocchio_device_id');
             if (!id) {
-                id = 'alunno-' + Math.floor(Math.random() * 10000000);
+                id = 'giocatore-' + Math.floor(Math.random() * 10000000);
                 sessionStorage.setItem('colpodocchio_device_id', id);
             }
             return id;
@@ -525,14 +635,42 @@
                 const im = new Image();
                 im.src = i.file;
                 if (im.decode) im.decode().catch(() => {});
-                immaginiCache.push(im);   // tiene le immagini in memoria
+                immaginiCache.push(im);
             });
         }
 
+        function impostaStatoAttesaStart(inAttesa) {
+            garaIniziata = !inAttesa;
+            const c1 = document.getElementById('card1');
+            const c2 = document.getElementById('card2');
+            const banner = document.getElementById('waiting-start-banner');
+            
+            if (inAttesa) {
+                c1.classList.add('waiting-card');
+                c2.classList.add('waiting-card');
+                banner.classList.remove('hidden');
+            } else {
+                c1.classList.remove('waiting-card');
+                c2.classList.remove('waiting-card');
+                banner.classList.add('hidden');
+            }
+        }
+
         function classificaCorrente() {
-            return [...mappaConnessioniStudenti.entries()]
-                .map(([id, o]) => ({ id, nome: o.nome, score: o.score }))
-                .sort((a, b) => b.score - a.score);
+            const lista = [...mappaConnessioniStudenti.entries()]
+                .map(([id, o]) => ({ id, nome: o.nome, score: o.score }));
+
+            if (ruolounico === 'docente') {
+                const nomeCampo = document.getElementById('student-name')?.value.trim();
+                const mioNomeHost = nomeCampo || mioNomeStudente || "Host";
+                lista.push({
+                    id: 'host-pc',
+                    nome: mioNomeHost,
+                    score: state.score
+                });
+            }
+
+            return lista.sort((a, b) => b.score - a.score);
         }
 
         function mostraParola(parola, chi) {
@@ -544,7 +682,6 @@
         }
         function nascondiParola() { document.getElementById('word-flash').classList.add('hidden'); }
 
-        // Tiene acceso lo schermo (alunni e host)
         async function tieniSchermoAcceso() {
             try { if (navigator.wakeLock) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
         }
@@ -563,18 +700,8 @@
             bannerTimeout = setTimeout(() => banner.classList.add('hidden'), duration);
         }
 
-        /* ==================== AVVIO E AUDIO ==================== */
-        const TEMPI = {};   // misure dei tempi di ingresso (per DEBUG_TEMPI)
-
-        // Tone.js si carica da codice, DOPO che la pagina è già utilizzabile
-        function caricaTone() {
-            return new Promise(res => {
-                const s = document.createElement('script');
-                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js';
-                s.onload = res; s.onerror = res;
-                document.head.appendChild(s);
-            });
-        }
+        /* ==================== AVVIO ==================== */
+        const TEMPI = {};
 
         document.addEventListener('DOMContentLoaded', function () {
             TEMPI.dom = performance.now();
@@ -586,12 +713,16 @@
             campoNome.addEventListener('keydown', e => { if (e.key === 'Enter') connettiComeStudente(); });
             campoPin.addEventListener('input', e => {
                 const v = e.target.value.trim();
-                if (v.length === 4) preparaStudente(v);   // anche col PIN digitato a mano si collega in anticipo
+                if (v.length === 4) preparaStudente(v);
             });
 
-            // Arrivo dal QR: il collegamento parte SUBITO, mentre l'alunno scrive il nome
             if (pinParam) {
                 campoPin.value = pinParam;
+                document.getElementById('host-create-section').classList.add('hidden');
+                campoPin.classList.add('hidden');
+                document.getElementById('qr-room-badge').classList.remove('hidden');
+                document.getElementById('qr-pin-label').textContent = '#' + pinParam;
+
                 mostraModalConnessione();
                 preparaStudente(pinParam);
                 if (!campoNome.value) campoNome.focus();
@@ -599,12 +730,13 @@
 
             initSpeechRecognition();
 
-            // Un solo listener per carta, su pointerdown: più veloce del click
             ['card1', 'card2'].forEach(id => {
                 document.getElementById(id).addEventListener('pointerdown', (e) => {
+                    getAudioContext(); // sblocca l'audio su dispositivi mobili
                     const el = e.target.closest('.symbol-item');
                     if (!el) return;
                     e.stopPropagation();
+                    if (!garaIniziata) return;
                     if (!state.touchEnabled) {
                         showWarningBanner("In questa partita vale solo la voce! Pronuncia la figura al microfono.", 3000, false);
                         return;
@@ -621,28 +753,8 @@
             setPenalita(state.penaltySec);
             setDurata(state.durataSec);
 
-            // Le cose pesanti DOPO, senza ritardare il collegamento
             preloadImmagini();
-            caricaTone().then(initAudio);
         });
-
-        function initAudio() {
-            try {
-                synthSound = new Tone.Synth({
-                    oscillator: { type: "triangle" },
-                    envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.1 }
-                }).toDestination();
-                wrongSound = new Tone.MembraneSynth({
-                    pitchDecay: 0.05, octaves: 2, oscillator: { type: "sine" },
-                    envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.1 }
-                }).toDestination();
-                try { Tone.getContext().lookAhead = 0.01; } catch (e) {}
-                // Il browser sblocca l'audio solo dopo un tocco: ritenta finché non è attivo
-                document.addEventListener('pointerdown', () => {
-                    try { if (Tone.context.state !== 'running') Tone.start(); } catch (e) {}
-                });
-            } catch (e) {}
-        }
 
         /* ==================== INTERFACCIA ==================== */
         function toggleTouch() {
@@ -686,14 +798,42 @@
             if (state.carta1) { renderCard('card1', state.carta1); renderCard('card2', state.carta2); }
         }
 
+        function toggleTrainingMode() {
+            if (state.isTimeAttack) return;
+
+            isTrainingMode = !isTrainingMode;
+            const btnLabel = document.getElementById('btn-training-label');
+            const btn = document.getElementById('btn-training');
+            const banner = document.getElementById('training-banner');
+            const scoreBox = document.getElementById('score-box');
+            const startTimerBtn = document.getElementById('start-timer-btn');
+
+            if (isTrainingMode) {
+                btnLabel.textContent = "Esci da Allenamento";
+                btn.className = "px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-md text-sm";
+                banner.classList.remove('hidden');
+                scoreBox.classList.add('hidden');
+                startTimerBtn.classList.add('hidden');
+                impostaStatoAttesaStart(false);
+            } else {
+                btnLabel.textContent = "Allenamento";
+                btn.className = "px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold transition flex items-center gap-2 shadow-md text-sm";
+                banner.classList.add('hidden');
+                scoreBox.classList.remove('hidden');
+                startTimerBtn.classList.remove('hidden');
+            }
+        }
+
         function speakWord(text) {
-            if (ruolounico === 'studente' || !state.audioEnabled || !text) return;
-            if (state.synth.speaking) state.synth.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'it-IT';
-            utterance.rate = 0.85;
-            utterance.pitch = 1.0;
-            state.synth.speak(utterance);
+            if (ruolounico === 'studente' || !state.audioEnabled || !text || !state.synth) return;
+            try {
+                if (state.synth.speaking) state.synth.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'it-IT';
+                utterance.rate = 0.85;
+                utterance.pitch = 1.0;
+                state.synth.speak(utterance);
+            } catch(e) {}
             state.lastSpokenWord = text;
             document.getElementById('last-word-display').textContent = text;
         }
@@ -713,7 +853,7 @@
 
             recognition.onresult = function (event) {
                 speechLastLen = event.results.length;
-                if (isTransitioning || isPenalized || roundBloccato || !matchRe || state.synth.speaking) return;
+                if (!garaIniziata || isTransitioning || isPenalized || roundBloccato || !matchRe || (state.synth && state.synth.speaking)) return;
 
                 let sentito = '', trovato = false;
                 for (let i = Math.max(event.resultIndex, speechBase); i < event.results.length; i++) {
@@ -721,7 +861,7 @@
                     for (let k = 0; k < res.length; k++) {
                         const t = norm(res[k].transcript);
                         if (k === 0) sentito += t + ' ';
-                        if (matchRe.test(t)) trovato = true;   // parola intera
+                        if (matchRe.test(t)) trovato = true;
                     }
                 }
                 document.getElementById('speech-heard-text').textContent = sentito.trim() || '...';
@@ -802,7 +942,7 @@
 
         function buildDeck() {
             let pool = state.activeSymbols;
-            if (state.n === 5) pool = mescola(pool);   // mazzo da 31: parole diverse ogni volta
+            if (state.n === 5) pool = mescola(pool);
             state.deckCards = generateProjectivePlaneDeck(state.n, pool);
             document.getElementById('symbols-count-badge').textContent = state.symbolsPerCard + " Figure/Carta";
             if (ruolounico !== 'studente') nextPair(false);
@@ -834,7 +974,7 @@
             setMatching(c1.find(s => valsC2.has(s.val)).val);
 
             roundId++;
-            speechBase = speechLastLen;   // ignora ciò che il microfono ha sentito finora
+            speechBase = speechLastLen;
             mostraCarte(c1, c2, animate);
             if (ruolounico === 'docente') broadcast(messaggioCarte());
         }
@@ -853,7 +993,6 @@
             renderCard('card2', c2);
         }
 
-        // Le carte viaggiano come elenco di parole: lo studente non ha bisogno del mazzo
         function messaggioCarte() {
             return {
                 tipo: 'AGGIORNA_CARTE',
@@ -862,7 +1001,8 @@
                 c2: state.carta2.map(s => s.val),
                 m: state.matchingSymbol,
                 touchEnabled: state.touchEnabled,
-                penaltySec: state.penaltySec
+                penaltySec: state.penaltySec,
+                garaIniziata
             };
         }
 
@@ -872,6 +1012,7 @@
             speechBase = speechLastLen;
             if (d.touchEnabled !== undefined) state.touchEnabled = d.touchEnabled;
             if (d.penaltySec !== undefined) state.penaltySec = d.penaltySec;
+            if (d.garaIniziata !== undefined) impostaStatoAttesaStart(!d.garaIniziata);
             setMatching(d.m);
             const toSym = v => ({ val: v, icon: ICONE[v] });
             mostraCarte(d.c1.map(toSym), d.c2.map(toSym), true);
@@ -895,7 +1036,7 @@
                 const left = (50 + p.r * Math.cos(rad)).toFixed(2);
                 const top = (50 + p.r * Math.sin(rad)).toFixed(2);
                 const scale = (0.75 + Math.random() * 0.65).toFixed(2);
-                const rot = Math.floor(Math.random() * 360) - 180;   // ruota immagine ed etichetta insieme
+                const rot = Math.floor(Math.random() * 360) - 180;
                 const label = state.showLabels
                     ? `<span class="font-bold text-purple-950 bg-white/95 px-2 py-0.5 rounded-full shadow border border-purple-300 mt-1 whitespace-nowrap select-none z-10 block text-center" style="font-size:12px;line-height:1.2;">${sym.val}</span>`
                     : '';
@@ -906,12 +1047,12 @@
                         </div>${label}
                     </div></div>`;
             });
-            cardEl.innerHTML = html;   // un solo aggiornamento del DOM
+            cardEl.innerHTML = html;
         }
 
         /* ==================== RISPOSTA E PUNTEGGIO ==================== */
         function handleSymbolClick(val, element) {
-            if (isTransitioning || isPenalized || roundBloccato) return;
+            if (!garaIniziata || isTransitioning || isPenalized || roundBloccato) return;
 
             if (val === state.matchingSymbol) {
                 if (ruolounico === 'studente') {
@@ -919,21 +1060,22 @@
                         showWarningBanner("⚠️ Connessione persa, riconnessione in corso...", 2000, true);
                         return;
                     }
-                    // Lo studente NON assegna il punto: manda la risposta e aspetta il verdetto dell'host
                     roundBloccato = true;
                     evidenzia(val);
                     connDocente.send({ tipo: 'RISPOSTA', roundId, valore: val, studentId: idDispositivo() });
                     const r = roundId;
-                    setTimeout(() => { if (roundId === r) roundBloccato = false; }, 2500);   // sblocco di sicurezza
+                    setTimeout(() => { if (roundId === r) roundBloccato = false; }, 2500);
                     return;
                 }
-                vittoriaRound(val, 'LIM', null);
+                const nomeCampo = document.getElementById('student-name')?.value.trim();
+                const mioNomeHost = nomeCampo || mioNomeStudente || "Host";
+                vittoriaRound(val, mioNomeHost, null);
             } else {
                 if (element) element.classList.add('symbol-wrong');
-                if (wrongSound) wrongSound.triggerAttackRelease("G2", "8n");
+                playSoundWrong();
                 setTimeout(() => { if (element) element.classList.remove('symbol-wrong'); }, 500);
 
-                if (ruolounico === 'studente' && state.penaltySec > 0) {
+                if (!isTrainingMode && state.penaltySec > 0) {
                     isPenalized = true;
                     const ms = state.penaltySec * 1000;
                     const c1 = document.getElementById('card1'), c2 = document.getElementById('card2');
@@ -947,18 +1089,17 @@
             }
         }
 
-        // Solo host / modalità singola. Un solo vincitore per round.
         function vittoriaRound(val, nomeVincitore, studentId) {
             if (isTransitioning) return false;
             isTransitioning = true;
 
             evidenzia(val);
-            if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
-            confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
+            playSoundSuccess();
+            if (window.confetti) confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
             speakWord(val);
-            mostraParola(val, studentId ? nomeVincitore : '');
+            mostraParola(val, nomeVincitore);
 
-            if (!studentId) {   // punto della LIM / modalità singola
+            if (!isTrainingMode && !studentId) {
                 state.score += 1;
                 document.getElementById('score-display').textContent = state.score;
             }
@@ -968,15 +1109,14 @@
                 aggiornaBarraGiocatoriLIM();
                 broadcast({
                     tipo: 'ROUND_VINTO', roundId, parola: val,
-                    vincitore: nomeVincitore, vincitoreId: studentId,
+                    vincitore: nomeVincitore, vincitoreId: studentId || 'host-pc',
                     classifica: classificaCorrente()
                 });
-                if (studentId) {
-                    const badge = document.querySelector(`.player-badge-item[data-player-id="${studentId}"]`);
-                    if (badge) {
-                        badge.classList.add('player-badge-active');
-                        setTimeout(() => badge.classList.remove('player-badge-active'), 600);
-                    }
+                const targetId = studentId || 'host-pc';
+                const badge = document.querySelector(`.player-badge-item[data-player-id="${targetId}"]`);
+                if (badge) {
+                    badge.classList.add('player-badge-active');
+                    setTimeout(() => badge.classList.remove('player-badge-active'), 600);
                 }
             }
 
@@ -994,19 +1134,34 @@
             if (ruolounico === 'docente') broadcast({ tipo: 'RESET_SCORES' });
         }
 
-        /* ==================== MODALE CONNESSIONE ==================== */
+        /* ==================== MODALE CONNESSIONE & START ==================== */
         function mostraModalConnessione() { document.getElementById('connection-modal').classList.remove('hidden'); }
         function chiudiModalConnessione() { document.getElementById('connection-modal').classList.add('hidden'); }
 
+        function avviaGaraDaModale() {
+            chiudiModalConnessione();
+            if (!state.isTimeAttack) {
+                startTimeAttack();
+            }
+        }
+
         /* ==================== LATO HOST ==================== */
         function avviaComeDocente(tentativo = 0) {
-            if (ruolounico === 'docente' && peer && !peer.destroyed) return;   // niente doppie stanze
-            // se era partito un collegamento "da alunno" in anticipo, lo chiude
+            if (ruolounico === 'docente' && peer && !peer.destroyed) return;
             if (peer) { try { peer.destroy(); } catch (e) {} peer = null; }
             preparazione = null;
             ruolounico = 'docente';
             const pinStanza = Math.floor(1000 + Math.random() * 9000).toString();
             stanzaPinCorrente = pinStanza;
+            
+            const nomeCampo = document.getElementById('student-name')?.value.trim();
+            if (nomeCampo) {
+                mioNomeStudente = nomeCampo;
+                localStorage.setItem('colpodocchio_nome', nomeCampo);
+            }
+
+            impostaStatoAttesaStart(true);
+            document.getElementById('waiting-start-text').textContent = "Stanza creata! Aspetta i giocatori e premi START! per avviare la gara.";
             resetScore();
 
             const p = new Peer(PREFISSO_STANZA + pinStanza);
@@ -1019,17 +1174,20 @@
                 document.getElementById('display-pin-code').textContent = pinStanza;
                 document.getElementById('connected-players-badge').classList.remove('hidden');
                 document.getElementById('live-players-bar').classList.remove('hidden');
-                document.getElementById('txt-multiplayer').textContent = "Host: " + pinStanza;
+                document.getElementById('txt-multiplayer').textContent = "Stanza: " + pinStanza;
                 document.getElementById('txt-multiplayer').className = "text-base md:text-xl font-black tracking-wider";
                 const qrBox = document.getElementById('qrcode-box');
                 qrBox.innerHTML = '';
                 const base = window.location.href.split('?')[0];
-                new QRCode(qrBox, { text: `${base}?pin=${pinStanza}`, width: 180, height: 180 });
-                tieniSchermoAcceso();   // la LIM/PC non va in standby durante la stanza
+                if (window.QRCode) {
+                    new QRCode(qrBox, { text: `${base}?pin=${pinStanza}`, width: 170, height: 170 });
+                }
+                tieniSchermoAcceso();
+                aggiornaBarraGiocatoriLIM();
             });
 
             p.on('error', (err) => {
-                if (err.type === 'unavailable-id' && tentativo < 5) {   // PIN occupato: ne genera un altro
+                if (err.type === 'unavailable-id' && tentativo < 5) {
                     try { p.destroy(); } catch (e) {}
                     peer = null; ruolounico = 'standalone';
                     avviaComeDocente(tentativo + 1);
@@ -1056,8 +1214,7 @@
                     const id = dati.studentId || conn.peer;
                     const prec = mappaConnessioniStudenti.get(id);
                     if (prec && prec.conn !== conn) { try { prec.conn.close(); } catch (e) {} }
-                    const nome = String(dati.nome || 'Alunno').slice(0, 20);
-                    // se l'alunno rientra (o il messaggio viene ripetuto) conserva il punteggio
+                    const nome = String(dati.nome || 'Giocatore').slice(0, 20);
                     mappaConnessioniStudenti.set(id, { conn, nome, score: prec ? prec.score : 0 });
                     aggiornaContatoreAlunni();
                     aggiornaBarraGiocatoriLIM();
@@ -1065,11 +1222,12 @@
                         ...messaggioCarte(),
                         tipo: 'BENVENUTO',
                         score: mappaConnessioniStudenti.get(id).score,
+                        garaIniziata,
                         timerRestanteMs: state.isTimeAttack ? Math.max(0, state.timerFine - Date.now()) : null
                     });
                 }
                 else if (dati.tipo === 'RISPOSTA') {
-                    if (isTransitioning || dati.roundId !== roundId || dati.valore !== state.matchingSymbol) return;
+                    if (!garaIniziata || isTransitioning || dati.roundId !== roundId || dati.valore !== state.matchingSymbol) return;
                     const st = mappaConnessioniStudenti.get(dati.studentId);
                     if (!st) return;
                     st.score++;
@@ -1083,19 +1241,63 @@
         function aggiornaBarraGiocatoriLIM() {
             const listEl = document.getElementById('live-players-list');
             listEl.innerHTML = '';
+
+            if (ruolounico === 'docente') {
+                const hostBadge = document.createElement('div');
+                hostBadge.setAttribute('data-player-id', 'host-pc');
+                hostBadge.className = "player-badge-item bg-amber-500/20 border border-amber-400/50 text-white text-xs font-semibold px-3 py-1 rounded-lg flex items-center gap-1.5 shadow-sm";
+                hostBadge.innerHTML = '<i class="fa-solid fa-desktop text-amber-300"></i>';
+                
+                const nomeCampo = document.getElementById('student-name')?.value.trim();
+                const mioNomeHost = nomeCampo || mioNomeStudente || "Host";
+
+                const nomeHost = document.createElement('span');
+                nomeHost.textContent = mioNomeHost;
+                
+                const ptHost = document.createElement('span');
+                ptHost.className = "bg-amber-400 text-purple-950 font-bold px-1.5 rounded-md text-[10px] ml-1";
+                ptHost.textContent = state.score || 0;
+                
+                hostBadge.append(nomeHost, ptHost);
+                listEl.appendChild(hostBadge);
+            }
+
             mappaConnessioniStudenti.forEach((obj, id) => {
                 const badge = document.createElement('div');
                 badge.setAttribute('data-player-id', id);
                 badge.className = "player-badge-item bg-purple-900 border border-purple-700 text-white text-xs font-semibold px-3 py-1 rounded-lg flex items-center gap-1.5 shadow-sm" + (obj.conn.open ? "" : " opacity-40");
                 badge.innerHTML = '<i class="fa-solid fa-user text-amber-300"></i>';
+                
                 const nome = document.createElement('span');
-                nome.textContent = obj.nome;   // textContent: niente HTML iniettato
+                nome.textContent = obj.nome;
+                
                 const pt = document.createElement('span');
                 pt.className = "bg-amber-400 text-purple-950 font-bold px-1.5 rounded-md text-[10px] ml-1";
                 pt.textContent = obj.score || 0;
+                
                 badge.append(nome, pt);
                 listEl.appendChild(badge);
             });
+
+            const modalList = document.getElementById('modal-players-list');
+            const modalCount = document.getElementById('modal-players-count');
+            if (modalList && modalCount) {
+                modalList.innerHTML = '';
+                let connessi = 0;
+                mappaConnessioniStudenti.forEach((obj) => {
+                    if (obj.conn.open) {
+                        connessi++;
+                        const tag = document.createElement('span');
+                        tag.className = "bg-fuchsia-600 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow";
+                        tag.innerHTML = `<i class="fa-solid fa-user-check text-amber-300"></i> ${obj.nome}`;
+                        modalList.appendChild(tag);
+                    }
+                });
+                modalCount.textContent = connessi;
+                if (connessi === 0) {
+                    modalList.innerHTML = '<span class="text-xs text-purple-400 italic">In attesa che qualcuno entri...</span>';
+                }
+            }
         }
 
         function aggiornaContatoreAlunni() {
@@ -1104,10 +1306,10 @@
             document.getElementById('players-count').textContent = n;
         }
 
-        /* ==================== LATO STUDENTE ==================== */
-        let preparazione = null;       // { pin, fallita }: collegamento avviato in anticipo
-        let connAperta = false;        // la connessione con l'host è già aperta
-        let ingressoRichiesto = false; // l'alunno ha premuto "Entra"
+        /* ==================== LATO PARTECIPANTE ==================== */
+        let preparazione = null;
+        let connAperta = false;
+        let ingressoRichiesto = false;
         let benvenutoRicevuto = false;
 
         function testoTempi() {
@@ -1118,19 +1320,18 @@
         function ripristinaBottoneIngresso() {
             const b = document.getElementById('btn-enter-room');
             b.disabled = false;
-            b.textContent = "Entra con PIN";
+            b.textContent = "ENTRA NELLA GARA!";
         }
 
         function erroreIngresso(msg) {
             if (preparazione) preparazione.fallita = true;
-            if (!ingressoRichiesto) return;          // non ha ancora premuto "Entra": se ne accorge al tocco
+            if (!ingressoRichiesto) return;
             if (inStanza) { showWarningBanner("⚠️ " + msg, 4000, true); return; }
             ingressoRichiesto = false;
             alert(msg);
             ripristinaBottoneIngresso();
         }
 
-        // Avvia il collegamento alla stanza prima che l'alunno prema "Entra"
         function preparaStudente(pin, forza = false) {
             if (ruolounico === 'docente' || inStanza) return;
             if (!forza && preparazione && preparazione.pin === pin && !preparazione.fallita) return;
@@ -1144,7 +1345,7 @@
         function connettiComeStudente() {
             const pin = document.getElementById('room-pin-input').value.trim();
             const nome = document.getElementById('student-name').value.trim().slice(0, 20);
-            mioNomeStudente = nome || "Alunno";
+            mioNomeStudente = nome || "Giocatore";
             if (!pin) { alert("Inserisci il PIN della Stanza!"); return; }
             if (nome) localStorage.setItem('colpodocchio_nome', nome);
 
@@ -1160,15 +1361,15 @@
             ingressoRichiesto = true;
             document.getElementById('start-timer-btn').classList.add('hidden');
             document.getElementById('btn-next-pair').classList.add('hidden');
+            document.getElementById('btn-training').classList.add('hidden');
 
             const pronta = preparazione && preparazione.pin === pin && !preparazione.fallita;
-            if (!pronta) preparaStudente(pin, true);   // PIN diverso o collegamento fallito: riparte
-            else if (connAperta) inviaIngresso();      // già collegato: manda solo il nome
-            // altrimenti si sta ancora aprendo: l'ingresso parte da solo appena è pronto
+            if (!pronta) preparaStudente(pin, true);
+            else if (connAperta) inviaIngresso();
         }
 
         function creaPeerStudente() {
-            connDocente = null;   // evita che la chiusura della vecchia connessione scateni una riconnessione
+            connDocente = null;
             if (peer) { try { peer.destroy(); } catch (e) {} }
             const p = new Peer(idDispositivo());
             peer = p;
@@ -1182,10 +1383,10 @@
             p.on('error', (err) => {
                 if (peer !== p) return;
                 if (err.type === 'unavailable-id') {
-                    sessionStorage.setItem('colpodocchio_device_id', 'alunno-' + Math.floor(Math.random() * 10000000));
+                    sessionStorage.setItem('colpodocchio_device_id', 'giocatore-' + Math.floor(Math.random() * 10000000));
                     creaPeerStudente();
                 } else if (err.type === 'peer-unavailable') {
-                    if (inStanza) setTimeout(collegaAlDocente, 2000);   // stanza momentaneamente irraggiungibile
+                    if (inStanza) setTimeout(collegaAlDocente, 2000);
                     else erroreIngresso("Stanza non trovata. Verifica il PIN!");
                 } else {
                     erroreIngresso("Errore di rete durante la connessione. Riprova.");
@@ -1201,7 +1402,7 @@
                 if (benvenutoRicevuto || !conn.open || connDocente !== conn) return;
                 if (tentativi++ >= 6) { erroreIngresso("L'host non risponde. Riprova a entrare."); return; }
                 conn.send({ tipo: 'STUDENTE_PRONTO', studentId: idDispositivo(), nome: mioNomeStudente });
-                setTimeout(invia, 1200);   // si ripete solo se l'host non risponde
+                setTimeout(invia, 1200);
             };
             invia();
         }
@@ -1219,7 +1420,7 @@
                 if (connDocente !== conn) return;
                 connAperta = true;
                 TEMPI.conn = performance.now();
-                if (ingressoRichiesto) inviaIngresso();   // l'alunno aveva già premuto "Entra" (o è una riconnessione)
+                if (ingressoRichiesto) inviaIngresso();
             });
 
             conn.on('error', () => {
@@ -1244,14 +1445,21 @@
                         inStanza = true;
                         TEMPI.welcome = performance.now();
                         chiudiModalConnessione();
-                        document.getElementById('txt-multiplayer').textContent = `In Stanza: ${stanzaPinCorrente} • ${mioNomeStudente}`;
+                        document.getElementById('txt-multiplayer').textContent = `Stanza: ${stanzaPinCorrente} • ${mioNomeStudente}`;
                         document.getElementById('repeat-speech-btn').classList.add('hidden');
                         document.getElementById('toggle-touch-btn').classList.add('hidden');
                         tieniSchermoAcceso();
-                        showWarningBanner(DEBUG_TEMPI ? testoTempi() : `✅ Connesso alla stanza ${stanzaPinCorrente}!`, DEBUG_TEMPI ? 8000 : 2000, false);
                         state.score = d.score || 0;
                         document.getElementById('score-display').textContent = state.score;
                         applicaCarte(d);
+                        
+                        if (!d.garaIniziata) {
+                            impostaStatoAttesaStart(true);
+                            document.getElementById('waiting-start-text').textContent = `Sei dentro! Aspetta che l'organizzatore prema START!`;
+                        } else {
+                            impostaStatoAttesaStart(false);
+                        }
+
                         if (d.timerRestanteMs != null) avviaTimerLocale(d.timerRestanteMs);
                         break;
 
@@ -1268,8 +1476,8 @@
                         document.getElementById('last-word-display').textContent = `${d.parola} (${d.vincitore})`;
                         mostraParola(d.parola, d.vincitoreId === io ? "Bravo, hai vinto il round!" : d.vincitore);
                         if (d.vincitoreId === io) {
-                            if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
-                            confetti({ particleCount: 25, spread: 60, origin: { y: 0.6 } });
+                            playSoundSuccess();
+                            if (window.confetti) confetti({ particleCount: 25, spread: 60, origin: { y: 0.6 } });
                         }
                         break;
                     }
@@ -1281,11 +1489,16 @@
 
                     case 'SET_INPUT_MODE':
                         state.touchEnabled = d.touchEnabled;
-                        showWarningBanner(state.touchEnabled ? "Modalità Touch riattivata dall'Host!" : "L'Host ha attivato la modalità Solo Voce!", 3000, false);
+                        showWarningBanner(state.touchEnabled ? "Modalità Touch riattivata!" : "Attivata la modalità Solo Voce!", 3000, false);
                         break;
 
-                    case 'TIMER_START': avviaTimerLocale(d.restanteMs); break;
-                    case 'TIMER_STOP':  fermaTimerLocale(); break;
+                    case 'TIMER_START':
+                        impostaStatoAttesaStart(false);
+                        avviaTimerLocale(d.restanteMs);
+                        break;
+                    case 'TIMER_STOP':
+                        fermaTimerLocale();
+                        break;
                     case 'GAMEOVER':
                         fermaTimerLocale();
                         showGameOverModal(d.classifica);
@@ -1319,16 +1532,23 @@
         }
 
         function startTimeAttack() {
+            if (isTrainingMode) toggleTrainingMode();
+
             state.isTimeAttack = true;
+            impostaStatoAttesaStart(false);
             state.timerFine = Date.now() + state.durataSec * 1000;
             resetScore();
+            nextPair(true);
 
+            document.getElementById('btn-training').classList.add('hidden');
             document.getElementById('timer-box').classList.remove('hidden');
             document.getElementById('timer-display').textContent = state.durataSec;
             document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-stop"></i> <span id="timer-btn-label">Ferma Sfida</span>`;
-            document.getElementById('start-timer-btn').className = "px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold transition flex items-center gap-2 shadow-lg text-sm";
+            document.getElementById('start-timer-btn').className = "px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black transition flex items-center gap-2 shadow-lg text-base";
 
-            if (ruolounico === 'docente') broadcast({ tipo: 'TIMER_START', restanteMs: state.durataSec * 1000 });
+            if (ruolounico === 'docente') {
+                broadcast({ tipo: 'TIMER_START', restanteMs: state.durataSec * 1000 });
+            }
 
             state.timerInterval = setInterval(() => {
                 const sec = Math.max(0, Math.ceil((state.timerFine - Date.now()) / 1000));
@@ -1343,9 +1563,10 @@
         function stopTimeAttack(finita = false) {
             state.isTimeAttack = false;
             clearInterval(state.timerInterval);
+            document.getElementById('btn-training').classList.remove('hidden');
             document.getElementById('timer-box').classList.add('hidden');
             document.getElementById('start-timer-btn').innerHTML = `<i class="fa-solid fa-play"></i> <span id="timer-btn-label"></span>`;
-            document.getElementById('start-timer-btn').className = "px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-lg text-sm";
+            document.getElementById('start-timer-btn').className = "px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-purple-950 font-black transition flex items-center gap-2 shadow-lg text-base";
             aggiornaEtichettaSfida();
             if (ruolounico === 'docente' && !finita) broadcast({ tipo: 'TIMER_STOP' });
         }
@@ -1353,8 +1574,8 @@
         function riempiClassifica(classifica, mioId) {
             const listEl = document.getElementById('leaderboard-list');
             listEl.innerHTML = '';
-            if (!classifica.length) {
-                listEl.innerHTML = '<p class="text-xs text-purple-300 italic">Nessun punto registrato dagli alunni.</p>';
+            if (!classifica || !classifica.length) {
+                listEl.innerHTML = '<p class="text-xs text-purple-300 italic">Nessun punto registrato.</p>';
                 return;
             }
             classifica.forEach((r, idx) => {
@@ -1377,38 +1598,21 @@
             });
         }
 
-        // Jingle di fine gara, generato da Tone.js (nessun file audio)
-        let fanfareSynth;
-        function suonoFinale() {
-            try {
-                if (!window.Tone) return;                                   // Tone.js non ancora caricato
-                if (Tone.context.state !== 'running') Tone.start();
-                if (!fanfareSynth) {
-                    fanfareSynth = new Tone.PolySynth(Tone.Synth, {
-                        oscillator: { type: 'triangle' },
-                        envelope: { attack: 0.01, decay: 0.2, sustain: 0.3, release: 0.8 }
-                    }).toDestination();
-                    fanfareSynth.volume.value = -6;                         // più basso = più piano
-                }
-                const t = Tone.now() + 0.05;
-                fanfareSynth.triggerAttackRelease('C5', '8n', t);           // do
-                fanfareSynth.triggerAttackRelease('E5', '8n', t + 0.18);    // mi
-                fanfareSynth.triggerAttackRelease('G5', '8n', t + 0.36);    // sol
-                fanfareSynth.triggerAttackRelease(['C6', 'E6', 'G5'], '2n', t + 0.6);   // accordo finale
-            } catch (e) {}
-        }
-
         function showGameOverModal(classifica) {
             const isHost = ruolounico === 'docente';
             if (isHost) {
                 classifica = classificaCorrente();
-                broadcast({ tipo: 'GAMEOVER', classifica });   // la classifica arriva anche agli studenti
+                broadcast({ tipo: 'GAMEOVER', classifica });
             }
 
-            document.getElementById('leaderboard-view').classList.toggle('hidden', !classifica);
-            document.getElementById('single-score-view').classList.toggle('hidden', isHost);
+            const haStanza = ruolounico === 'docente' || ruolounico === 'studente';
+            document.getElementById('leaderboard-view').classList.toggle('hidden', !haStanza);
+            document.getElementById('single-score-view').classList.toggle('hidden', haStanza);
 
-            if (classifica) riempiClassifica(classifica, isHost ? null : idDispositivo());
+            if (classifica) {
+                const mioId = isHost ? 'host-pc' : idDispositivo();
+                riempiClassifica(classifica, mioId);
+            }
 
             if (!isHost) {
                 if (classifica) {
@@ -1421,14 +1625,14 @@
                     best = state.score;
                     localStorage.setItem('colpodocchio_best_score', best);
                     document.getElementById('new-record-badge').classList.remove('hidden');
-                    confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
+                    if (window.confetti) confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
                 } else {
                     document.getElementById('new-record-badge').classList.add('hidden');
                 }
                 document.getElementById('best-score-display').textContent = best;
             }
             document.getElementById('gameover-modal').classList.remove('hidden');
-            suonoFinale();   // jingle di fine gara
+            suonoFinale();
         }
 
         function closeGameOverModal() {
@@ -1454,7 +1658,7 @@
 
         function aggiornaEtichettaSfida() {
             const el = document.getElementById('timer-btn-label');
-            if (el && !state.isTimeAttack) el.textContent = `Avvia Sfida ${state.durataSec}s`;
+            if (el && !state.isTimeAttack) el.textContent = `START! (${state.durataSec}s)`;
         }
 
         function setPenalita(s) {
