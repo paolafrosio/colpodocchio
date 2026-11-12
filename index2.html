@@ -6,6 +6,7 @@
     <title>Colpo d'occhio - Giochiamo Insieme</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Script non bloccanti per velocizzare l'apertura su smartphone -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
@@ -277,7 +278,7 @@
 
                     <div class="relative flex py-2 items-center">
                         <div class="flex-grow border-t-2 border-purple-600"></div>
-                        <span class="flex-shrink mx-4 text-amber-300 text-base md:text-lg uppercase font-black tracking-wider bg-purple-900 px-2">OPPUR PARTECIPA</span>
+                        <span class="flex-shrink mx-4 text-amber-300 text-base md:text-lg uppercase font-black tracking-wider bg-purple-900 px-2">OPPURE PARTECIPA</span>
                         <div class="flex-grow border-t-2 border-purple-600"></div>
                     </div>
                 </div>
@@ -522,7 +523,74 @@
             lastSpokenWord: ''
         };
 
-        let synthSound, wrongSound;
+        /* ==================== MOTORE AUDIO NATIVO (NO GRACCHIO) ==================== */
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playSoundSuccess() {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.15);
+            } catch (e) {}
+        }
+
+        function playSoundWrong() {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.2);
+            } catch (e) {}
+        }
+
+        function suonoFinale() {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.12);
+                    gain.gain.setValueAtTime(0, ctx.currentTime + idx * 0.12);
+                    gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + idx * 0.12 + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.12 + (idx === 3 ? 0.8 : 0.25));
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime + idx * 0.12);
+                    osc.stop(ctx.currentTime + idx * 0.12 + (idx === 3 ? 0.8 : 0.25));
+                });
+            } catch (e) {}
+        }
 
         const norm = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
                            .replace(/[^a-z\s]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -632,17 +700,8 @@
             bannerTimeout = setTimeout(() => banner.classList.add('hidden'), duration);
         }
 
-        /* ==================== AVVIO E AUDIO ==================== */
+        /* ==================== AVVIO ==================== */
         const TEMPI = {};
-
-        function caricaTone() {
-            return new Promise(res => {
-                const s = document.createElement('script');
-                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js';
-                s.onload = res; s.onerror = res;
-                document.head.appendChild(s);
-            });
-        }
 
         document.addEventListener('DOMContentLoaded', function () {
             TEMPI.dom = performance.now();
@@ -673,6 +732,7 @@
 
             ['card1', 'card2'].forEach(id => {
                 document.getElementById(id).addEventListener('pointerdown', (e) => {
+                    getAudioContext(); // sblocca l'audio su dispositivi mobili
                     const el = e.target.closest('.symbol-item');
                     if (!el) return;
                     e.stopPropagation();
@@ -694,25 +754,7 @@
             setDurata(state.durataSec);
 
             preloadImmagini();
-            caricaTone().then(initAudio);
         });
-
-        function initAudio() {
-            try {
-                synthSound = new Tone.Synth({
-                    oscillator: { type: "triangle" },
-                    envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.1 }
-                }).toDestination();
-                wrongSound = new Tone.MembraneSynth({
-                    pitchDecay: 0.05, octaves: 2, oscillator: { type: "sine" },
-                    envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.1 }
-                }).toDestination();
-                try { Tone.getContext().lookAhead = 0.01; } catch (e) {}
-                document.addEventListener('pointerdown', () => {
-                    try { if (Tone.context.state !== 'running') Tone.start(); } catch (e) {}
-                });
-            } catch (e) {}
-        }
 
         /* ==================== INTERFACCIA ==================== */
         function toggleTouch() {
@@ -1028,7 +1070,7 @@
                 vittoriaRound(val, mioNomeHost, null);
             } else {
                 if (element) element.classList.add('symbol-wrong');
-                if (wrongSound) wrongSound.triggerAttackRelease("G2", "8n");
+                playSoundWrong();
                 setTimeout(() => { if (element) element.classList.remove('symbol-wrong'); }, 500);
 
                 if (!isTrainingMode && state.penaltySec > 0) {
@@ -1050,8 +1092,8 @@
             isTransitioning = true;
 
             evidenzia(val);
-            if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
-            confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
+            playSoundSuccess();
+            if (window.confetti) confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
             speakWord(val);
             mostraParola(val, nomeVincitore);
 
@@ -1135,7 +1177,9 @@
                 const qrBox = document.getElementById('qrcode-box');
                 qrBox.innerHTML = '';
                 const base = window.location.href.split('?')[0];
-                new QRCode(qrBox, { text: `${base}?pin=${pinStanza}`, width: 170, height: 170 });
+                if (window.QRCode) {
+                    new QRCode(qrBox, { text: `${base}?pin=${pinStanza}`, width: 170, height: 170 });
+                }
                 tieniSchermoAcceso();
                 aggiornaBarraGiocatoriLIM();
             });
@@ -1430,8 +1474,8 @@
                         document.getElementById('last-word-display').textContent = `${d.parola} (${d.vincitore})`;
                         mostraParola(d.parola, d.vincitoreId === io ? "Bravo, hai vinto il round!" : d.vincitore);
                         if (d.vincitoreId === io) {
-                            if (synthSound) synthSound.triggerAttackRelease("C5", "8n");
-                            confetti({ particleCount: 25, spread: 60, origin: { y: 0.6 } });
+                            playSoundSuccess();
+                            if (window.confetti) confetti({ particleCount: 25, spread: 60, origin: { y: 0.6 } });
                         }
                         break;
                     }
@@ -1552,26 +1596,6 @@
             });
         }
 
-        let fanfareSynth;
-        function suonoFinale() {
-            try {
-                if (!window.Tone) return;
-                if (Tone.context.state !== 'running') Tone.start();
-                if (!fanfareSynth) {
-                    fanfareSynth = new Tone.PolySynth(Tone.Synth, {
-                        oscillator: { type: 'triangle' },
-                        envelope: { attack: 0.01, decay: 0.2, sustain: 0.3, release: 0.8 }
-                    }).toDestination();
-                    fanfareSynth.volume.value = -6;
-                }
-                const t = Tone.now() + 0.05;
-                fanfareSynth.triggerAttackRelease('C5', '8n', t);
-                fanfareSynth.triggerAttackRelease('E5', '8n', t + 0.18);
-                fanfareSynth.triggerAttackRelease('G5', '8n', t + 0.36);
-                fanfareSynth.triggerAttackRelease(['C6', 'E6', 'G5'], '2n', t + 0.6);
-            } catch (e) {}
-        }
-
         function showGameOverModal(classifica) {
             const isHost = ruolounico === 'docente';
             if (isHost) {
@@ -1599,7 +1623,7 @@
                     best = state.score;
                     localStorage.setItem('colpodocchio_best_score', best);
                     document.getElementById('new-record-badge').classList.remove('hidden');
-                    confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
+                    if (window.confetti) confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
                 } else {
                     document.getElementById('new-record-badge').classList.add('hidden');
                 }
