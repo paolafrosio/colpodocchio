@@ -253,7 +253,7 @@
             </h2>
 
             <div id="role-selection" class="space-y-5">
-                <!-- CAMPO NOME MOLTO PIÙ GRANDE E VISIBILE -->
+                <!-- CAMPO NOME GRANDE E VISIBILE -->
                 <div>
                     <label class="block text-lg font-extrabold text-amber-300 mb-2 tracking-wide">Il tuo Nome:</label>
                     <input type="text" id="student-name" placeholder="Scrivi qui il tuo nome..." maxlength="20" class="w-full bg-purple-950 border-2 border-amber-400/70 p-4 rounded-2xl text-center text-2xl font-black text-white placeholder-purple-400/60 focus:border-amber-300 focus:ring-4 focus:ring-amber-400/20 outline-none shadow-inner">
@@ -267,7 +267,7 @@
                     </div>
                 </button>
 
-                <!-- SEPARATORE "OPPURE PARTECIPA" MOLTO PIÙ GRANDE E VISIBILE -->
+                <!-- SEPARATORE "OPPURE PARTECIPA" -->
                 <div class="relative flex py-2 items-center">
                     <div class="flex-grow border-t-2 border-purple-600"></div>
                     <span class="flex-shrink mx-4 text-amber-300 text-base md:text-lg uppercase font-black tracking-wider bg-purple-900 px-2">OPPURE PARTECIPA</span>
@@ -282,13 +282,25 @@
                 </div>
             </div>
 
-            <!-- VISTA STANZA CREATA (CON TASTO START!) -->
+            <!-- VISTA STANZA CREATA (CON LISTA SFIDANTI E TASTO START!) -->
             <div id="teacher-qr-view" class="hidden flex-col items-center text-center space-y-4">
                 <div class="bg-white p-3 rounded-2xl inline-block shadow-lg" id="qrcode-box"></div>
                 <div class="w-full text-center">
                     <div class="text-sm font-bold uppercase tracking-widest text-amber-300 mb-1">PIN Stanza</div>
                     <div id="display-pin-code" class="text-7xl md:text-8xl font-black font-mono tracking-[0.15em] text-white bg-purple-950 px-6 py-3 rounded-2xl shadow-inner leading-none">----</div>
                 </div>
+
+                <!-- RIQUADRO CON I NOMI DEGLI SFIDANTI IN SALA D'ATTESA -->
+                <div class="w-full bg-purple-950/90 border border-purple-700 rounded-2xl p-3 text-left">
+                    <div class="text-xs uppercase tracking-wider text-amber-300 font-bold mb-2 flex justify-between">
+                        <span><i class="fa-solid fa-users"></i> Sfidanti in sala d'attesa:</span>
+                        <span id="modal-players-count">0</span>
+                    </div>
+                    <div id="modal-players-list" class="flex flex-wrap gap-2 max-h-28 overflow-y-auto">
+                        <span class="text-xs text-purple-400 italic">In attesa che qualcuno entri...</span>
+                    </div>
+                </div>
+
                 <p class="text-xs text-purple-200">Aspetta che tutti entrino nella stanza, poi premi START!</p>
                 
                 <!-- PULSANTE START GARA -->
@@ -1187,6 +1199,27 @@
                 badge.append(nome, pt);
                 listEl.appendChild(badge);
             });
+
+            // AGGIORNA ANCHE L'ELENCO NELLA FINESTRA DEL PIN (SALA D'ATTESA)
+            const modalList = document.getElementById('modal-players-list');
+            const modalCount = document.getElementById('modal-players-count');
+            if (modalList && modalCount) {
+                modalList.innerHTML = '';
+                let connessi = 0;
+                mappaConnessioniStudenti.forEach((obj) => {
+                    if (obj.conn.open) {
+                        connessi++;
+                        const tag = document.createElement('span');
+                        tag.className = "bg-fuchsia-600 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow";
+                        tag.innerHTML = `<i class="fa-solid fa-user-check text-amber-300"></i> ${obj.nome}`;
+                        modalList.appendChild(tag);
+                    }
+                });
+                modalCount.textContent = connessi;
+                if (connessi === 0) {
+                    modalList.innerHTML = '<span class="text-xs text-purple-400 italic">In attesa che qualcuno entri...</span>';
+                }
+            }
         }
 
         function aggiornaContatoreAlunni() {
