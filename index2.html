@@ -6,7 +6,6 @@
     <title>Colpo d'occhio - Giochiamo Insieme</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Script non bloccanti: la pagina compare subito; Tone.js viene caricato da codice, dopo -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
@@ -18,27 +17,24 @@
             -webkit-user-select: none;
         }
 
-        /* Sfondo a pattern (SVG che si ripete) */
         #bg-pattern {
             position: fixed;
             inset: 0;
-            z-index: -1;                    /* sta dietro a tutto */
-            pointer-events: none;           /* non intercetta i tocchi */
+            z-index: -1;
+            pointer-events: none;
             background-image: url('pattern.svg');
             background-repeat: repeat;
-            background-size: 120px 120px;   /* dimensione della piastrella */
-            opacity: 0.25;                  /* 0 = invisibile, 1 = pieno */
+            background-size: 120px 120px;
+            opacity: 0.25;
         }
 
         .colpo-card {
             aspect-ratio: 1 / 1;
-            /* Fondo viola */
             background: radial-gradient(circle, #8b5cf6 0%, #6d28d9 70%, #4c1d95 100%);
-            /* Bordo viola scuro spesso + ombra sfumata esterna ed interna */
             border: 10px solid #2e1065;
             box-shadow:
-                0 20px 50px rgba(0, 0, 0, 0.6),            /* ombra esterna d'appoggio */
-                inset 0 0 25px rgba(30, 10, 60, 0.8);      /* sfumatura scura interna ai bordi */
+                0 20px 50px rgba(0, 0, 0, 0.6),
+                inset 0 0 25px rgba(30, 10, 60, 0.8);
             transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             overflow: visible !important;
         }
@@ -101,7 +97,6 @@
 </head>
 <body class="bg-purple-950 text-slate-100 min-h-screen flex flex-col justify-between bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 overflow-x-hidden">
 
-    <!-- PATTERN DI SFONDO -->
     <div id="bg-pattern"></div>
 
     <!-- PAROLA VINCENTE -->
@@ -183,7 +178,7 @@
                     <i class="fa-solid fa-stopwatch text-amber-300 text-xl"></i>
                     <span id="timer-display" class="text-2xl font-bold font-mono text-amber-300">60</span>s
                 </div>
-                <div class="flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 px-3.5 py-1 rounded-xl">
+                <div id="score-box" class="flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 px-3.5 py-1 rounded-xl">
                     <i class="fa-solid fa-star text-amber-300"></i>
                     <span class="text-xs font-semibold uppercase text-amber-200">Punti:</span>
                     <span id="score-display" class="text-xl font-bold text-white">0</span>
@@ -203,6 +198,12 @@
         <div id="waiting-start-banner" class="hidden w-full bg-amber-400 text-purple-950 text-center py-2.5 px-4 rounded-xl text-sm md:text-base font-black shadow-lg animate-pulse flex items-center justify-center gap-2">
             <i class="fa-solid fa-hourglass-half"></i>
             <span id="waiting-start-text">In attesa che inizi la gara... Preparati!</span>
+        </div>
+
+        <!-- BANNER ALLENAMENTO -->
+        <div id="training-banner" class="hidden w-full bg-cyan-500/90 text-purple-950 text-center py-1.5 px-4 rounded-xl text-xs font-extrabold shadow-md flex items-center justify-center gap-2">
+            <i class="fa-solid fa-bullseye text-sm"></i>
+            <span>Modalità Allenamento Attiva — Nessun timer, nessuna penalità, gioco libero!</span>
         </div>
 
         <!-- BANNER AVVISI -->
@@ -232,6 +233,9 @@
             <button id="btn-next-pair" onclick="nextPair(true)" class="px-4 py-2 rounded-xl bg-purple-800 hover:bg-purple-700 text-purple-100 font-semibold transition flex items-center gap-2 border border-purple-600/50 text-sm">
                 <i class="fa-solid fa-arrows-rotate"></i> Cambia Carte
             </button>
+            <button id="btn-training" onclick="toggleTrainingMode()" class="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold transition flex items-center gap-2 shadow-md text-sm">
+                <i class="fa-solid fa-bullseye"></i> <span id="btn-training-label">Allenamento</span>
+            </button>
             <button id="start-timer-btn" onclick="toggleTimeAttack()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-purple-950 font-black transition flex items-center gap-2 shadow-lg text-base">
                 <i class="fa-solid fa-play"></i> <span id="timer-btn-label">START! (60s)</span>
             </button>
@@ -253,18 +257,15 @@
             </h2>
 
             <div id="role-selection" class="space-y-5">
-                <!-- BADGE DA QR CODE (Nascosto se apertura normale) -->
                 <div id="qr-room-badge" class="hidden bg-amber-400/20 border border-amber-400/50 text-amber-300 text-center py-2.5 px-4 rounded-xl text-sm font-bold">
                     <i class="fa-solid fa-qrcode mr-1"></i> Stai entrando nella stanza <span id="qr-pin-label" class="font-mono text-base underline font-black">----</span>
                 </div>
 
-                <!-- CAMPO NOME GRANDE E VISIBILE -->
                 <div>
                     <label class="block text-lg font-extrabold text-amber-300 mb-2 tracking-wide">Il tuo Nome:</label>
                     <input type="text" id="student-name" placeholder="Scrivi qui il tuo nome..." maxlength="20" class="w-full bg-purple-950 border-2 border-amber-400/70 p-4 rounded-2xl text-center text-2xl font-black text-white placeholder-purple-400/60 focus:border-amber-300 focus:ring-4 focus:ring-amber-400/20 outline-none shadow-inner">
                 </div>
 
-                <!-- SEZIONE CREA STANZA (Nascosta se apertura da QR Code) -->
                 <div id="host-create-section" class="space-y-5">
                     <button onclick="avviaComeDocente()" class="w-full p-4 rounded-2xl bg-fuchsia-600 hover:bg-fuchsia-500 font-bold flex items-center gap-4 transition text-left shadow-lg border border-fuchsia-400/30">
                         <i class="fa-solid fa-desktop text-3xl"></i>
@@ -274,7 +275,6 @@
                         </div>
                     </button>
 
-                    <!-- SEPARATORE "OPPURE PARTECIPA" -->
                     <div class="relative flex py-2 items-center">
                         <div class="flex-grow border-t-2 border-purple-600"></div>
                         <span class="flex-shrink mx-4 text-amber-300 text-base md:text-lg uppercase font-black tracking-wider bg-purple-900 px-2">OPPURE PARTECIPA</span>
@@ -290,7 +290,7 @@
                 </div>
             </div>
 
-            <!-- VISTA STANZA CREATA (CON LISTA SFIDANTI E TASTO START!) -->
+            <!-- VISTA STANZA CREATA -->
             <div id="teacher-qr-view" class="hidden flex-col items-center text-center space-y-4">
                 <div class="bg-white p-3 rounded-2xl inline-block shadow-lg" id="qrcode-box"></div>
                 <div class="w-full text-center">
@@ -298,7 +298,6 @@
                     <div id="display-pin-code" class="text-7xl md:text-8xl font-black font-mono tracking-[0.15em] text-white bg-purple-950 px-6 py-3 rounded-2xl shadow-inner leading-none">----</div>
                 </div>
 
-                <!-- RIQUADRO CON I NOMI DEGLI SFIDANTI IN SALA D'ATTESA -->
                 <div class="w-full bg-purple-950/90 border border-purple-700 rounded-2xl p-3 text-left">
                     <div class="text-xs uppercase tracking-wider text-amber-300 font-bold mb-2 flex justify-between">
                         <span><i class="fa-solid fa-users"></i> Sfidanti in sala d'attesa:</span>
@@ -311,7 +310,6 @@
 
                 <p class="text-xs text-purple-200">Aspetta che tutti entrino nella stanza, poi premi START!</p>
                 
-                <!-- PULSANTE START GARA -->
                 <button onclick="avviaGaraDaModale()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-purple-950 font-black text-2xl tracking-wider transition shadow-xl flex items-center justify-center gap-3 animate-bounce mt-2">
                     <i class="fa-solid fa-play"></i> START!
                 </button>
@@ -417,7 +415,6 @@
         /* ==================== COSTANTI ==================== */
         const PREFISSO_STANZA = 'colpo-docchio-';
         const DELAY_ROUND = 800;
-        const DEBUG_TEMPI = false;
 
         const CARTELLA_IMMAGINI = [
             { val: 'contagocce', file: 'img_corpoumano/contagocce.png' },
@@ -484,14 +481,15 @@
 
         /* ==================== STATO ==================== */
         let peer = null;
-        let ruolounico = 'standalone';   // 'standalone' | 'docente' | 'studente'
+        let ruolounico = 'standalone';
         let mappaConnessioniStudenti = new Map();
         let connDocente = null;
         let mioNomeStudente = "Giocatore";
         let stanzaPinCorrente = "";
         let isTransitioning = false;
         let isPenalized = false;
-        let garaIniziata = true;         // in multiplayer diventa false finché non si preme START!
+        let garaIniziata = true;
+        let isTrainingMode = false;
         let roundId = 0;
         let roundBloccato = false;
         let inStanza = false;
@@ -527,7 +525,6 @@
 
         let synthSound, wrongSound;
 
-        /* ==================== HELPER ==================== */
         const norm = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
                            .replace(/[^a-z\s]/g, ' ').replace(/\s+/g, ' ').trim();
 
@@ -592,7 +589,6 @@
             }
         }
 
-        // CLASSIFICA CON HOST INCLUSO E NOME DINAMICO
         function classificaCorrente() {
             const lista = [...mappaConnessioniStudenti.entries()]
                 .map(([id, o]) => ({ id, nome: o.nome, score: o.score }));
@@ -662,14 +658,10 @@
                 if (v.length === 4) preparaStudente(v);
             });
 
-            // GESTIONE ACCESSO DA QR CODE (SENZA CONFUSIONE)
             if (pinParam) {
                 campoPin.value = pinParam;
-                // Nasconde la sezione "Crea Stanza" e il campo PIN duplicato
                 document.getElementById('host-create-section').classList.add('hidden');
                 campoPin.classList.add('hidden');
-                
-                // Mostra il badge elegante con il numero di stanza
                 document.getElementById('qr-room-badge').classList.remove('hidden');
                 document.getElementById('qr-pin-label').textContent = '#' + pinParam;
 
@@ -763,6 +755,32 @@
                 text.textContent = "Testo: OFF";
             }
             if (state.carta1) { renderCard('card1', state.carta1); renderCard('card2', state.carta2); }
+        }
+
+        function toggleTrainingMode() {
+            isTrainingMode = !isTrainingMode;
+            const btnLabel = document.getElementById('btn-training-label');
+            const btn = document.getElementById('btn-training');
+            const banner = document.getElementById('training-banner');
+            const scoreBox = document.getElementById('score-box');
+            const startTimerBtn = document.getElementById('start-timer-btn');
+
+            if (state.isTimeAttack) stopTimeAttack();
+
+            if (isTrainingMode) {
+                btnLabel.textContent = "Esci da Allenamento";
+                btn.className = "px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-purple-950 font-bold transition flex items-center gap-2 shadow-md text-sm";
+                banner.classList.remove('hidden');
+                scoreBox.classList.add('hidden');
+                startTimerBtn.classList.add('hidden');
+                impostaStatoAttesaStart(false);
+            } else {
+                btnLabel.textContent = "Allenamento";
+                btn.className = "px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold transition flex items-center gap-2 shadow-md text-sm";
+                banner.classList.add('hidden');
+                scoreBox.classList.remove('hidden');
+                startTimerBtn.classList.remove('hidden');
+            }
         }
 
         function speakWord(text) {
@@ -1014,7 +1032,7 @@
                 if (wrongSound) wrongSound.triggerAttackRelease("G2", "8n");
                 setTimeout(() => { if (element) element.classList.remove('symbol-wrong'); }, 500);
 
-                if (state.penaltySec > 0) {
+                if (!isTrainingMode && state.penaltySec > 0) {
                     isPenalized = true;
                     const ms = state.penaltySec * 1000;
                     const c1 = document.getElementById('card1'), c2 = document.getElementById('card2');
@@ -1038,7 +1056,7 @@
             speakWord(val);
             mostraParola(val, nomeVincitore);
 
-            if (!studentId) {
+            if (!isTrainingMode && !studentId) {
                 state.score += 1;
                 document.getElementById('score-display').textContent = state.score;
             }
@@ -1099,7 +1117,6 @@
                 localStorage.setItem('colpodocchio_nome', nomeCampo);
             }
 
-            // Blocca il gioco per tutti finché l'Host non preme START!
             impostaStatoAttesaStart(true);
             document.getElementById('waiting-start-text').textContent = "Stanza creata! Aspetta i giocatori e premi START! per avviare la gara.";
             resetScore();
@@ -1217,7 +1234,6 @@
                 listEl.appendChild(badge);
             });
 
-            // AGGIORNA ANCHE L'ELENCO NELLA FINESTRA DEL PIN (SALA D'ATTESA)
             const modalList = document.getElementById('modal-players-list');
             const modalCount = document.getElementById('modal-players-count');
             if (modalList && modalCount) {
